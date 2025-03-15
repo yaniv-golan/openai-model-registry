@@ -4,7 +4,6 @@ target-version = "py39"
 # Line length - same as black
 line-length = 79
 
-[lint]
 # Enable Pyflakes (`F`), Bugbear (`B`), and import sorting (`I`)
 # along with Pycodestyle errors (`E`) and warnings (`W`)
 select = ["E", "F", "W", "I", "B", "D"]
@@ -20,7 +19,7 @@ ignore = [
     "D107",  # Missing docstring in __init__
     # Temporarily ignore line length errors until we can fix them properly
     "E501",  # Line too long
-    # Temporarily ignore missing docstrings in magic methods 
+    # Temporarily ignore missing docstrings in magic methods
     "D105",  # Missing docstring in magic method
     # Temporarily ignore bare excepts
     "B904",  # Within an except clause, use raise from
@@ -50,11 +49,9 @@ exclude = [
     "venv",
 ]
 
-# Sort imports
-[lint.isort]
+[isort]
 known-first-party = ["openai_model_registry"]
 known-third-party = ["pydantic", "yaml", "requests"]
 
-# Docstrings
-[lint.pydocstyle]
-convention = "google" 
+[pydocstyle]
+convention = "google"
