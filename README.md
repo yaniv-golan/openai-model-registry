@@ -50,6 +50,35 @@ if capabilities.supports_structured:
 
 See the [examples directory](./examples) for more detailed usage examples.
 
+### CLI Integration Example
+
+The package includes an example of integrating the Model Registry into a CLI application:
+
+```python
+# Create a CLI app with model registry update command
+@cli.command("update-registry")
+@click.option("--force", is_flag=True, help="Force update even if registry is current")
+def update_registry_command(force: bool) -> None:
+    """Update the model registry with the latest model information."""
+    registry = ModelRegistry.get_instance()
+    result = registry.refresh_from_remote(force=force)
+    if result.success:
+        click.echo("Model registry updated successfully.")
+    else:
+        click.echo(f"Update failed: {result.message}")
+
+# Automatically check for updates
+def get_update_notification() -> Optional[str]:
+    """Check if registry updates are available and return notification message."""
+    registry = ModelRegistry.get_instance()
+    result = registry.check_for_updates()
+    if result.status.name == "UPDATE_AVAILABLE":
+        return "Model registry updates are available. Run 'myapp update-registry'."
+    return None
+```
+
+For a complete example including features like parameter validation and update notifications, see [examples/cli_integration.py](./examples/cli_integration.py).
+
 ## Command Line Interface
 
 Update the local registry data:
