@@ -4,6 +4,7 @@ target-version = "py39"
 # Line length - same as black
 line-length = 79
 
+[lint]
 # Enable Pyflakes (`F`), Bugbear (`B`), and import sorting (`I`)
 # along with Pycodestyle errors (`E`) and warnings (`W`)
 select = ["E", "F", "W", "I", "B", "D"]
@@ -49,9 +50,9 @@ exclude = [
     "venv",
 ]
 
-[isort]
+[lint.isort]
 known-first-party = ["openai_model_registry"]
 known-third-party = ["pydantic", "yaml", "requests"]
 
-[pydocstyle]
+[lint.pydocstyle]
 convention = "google"
