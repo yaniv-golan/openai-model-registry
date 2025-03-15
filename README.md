@@ -36,7 +36,7 @@ print(f"Supports streaming: {capabilities.supports_streaming}")
 try:
     capabilities.validate_parameter("temperature", 0.7)  # Valid
     print("Parameter is valid")
-    
+
     capabilities.validate_parameter("temperature", 3.0)  # Invalid
 except ValueError as e:
     print(f"Invalid parameter: {e}")
@@ -61,3 +61,51 @@ openai-model-registry-update
 ## License
 
 MIT License - See [LICENSE](./LICENSE) for details.
+
+## Development
+
+### Setup Development Environment
+
+This project uses Poetry for dependency management:
+
+```bash
+# Install Poetry
+curl -sSL https://install.python-poetry.org | python3 -
+
+# Install dependencies
+poetry install
+
+# Activate virtual environment
+poetry shell
+```
+
+### Pre-commit Hooks
+
+We use pre-commit hooks to enforce code quality:
+
+```bash
+# Install pre-commit hooks
+poetry run pre-commit install
+
+# Run hooks manually
+poetry run pre-commit run --all-files
+```
+
+### Testing
+
+```bash
+# Run tests
+poetry run pytest
+
+# Run tests with coverage
+poetry run pytest --cov=openai_model_registry
+```
+
+### CI/CD Pipeline
+
+The repository uses GitHub Actions for continuous integration and deployment:
+
+- **CI**: Runs on all pushes to main and pull requests, ensuring code quality and tests pass
+- **Release**: Automatically publishes to PyPI when a new release is created
+
+See the workflows in the `.github/workflows` directory for more details.
