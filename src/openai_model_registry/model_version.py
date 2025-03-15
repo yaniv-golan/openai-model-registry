@@ -1,0 +1,173 @@
+"""Model version handling for OpenAI models.
+
+This module provides utilities for parsing and comparing model versions
+in the format YYYY-MM-DD.
+"""
+
+from typing import Optional, Tuple
+
+
+class ModelVersion:
+    """Represents a model version in YYYY-MM-DD format.
+
+    This class handles parsing, validation, and comparison of model version dates.
+
+    Attributes:
+        year: The year component of the version
+        month: The month component of the version
+        day: The day component of the version
+    """
+
+    def __init__(self, year: int, month: int, day: int) -> None:
+        """Initialize a model version.
+
+        Args:
+            year: The year component (e.g., 2024)
+            month: The month component (1-12)
+            day: The day component (1-31)
+        """
+        self.year = year
+        self.month = month
+        self.day = day
+
+    def __eq__(self, other: object) -> bool:
+        """Check if two versions are equal.
+
+        Args:
+            other: The other version to compare with
+
+        Returns:
+            bool: True if versions are equal, False otherwise
+        """
+        if not isinstance(other, ModelVersion):
+            return NotImplemented
+        return (
+            self.year == other.year
+            and self.month == other.month
+            and self.day == other.day
+        )
+
+    def __lt__(self, other: "ModelVersion") -> bool:
+        """Check if this version is earlier than another.
+
+        Args:
+            other: The other version to compare with
+
+        Returns:
+            bool: True if this version is earlier, False otherwise
+        """
+        if self.year != other.year:
+            return self.year < other.year
+        if self.month != other.month:
+            return self.month < other.month
+        return self.day < other.day
+
+    def __le__(self, other: "ModelVersion") -> bool:
+        """Check if this version is earlier than or equal to another.
+
+        Args:
+            other: The other version to compare with
+
+        Returns:
+            bool: True if this version is earlier or equal, False otherwise
+        """
+        return self < other or self == other
+
+    def __gt__(self, other: "ModelVersion") -> bool:
+        """Check if this version is later than another.
+
+        Args:
+            other: The other version to compare with
+
+        Returns:
+            bool: True if this version is later, False otherwise
+        """
+        return not (self <= other)
+
+    def __ge__(self, other: "ModelVersion") -> bool:
+        """Check if this version is later than or equal to another.
+
+        Args:
+            other: The other version to compare with
+
+        Returns:
+            bool: True if this version is later or equal, False otherwise
+        """
+        return not (self < other)
+
+    def __repr__(self) -> str:
+        """Get string representation of the version.
+
+        Returns:
+            str: Version in YYYY-MM-DD format
+        """
+        return f"{self.year:04d}-{self.month:02d}-{self.day:02d}"
+
+    @classmethod
+    def from_string(cls, version_str: str) -> "ModelVersion":
+        """Create a version from a string in YYYY-MM-DD format.
+
+        Args:
+            version_str: Version string in YYYY-MM-DD format
+
+        Returns:
+            ModelVersion: Parsed version object
+
+        Raises:
+            ValueError: If the format is invalid
+        """
+        parts = version_str.split("-")
+        if len(parts) != 3:
+            raise ValueError(
+                f"Invalid version format: {version_str}. "
+                f"Expected YYYY-MM-DD."
+            )
+
+        try:
+            year = int(parts[0])
+            month = int(parts[1])
+            day = int(parts[2])
+        except ValueError:
+            raise ValueError(
+                f"Invalid version components in {version_str}. "
+                f"Year, month, and day must be integers."
+            )
+
+        # Basic validation
+        if not (1000 <= year <= 9999):
+            raise ValueError(f"Invalid year: {year}. Must be 1000-9999.")
+        if not (1 <= month <= 12):
+            raise ValueError(f"Invalid month: {month}. Must be 1-12.")
+        if not (1 <= day <= 31):
+            raise ValueError(f"Invalid day: {day}. Must be 1-31.")
+
+        return cls(year, month, day)
+
+    @staticmethod
+    def parse_from_model(model: str) -> Optional[Tuple[str, "ModelVersion"]]:
+        """Parse a model name into base name and version.
+
+        Args:
+            model: Full model name with version (e.g., "gpt-4o-2024-08-06")
+
+        Returns:
+            Optional tuple of (base_name, version) if valid, None otherwise
+            Example: ("gpt-4o", ModelVersion(2024, 8, 6))
+        """
+        import re
+
+        # Format: "{base_model}-{YYYY}-{MM}-{DD}"
+        pattern = re.compile(r"^([\w-]+?)-(\d{4}-\d{2}-\d{2})$")
+        match = pattern.match(model)
+
+        if not match:
+            return None
+
+        base_model = match.group(1)
+        version_str = match.group(2)
+
+        try:
+            version = ModelVersion.from_string(version_str)
+            return base_model, version
+        except ValueError:
+            return None

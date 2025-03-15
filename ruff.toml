@@ -1,0 +1,60 @@
+# Target Python version
+target-version = "py39"
+
+# Line length - same as black
+line-length = 79
+
+[lint]
+# Enable Pyflakes (`F`), Bugbear (`B`), and import sorting (`I`)
+# along with Pycodestyle errors (`E`) and warnings (`W`)
+select = ["E", "F", "W", "I", "B", "D"]
+
+# Ignore specific rules
+ignore = [
+    "E203",  # Whitespace before ':' (black formats this differently)
+    "D203",  # One blank line required before class docstring (conflicts with D211)
+    "D212",  # Multi-line docstring summary should start at the first line
+    "FBT001",  # Boolean positional arg in function definition
+    "FBT002",  # Boolean default value in function definition
+    # Temporarily ignore missing docstrings in __init__ methods
+    "D107",  # Missing docstring in __init__
+    # Temporarily ignore line length errors until we can fix them properly
+    "E501",  # Line too long
+    # Temporarily ignore missing docstrings in magic methods 
+    "D105",  # Missing docstring in magic method
+    # Temporarily ignore bare excepts
+    "B904",  # Within an except clause, use raise from
+]
+
+# Exclude file patterns
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+]
+
+# Sort imports
+[lint.isort]
+known-first-party = ["openai_model_registry"]
+known-third-party = ["pydantic", "yaml", "requests"]
+
+# Docstrings
+[lint.pydocstyle]
+convention = "google" 

@@ -1,0 +1,59 @@
+# Models supporting structured output
+# This file defines the capabilities and constraints for all supported models
+version: "1.0.0"
+
+# Primary section: dated model versions
+dated_models:
+  gpt-4o-2024-08-06:
+    context_window: 128000
+    max_output_tokens: 16384
+    supports_structured: true
+    supports_streaming: true
+    supported_parameters:
+      - ref: "numeric_constraints.temperature"
+      - ref: "numeric_constraints.top_p"
+      - ref: "numeric_constraints.frequency_penalty"
+      - ref: "numeric_constraints.presence_penalty"
+      - ref: "numeric_constraints.max_completion_tokens"
+    description: "Initial release with 16k output support"
+    min_version:
+      year: 2024
+      month: 8
+      day: 6
+
+  gpt-4o-mini-2024-07-18:
+    context_window: 128000
+    max_output_tokens: 16384
+    supports_structured: true
+    supports_streaming: true
+    supported_parameters:
+      - ref: "numeric_constraints.temperature"
+      - ref: "numeric_constraints.top_p"
+      - ref: "numeric_constraints.frequency_penalty"
+      - ref: "numeric_constraints.presence_penalty"
+      - ref: "numeric_constraints.max_completion_tokens"
+    description: "First release of mini variant"
+    min_version:
+      year: 2024
+      month: 7
+      day: 18
+
+  o1-2024-12-17:
+    context_window: 200000
+    max_output_tokens: 100000
+    supports_structured: true
+    supports_streaming: true
+    supported_parameters:
+      - ref: "numeric_constraints.max_completion_tokens"
+      - ref: "enum_constraints.reasoning_effort"
+    description: "Production O1 model optimized for structured output"
+    min_version:
+      year: 2024
+      month: 12
+      day: 17
+
+# Secondary section: aliases pointing to dated versions
+aliases:
+  gpt-4o: "gpt-4o-2024-08-06"
+  gpt-4o-mini: "gpt-4o-mini-2024-07-18"
+  o1: "o1-2024-12-17" 

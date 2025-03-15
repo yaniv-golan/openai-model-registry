@@ -1,0 +1,49 @@
+# Parameter Constraints Configuration
+# This file defines reusable parameter constraints that can be referenced by models
+
+numeric_constraints:
+  temperature:
+    type: numeric
+    min_value: 0.0
+    max_value: 2.0
+    description: Controls randomness in the output
+    allow_float: true
+    allow_int: true
+
+  top_p:
+    type: numeric
+    min_value: 0.0
+    max_value: 1.0
+    description: Controls diversity via nucleus sampling
+    allow_float: true
+    allow_int: true
+
+  frequency_penalty:
+    type: numeric
+    min_value: -2.0
+    max_value: 2.0
+    description: Adjusts likelihood based on frequency
+    allow_float: true
+    allow_int: true
+
+  presence_penalty:
+    type: numeric
+    min_value: -2.0
+    max_value: 2.0
+    description: Adjusts likelihood based on presence
+    allow_float: true
+    allow_int: true
+
+  max_completion_tokens:
+    type: numeric
+    min_value: 1
+    max_value: null  # Set by model's max_output_tokens
+    allow_float: false
+    allow_int: true
+    description: Maximum number of tokens to generate
+
+enum_constraints:
+  reasoning_effort:
+    type: enum
+    allowed_values: [low, medium, high]
+    description: Controls the model's reasoning depth 

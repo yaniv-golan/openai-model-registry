@@ -1,0 +1,102 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "openai-model-registry"
+version = "1.0.0"
+description = "Registry for OpenAI models with capability and parameter validation"
+authors = ["Yaniv Golan <yaniv@golan.name>"]
+readme = "README.md"
+packages = [{include = "openai_model_registry", from = "src"}]
+include = ["src/openai_model_registry/py.typed"]
+
+[tool.poetry.dependencies]
+python = ">=3.9,<4.0"
+pydantic = { version = "^2.6.3", extras = ["mypy"] }
+PyYAML = "^6.0.1"
+requests = "^2.31.0"
+typing-extensions = "^4.9.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.4"
+flake8 = "^6.0"
+flake8-pyproject = "^1.2.3"
+black = "24.8.0"
+isort = "^5.13"
+mypy = "^1.0"
+pre-commit = "^3.6.0"
+pytest-mock = "^3.14.0"
+build = "^1.2.2.post1"
+twine = "^6.0.1"
+types-pyyaml = "^6.0.12.20241230"
+types-requests = "^2.31.0.20240125"
+
+[tool.flake8]
+max-line-length = 120
+extend-ignore = ["E203"]
+
+[tool.mypy]
+plugins = ["pydantic.mypy"]
+follow_imports = "normal"
+strict = true
+show_error_codes = true
+warn_unused_configs = true
+
+# Path configuration
+mypy_path = ["src", "tests"]
+files = ["src/openai_model_registry", "tests"]
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
+warn_untyped_fields = true
+
+[tool.black]
+line-length = 79
+target-version = ["py39"]
+include = '\.pyi?$'
+preview = false
+required-version = "24.8.0"
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 79
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+
+[tool.poetry.scripts]
+openai-model-registry-update = "openai_model_registry.scripts.update_registry:main"
+
+[tool.ruff]
+target-version = "py39"
+line-length = 79
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "D"]
+ignore = [
+    "E203",  # Whitespace before ':' (black formats this differently)
+    "D203",  # One blank line required before class docstring (conflicts with D211)
+    "D212",  # Multi-line docstring summary should start at the first line
+    "FBT001",  # Boolean positional arg in function definition
+    "FBT002",  # Boolean default value in function definition
+    # Temporarily ignore missing docstrings in __init__ methods
+    "D107",  # Missing docstring in __init__
+    # Temporarily ignore line length errors until we can fix them properly
+    "E501",  # Line too long
+    # Temporarily ignore missing docstrings in magic methods 
+    "D105",  # Missing docstring in magic method
+    # Temporarily ignore bare excepts
+    "B904",  # Within an except clause, use raise from
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["openai_model_registry"]
+known-third-party = ["pydantic", "yaml", "requests"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google" 
