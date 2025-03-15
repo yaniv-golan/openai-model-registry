@@ -31,6 +31,7 @@ build = "^1.2.2.post1"
 twine = "^6.0.1"
 types-pyyaml = "^6.0.12.20241230"
 types-requests = "^2.31.0.20240125"
+ruff = "^0.3.6"
 
 [tool.flake8]
 max-line-length = 120

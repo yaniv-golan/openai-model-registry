@@ -33,6 +33,7 @@ jobs:
 
       - name: Lint with ruff
         run: |
+          poetry run pip install ruff==0.3.6
           poetry run ruff check .
 
       - name: Type check with mypy
