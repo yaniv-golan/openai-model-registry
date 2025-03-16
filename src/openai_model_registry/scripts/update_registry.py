@@ -36,7 +36,9 @@ def refresh_registry(
             registry._load_capabilities()  # Force revalidation
             print("✅ Config validation successful")
             if verbose:
-                print(f"\nLocal registry file: {registry._config_path}")
+                print(
+                    f"\nLocal registry file: {registry.config.registry_path}"
+                )
             return 0
 
         if check_only:

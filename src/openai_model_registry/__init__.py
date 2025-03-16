@@ -26,6 +26,7 @@ from .model_version import ModelVersion
 from .registry import (
     ModelCapabilities,
     ModelRegistry,
+    RegistryConfig,
     RegistryUpdateResult,
     RegistryUpdateStatus,
     get_registry,
@@ -36,6 +37,7 @@ __all__ = [
     # Core registry
     "ModelRegistry",
     "ModelCapabilities",
+    "RegistryConfig",
     "get_registry",
     # Version handling
     "ModelVersion",

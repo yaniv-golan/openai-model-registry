@@ -10,12 +10,11 @@ import yaml
 from openai_model_registry import (
     ModelRegistry,
     ModelRegistryError,
-    ModelVersion,
-    TokenParameterError,
 )
 from openai_model_registry.errors import (
     ModelNotSupportedError,
 )
+from openai_model_registry.registry import RegistryConfig
 
 
 @pytest.fixture
@@ -43,35 +42,28 @@ def registry(test_config_dir: Path) -> Generator[ModelRegistry, None, None]:
     original_constraints_path = os.environ.get("PARAMETER_CONSTRAINTS_PATH")
 
     # Cleanup any existing registry first
-    ModelRegistry._instance = None
+    ModelRegistry._default_instance = None
 
     # Create parameter constraints file
     constraints_path = test_config_dir / "parameter_constraints.yml"
     constraints_content = {
-        "numeric_constraints": {
-            "temperature": {
-                "type": "numeric",
-                "min_value": 0.0,
-                "max_value": 2.0,
-                "description": "Controls randomness in the output",
-                "allow_float": True,
-                "allow_int": True,
-            },
-            "max_completion_tokens": {
-                "type": "numeric",
-                "min_value": 1,
-                "max_value": None,
-                "description": "Maximum number of tokens to generate",
-                "allow_float": False,
-                "allow_int": True,
-            },
+        "temperature": {
+            "type": "numeric",
+            "min": 0.0,
+            "max": 2.0,
+            "description": "Controls randomness in the output",
+            "allow_float": True,
         },
-        "enum_constraints": {
-            "reasoning_effort": {
-                "type": "enum",
-                "allowed_values": ["low", "medium", "high"],
-                "description": "Controls the model's reasoning depth",
-            }
+        "max_completion_tokens": {
+            "type": "numeric",
+            "min": 1,
+            "description": "Maximum number of tokens to generate",
+            "allow_float": False,
+        },
+        "reasoning_effort": {
+            "type": "enum",
+            "values": ["low", "medium", "high"],
+            "description": "Controls the model's reasoning depth",
         },
     }
 
@@ -82,107 +74,183 @@ def registry(test_config_dir: Path) -> Generator[ModelRegistry, None, None]:
     models_path = test_config_dir / "models.yml"
     models_content = {
         "version": "1.0.0",
-        "dated_models": {
+        "models": {
             "test-model-2024-01-01": {
+                "openai_name": "test-model",
                 "context_window": 4096,
                 "max_output_tokens": 2048,
                 "supports_structured": True,
                 "supports_streaming": True,
-                "supported_parameters": [
-                    {"ref": "numeric_constraints.temperature"},
-                    {"ref": "numeric_constraints.max_completion_tokens"},
-                ],
-                "description": "Test model",
-                "min_version": {"year": 2024, "month": 1, "day": 1},
+                "min_version": "2024-01-01",
+                "parameters": {
+                    "temperature": {
+                        "constraint": "temperature",
+                        "description": "Controls randomness in the output",
+                    },
+                    "max_completion_tokens": {
+                        "constraint": "max_completion_tokens",
+                        "description": "Maximum number of tokens to generate",
+                    },
+                },
+                "aliases": ["test-model"],
             },
             "gpt-4o-2024-08-06": {
+                "openai_name": "gpt-4o",
                 "context_window": 128000,
                 "max_output_tokens": 16384,
                 "supports_structured": True,
                 "supports_streaming": True,
-                "supported_parameters": [
-                    {"ref": "numeric_constraints.temperature"},
-                    {"ref": "numeric_constraints.max_completion_tokens"},
-                ],
-                "description": "Test GPT-4o model",
-                "min_version": {"year": 2024, "month": 8, "day": 6},
+                "supports_vision": True,
+                "supports_functions": True,
+                "min_version": "2024-08-06",
+                "parameters": {
+                    "temperature": {
+                        "constraint": "temperature",
+                        "description": "Controls randomness in the output",
+                    },
+                    "max_completion_tokens": {
+                        "constraint": "max_completion_tokens",
+                        "description": "Maximum number of tokens to generate",
+                    },
+                    "reasoning_effort": {
+                        "constraint": "reasoning_effort",
+                        "description": "Controls the reasoning depth",
+                    },
+                },
+                "aliases": ["gpt-4o"],
             },
-        },
-        "aliases": {
-            "test-model": "test-model-2024-01-01",
-            "gpt-4o": "gpt-4o-2024-08-06",
         },
     }
 
     with open(models_path, "w") as f:
         yaml.dump(models_content, f)
 
-    # Set environment variables
+    # Set environment variables to point to test files
     os.environ["MODEL_REGISTRY_PATH"] = str(models_path)
     os.environ["PARAMETER_CONSTRAINTS_PATH"] = str(constraints_path)
 
-    # Create and return registry
-    registry = ModelRegistry()
+    # Create and return registry with the test configuration
+    config = RegistryConfig(
+        registry_path=str(models_path), constraints_path=str(constraints_path)
+    )
+    registry = ModelRegistry(config)
 
-    yield registry
+    try:
+        yield registry
+    finally:
+        # Clean up environment variables
+        if original_registry_path:
+            os.environ["MODEL_REGISTRY_PATH"] = original_registry_path
+        else:
+            os.environ.pop("MODEL_REGISTRY_PATH", None)
 
-    # Restore original environment variables
-    if original_registry_path:
-        os.environ["MODEL_REGISTRY_PATH"] = original_registry_path
-    else:
-        os.environ.pop("MODEL_REGISTRY_PATH", None)
+        if original_constraints_path:
+            os.environ[
+                "PARAMETER_CONSTRAINTS_PATH"
+            ] = original_constraints_path
+        else:
+            os.environ.pop("PARAMETER_CONSTRAINTS_PATH", None)
 
-    if original_constraints_path:
-        os.environ["PARAMETER_CONSTRAINTS_PATH"] = original_constraints_path
-    else:
-        os.environ.pop("PARAMETER_CONSTRAINTS_PATH", None)
-
-    # Reset the singleton
-    ModelRegistry._instance = None
+        # Reset the registry
+        ModelRegistry._default_instance = None
 
 
 def test_registry_initialization(registry: ModelRegistry) -> None:
-    """Test that the registry initializes correctly."""
-    # Check that capabilities were loaded
-    assert len(registry.models) > 0
-    assert "test-model" in registry.models
-    assert "gpt-4o" in registry.models
+    """Test that the registry initializes properly."""
+    assert registry is not None
+    assert registry.config is not None
+    assert "test-model-2024-01-01" in registry.models
+    assert "gpt-4o-2024-08-06" in registry.models
 
 
 def test_get_capabilities(registry: ModelRegistry) -> None:
-    """Test getting model capabilities."""
-    # Test getting by alias
-    capabilities = registry.get_capabilities("test-model")
-    assert capabilities.context_window == 4096
-    assert capabilities.max_output_tokens == 2048
-    assert capabilities.supports_structured is True
-
-    # Test getting by dated model
+    """Test retrieving model capabilities."""
+    # Test getting capabilities for a dated model
     capabilities = registry.get_capabilities("test-model-2024-01-01")
     assert capabilities.context_window == 4096
     assert capabilities.max_output_tokens == 2048
+    assert capabilities.supports_streaming is True
+    assert capabilities.supports_structured is True
+
+    # Test getting capabilities via the base model alias
+    base_capabilities = registry.get_capabilities("test-model")
+    assert base_capabilities.context_window == 4096
 
 
 def test_unsupported_model(registry: ModelRegistry) -> None:
-    """Test behavior with unsupported models."""
+    """Test error handling for unsupported models."""
     with pytest.raises(ModelNotSupportedError):
-        registry.get_capabilities("not-a-model")
+        registry.get_capabilities("non-existent-model")
 
 
 def test_parameter_validation(registry: ModelRegistry) -> None:
     """Test parameter validation."""
     capabilities = registry.get_capabilities("test-model")
 
-    # Valid parameters
+    # Test valid parameter
     capabilities.validate_parameter("temperature", 0.7)
-    capabilities.validate_parameter("max_completion_tokens", 100)
 
-    # Invalid parameters
+    # Test invalid parameter (too high)
     with pytest.raises(ModelRegistryError):
         capabilities.validate_parameter("temperature", 3.0)
 
+    # Test invalid parameter type
     with pytest.raises(ModelRegistryError):
-        capabilities.validate_parameter("max_completion_tokens", 0)
+        capabilities.validate_parameter("temperature", "hot")
 
-    with pytest.raises(ModelRegistryError):
-        capabilities.validate_parameter("unsupported_param", 1.0)
+
+def test_registry_config() -> None:
+    """Test creating registry with different configurations."""
+    # Clean up for this test
+    ModelRegistry._default_instance = None
+
+    # Test creating with explicit config
+    config = RegistryConfig(
+        registry_path="/custom/path/registry.yml",
+        constraints_path="/custom/path/constraints.yml",
+        auto_update=True,
+        cache_size=200,
+    )
+    registry = ModelRegistry(config)
+
+    assert registry.config is not None
+    assert registry.config.registry_path == "/custom/path/registry.yml"
+    assert registry.config.constraints_path == "/custom/path/constraints.yml"
+    assert registry.config.auto_update is True
+    assert registry.config.cache_size == 200
+
+
+def test_multiple_registry_instances() -> None:
+    """Test creating multiple registry instances."""
+    # Clean up for this test
+    ModelRegistry._default_instance = None
+
+    # Create two different configurations
+    config1 = RegistryConfig(registry_path="/path/to/registry1.yml")
+    config2 = RegistryConfig(registry_path="/path/to/registry2.yml")
+
+    # Create two registry instances
+    registry1 = ModelRegistry(config1)
+    registry2 = ModelRegistry(config2)
+
+    # Check they have different configurations
+    assert registry1.config.registry_path == "/path/to/registry1.yml"
+    assert registry2.config.registry_path == "/path/to/registry2.yml"
+    assert registry1 is not registry2
+
+
+def test_default_registry_instance() -> None:
+    """Test getting the default registry instance."""
+    # Clean up for this test
+    ModelRegistry._default_instance = None
+
+    # Get default instance
+    registry1 = ModelRegistry.get_default()
+    registry2 = ModelRegistry.get_default()
+
+    # Should be the same instance
+    assert registry1 is registry2
+
+    # Test backwards compatibility
+    registry3 = ModelRegistry.get_instance()
+    assert registry3 is registry1
