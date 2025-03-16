@@ -38,4 +38,4 @@ For more detailed usage instructions, see the [User Guide](user-guide/index.md).
 
 ## Contributing
 
-Contributions are welcome! Please see our [Contributing Guide](../CONTRIBUTING.md) for more details.
+Contributions are welcome! Please see our [Contributing Guide](contributing.md) for more details.
