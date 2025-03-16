@@ -2,7 +2,7 @@
 
 [![PyPI version](https://img.shields.io/pypi/v/openai-model-registry.svg)](https://pypi.org/project/openai-model-registry/)
 [![Python Versions](https://img.shields.io/pypi/pyversions/openai-model-registry.svg)](https://pypi.org/project/openai-model-registry/)
-[![CI Status](https://github.com/yaniv-golan/openai-model-registry/workflows/CI/badge.svg)](https://github.com/yaniv-golan/openai-model-registry/actions)
+[![CI Status](https://github.com/yaniv-golan/openai-model-registry/workflows/Python%20CI/badge.svg)](https://github.com/yaniv-golan/openai-model-registry/actions)
 [![codecov](https://codecov.io/gh/yaniv-golan/openai-model-registry/branch/main/graph/badge.svg)](https://codecov.io/gh/yaniv-golan/openai-model-registry)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
