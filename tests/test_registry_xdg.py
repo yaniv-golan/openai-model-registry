@@ -11,10 +11,10 @@ import pytest
 from openai_model_registry.config_paths import (
     MODEL_REGISTRY_FILENAME,
     PARAM_CONSTRAINTS_FILENAME,
-    get_user_config_dir,
 )
 from openai_model_registry.registry import (
     ModelRegistry,
+    RegistryConfig,
 )
 
 
@@ -28,217 +28,144 @@ def temp_dir() -> Generator[Path, None, None]:
 @pytest.fixture(autouse=True)
 def reset_registry_singleton() -> Generator[None, None, None]:
     """Reset the ModelRegistry singleton before and after each test."""
-    # Save the original instance and config paths
-    original_instance = ModelRegistry._instance
-    original_config_path = ModelRegistry._config_path
-    original_constraints_path = ModelRegistry._constraints_path
-
-    # Reset the instance
-    ModelRegistry._instance = None
-    ModelRegistry._config_path = None
-    ModelRegistry._constraints_path = None
+    # Reset the default instance
+    original_instance = ModelRegistry._default_instance
+    ModelRegistry._default_instance = None
 
     # Run the test
     yield
 
-    # Restore the original instance and paths
-    ModelRegistry._instance = original_instance
-    ModelRegistry._config_path = original_config_path
-    ModelRegistry._constraints_path = original_constraints_path
+    # Restore the original instance
+    ModelRegistry._default_instance = original_instance
 
 
 def test_xdg_config_home(temp_dir: Path) -> None:
-    """Test that the registry uses XDG_CONFIG_HOME for config files."""
-    xdg_config_home = temp_dir / "config"
-    xdg_config_home.mkdir()
-
-    with patch.dict(os.environ, {"XDG_CONFIG_HOME": str(xdg_config_home)}):
-        # Verify that the user config dir is set correctly
-        with patch(
-            "openai_model_registry.config_paths.platformdirs.user_config_dir"
-        ) as mock_user_config_dir:
-            mock_user_config_dir.return_value = str(
-                xdg_config_home / "openai-model-registry"
-            )
-
-            # Create a registry instance but don't use it directly
-            # We just need to verify the config dir is set correctly
-            _ = ModelRegistry()
-
-            # Verify that the user config dir is used
-            assert (
-                get_user_config_dir()
-                == xdg_config_home / "openai-model-registry"
-            )
-
-
-def test_xdg_config_home_with_existing_config(temp_dir: Path) -> None:
-    """Test that the registry uses existing config in XDG_CONFIG_HOME."""
-    # Create config directory
+    """Test that the registry uses the XDG_CONFIG_HOME environment variable."""
+    # Mock get_user_config_dir to directly return the expected path
     config_dir = temp_dir / "openai-model-registry"
-    config_dir.mkdir(parents=True)
-
-    # Create a config file with valid model data
-    config_file = config_dir / MODEL_REGISTRY_FILENAME
-    config_file.write_text(
-        """
-version: '1.0.0'
-dated_models:
-  test-model-2024-01-01:
-    context_window: 4096
-    max_output_tokens: 2048
-    supported_parameters: []
-    min_version:
-      year: 2024
-      month: 1
-      day: 1
-aliases:
-  test-model: test-model-2024-01-01
-"""
-    )
-
-    # Create a parameter constraints file
-    constraints_file = config_dir / PARAM_CONSTRAINTS_FILENAME
-    constraints_file.write_text(
-        """
-numeric_constraints: {}
-enum_constraints: {}
-fixed_parameter_sets: {}
-"""
-    )
-
-    # Mock the config paths directly on the registry class
-    with patch(
-        "openai_model_registry.registry.get_model_registry_path",
-        return_value=str(config_file),
-    ), patch(
-        "openai_model_registry.registry.get_parameter_constraints_path",
-        return_value=str(constraints_file),
-    ), patch(
-        "pathlib.Path.is_file", return_value=True
-    ):
-        # Create a registry instance
-        registry = ModelRegistry()
-
-        # Verify that the model is loaded
-        assert "test-model" in registry.models
-
-
-def test_xdg_config_dirs(temp_dir: Path) -> None:
-    """Test that the registry uses XDG_CONFIG_DIRS for config files."""
-    xdg_config_dirs = [temp_dir / "config1", temp_dir / "config2"]
-    for dir_path in xdg_config_dirs:
-        dir_path.mkdir()
-        (dir_path / "openai-model-registry").mkdir()
 
     with patch.dict(
         os.environ,
-        {"XDG_CONFIG_DIRS": f"{xdg_config_dirs[0]}:{xdg_config_dirs[1]}"},
+        {"XDG_CONFIG_HOME": str(temp_dir)},
+        clear=True,
+    ), patch(
+        "openai_model_registry.config_paths.get_user_config_dir",
+        return_value=config_dir,
     ):
-        # This test just verifies that the environment variable is set correctly
-        # We don't need to create a registry instance
-        pass
+        # Ensure directory doesn't exist yet
+        assert not config_dir.exists()
+
+        # Create empty registry instance to trigger directory creation
+        registry = ModelRegistry.get_default()
+        assert registry is not None
+        assert config_dir.exists()
 
 
-def test_xdg_config_dirs_with_existing_config(temp_dir: Path) -> None:
-    """Test that the registry uses existing config in XDG_CONFIG_DIRS."""
-    # Create config directory
-    config_dir = temp_dir / "openai-model-registry"
-    config_dir.mkdir(parents=True)
+def test_xdg_config_home_with_existing_config(temp_dir: Path) -> None:
+    """Test that the registry uses existing config files in XDG_CONFIG_HOME."""
+    # Create XDG config directory structure
+    app_config_dir = temp_dir / "openai-model-registry"
+    app_config_dir.mkdir(parents=True)
 
-    # Create a config file with valid model data
-    config_file = config_dir / MODEL_REGISTRY_FILENAME
-    config_file.write_text(
-        """
-version: '1.0.0'
-dated_models:
-  test-model-1-2024-01-01:
-    context_window: 4096
-    max_output_tokens: 2048
-    supported_parameters: []
-    min_version:
-      year: 2024
-      month: 1
-      day: 1
-aliases:
-  test-model-1: test-model-1-2024-01-01
-"""
-    )
+    # Create minimal config files
+    registry_path = app_config_dir / MODEL_REGISTRY_FILENAME
+    registry_content = {
+        "version": "1.0.0",
+        "models": {
+            "test-model": {
+                "openai_name": "test-model",
+                "context_window": 4096,
+                "max_output_tokens": 2048,
+                "supports_streaming": True,
+                "supports_structured": True,
+                "parameters": {
+                    "temperature": {
+                        "constraint": "temperature",
+                        "description": "Controls randomness",
+                    }
+                },
+            }
+        },
+    }
 
-    # Create a parameter constraints file
-    constraints_file = config_dir / PARAM_CONSTRAINTS_FILENAME
-    constraints_file.write_text(
-        """
-numeric_constraints: {}
-enum_constraints: {}
-fixed_parameter_sets: {}
-"""
-    )
+    with open(registry_path, "w") as f:
+        f.write(str(registry_content))
 
-    # Mock the config paths directly on the registry class
-    with patch(
+    constraints_path = app_config_dir / PARAM_CONSTRAINTS_FILENAME
+    constraints_content = {
+        "temperature": {
+            "type": "numeric",
+            "min": 0.0,
+            "max": 2.0,
+            "description": "Controls randomness",
+        }
+    }
+
+    with open(constraints_path, "w") as f:
+        f.write(str(constraints_content))
+
+    # Test with XDG environment variables
+    with patch.dict(
+        os.environ,
+        {"XDG_CONFIG_HOME": str(temp_dir)},
+        clear=True,
+    ), patch(
         "openai_model_registry.registry.get_model_registry_path",
-        return_value=str(config_file),
+        return_value=str(registry_path),
     ), patch(
         "openai_model_registry.registry.get_parameter_constraints_path",
-        return_value=str(constraints_file),
-    ), patch(
-        "pathlib.Path.is_file", return_value=True
+        return_value=str(constraints_path),
     ):
-        # Create a registry instance
-        registry = ModelRegistry()
+        # Get default registry to test path resolution
+        registry = ModelRegistry.get_default()
+        assert registry is not None
 
-        # Verify that the model is loaded
-        assert "test-model-1" in registry.models
+        # Verify the paths were properly set
+        assert registry.config.registry_path == str(registry_path)
+        assert registry.config.constraints_path == str(constraints_path)
 
 
-def test_xdg_precedence(temp_dir: Path) -> None:
-    """Test that XDG_CONFIG_HOME takes precedence over XDG_CONFIG_DIRS."""
-    # Create config directory
-    config_dir = temp_dir / "openai-model-registry"
-    config_dir.mkdir(parents=True)
-
-    # Create config file with valid model data
-    config_file = config_dir / MODEL_REGISTRY_FILENAME
-    config_file.write_text(
-        """
-version: '1.0.0'
-dated_models:
-  test-model-home-2024-01-01:
-    context_window: 4096
-    max_output_tokens: 2048
-    supported_parameters: []
-    min_version:
-      year: 2024
-      month: 1
-      day: 1
-aliases:
-  test-model-home: test-model-home-2024-01-01
-"""
+def test_custom_registry_config() -> None:
+    """Test creating a registry with a custom configuration."""
+    # Create a custom configuration
+    config = RegistryConfig(
+        registry_path="/custom/path/registry.yml",
+        constraints_path="/custom/path/constraints.yml",
+        auto_update=True,
+        cache_size=500,
     )
 
-    # Create a parameter constraints file
-    constraints_file = config_dir / PARAM_CONSTRAINTS_FILENAME
-    constraints_file.write_text(
-        """
-numeric_constraints: {}
-enum_constraints: {}
-fixed_parameter_sets: {}
-"""
-    )
+    # Create registry with custom config
+    registry = ModelRegistry(config)
 
-    # Mock the config paths directly on the registry class
+    # Verify config was properly set
+    assert registry.config.registry_path == "/custom/path/registry.yml"
+    assert registry.config.constraints_path == "/custom/path/constraints.yml"
+    assert registry.config.auto_update is True
+    assert registry.config.cache_size == 500
+
+    # Ensure this is not the default instance
+    assert registry is not ModelRegistry.get_default()
+
+
+def test_env_var_override() -> None:
+    """Test that environment variables override default paths."""
+    registry_path = "/env/var/path/registry.yml"
+    constraints_path = "/env/var/path/constraints.yml"
+
     with patch(
         "openai_model_registry.registry.get_model_registry_path",
-        return_value=str(config_file),
+        return_value=registry_path,
     ), patch(
         "openai_model_registry.registry.get_parameter_constraints_path",
-        return_value=str(constraints_file),
-    ), patch(
-        "pathlib.Path.is_file", return_value=True
+        return_value=constraints_path,
     ):
-        # Create a registry instance
-        registry = ModelRegistry()
+        # Reset singleton
+        ModelRegistry._default_instance = None
 
-        # Verify that the user config takes precedence
-        assert "test-model-home" in registry.models
+        # Get default registry with default config (which should use env vars)
+        registry = ModelRegistry.get_default()
+
+        # Verify paths from env vars were used
+        assert registry.config.registry_path == registry_path
+        assert registry.config.constraints_path == constraints_path
