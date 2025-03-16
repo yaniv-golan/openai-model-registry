@@ -9,10 +9,15 @@ repos:
     -   id: check-json
     -   id: debug-statements
 
--   repo: https://github.com/psf/black
-    rev: 23.3.0
+-   repo: local
     hooks:
     -   id: black
+        name: black
+        description: "Black: The uncompromising Python code formatter"
+        entry: poetry run black
+        language: system
+        require_serial: true
+        types: [python]
 
 -   repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.3.6
@@ -20,16 +25,13 @@ repos:
     -   id: ruff
         args: [--fix, --exit-non-zero-on-fix]
 
--   repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.15.0
+-   repo: local
     hooks:
     -   id: mypy
-        additional_dependencies: [
-            types-pyyaml,
-            types-requests,
-            "pydantic>=2.6.3",
-            pytest,
-            click,
-            platformdirs,
-        ]
+        name: mypy
+        description: "MyPy: Optional static typing for Python"
+        entry: poetry run mypy
+        language: system
+        require_serial: true
+        types: [python]
         args: [--strict]

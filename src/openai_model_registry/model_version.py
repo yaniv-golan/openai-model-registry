@@ -4,6 +4,7 @@ This module provides utilities for parsing and comparing model versions
 in the format YYYY-MM-DD.
 """
 
+import re
 from typing import Optional, Tuple
 
 
@@ -154,8 +155,6 @@ class ModelVersion:
             Optional tuple of (base_name, version) if valid, None otherwise
             Example: ("gpt-4o", ModelVersion(2024, 8, 6))
         """
-        import re
-
         # Format: "{base_model}-{YYYY}-{MM}-{DD}"
         pattern = re.compile(r"^([\w-]+?)-(\d{4}-\d{2}-\d{2})$")
         match = pattern.match(model)
@@ -171,3 +170,15 @@ class ModelVersion:
             return base_model, version
         except ValueError:
             return None
+
+    @staticmethod
+    def is_dated_model(model_name: str) -> bool:
+        """Check if a model name follows the dated model format.
+
+        Args:
+            model_name: The model name to check
+
+        Returns:
+            True if the model name follows the dated format (with YYYY-MM-DD suffix)
+        """
+        return bool(re.match(r"^.*-\d{4}-\d{2}-\d{2}$", model_name))
