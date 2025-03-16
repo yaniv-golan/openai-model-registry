@@ -217,9 +217,9 @@ class ModelCapabilities:
 
         # Validate based on constraint type
         if isinstance(constraint, NumericConstraint):
-            constraint.validate(name, value)
+            constraint.validate(name=name, value=value)
         elif isinstance(constraint, EnumConstraint):
-            constraint.validate(name, value)
+            constraint.validate(name=name, value=value)
 
     def validate_parameters(
         self, params: Dict[str, Any], used_params: Optional[Set[str]] = None
@@ -416,11 +416,14 @@ class ModelRegistry:
                 ).items():
                     constraint_ref = param_config.get("constraint")
                     if constraint_ref:
-                        param_ref = ParameterReference(ref=constraint_ref)
-                        param_ref.description = param_config.get(
-                            "description", ""
+                        # Create a parameter reference with description
+                        description = param_config.get("description", "")
+                        param_refs.append(
+                            ParameterReference(
+                                ref=constraint_ref,
+                                description=description,
+                            )
                         )
-                        param_refs.append(param_ref)
 
                 # Create capabilities object
                 capabilities = ModelCapabilities(

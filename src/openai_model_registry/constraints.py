@@ -3,73 +3,136 @@
 This module defines the constraint types used to validate parameters for model calls.
 """
 
+from dataclasses import dataclass
 from typing import (
+    Any,
     List,
     Optional,
 )
 
-from pydantic import BaseModel
+from .errors import ModelRegistryError
 
 
-class NumericConstraint(BaseModel):
-    """Constraint for numeric parameters.
-
-    This defines the valid range and types for numeric parameters.
-
-    Attributes:
-        type: The constraint type, always "numeric"
-        min_value: The minimum allowed value
-        max_value: The maximum allowed value (can be None for context-dependent limits)
-        description: Human-readable description of the parameter
-        allow_float: Whether float values are allowed
-        allow_int: Whether integer values are allowed
-    """
-
-    type: str = "numeric"
-    min_value: float
-    max_value: Optional[float] = None
-    description: str
-    allow_float: bool = True
-    allow_int: bool = True
-
-    model_config = {
-        "arbitrary_types_allowed": True,
-    }
-
-
-class EnumConstraint(BaseModel):
-    """Constraint for enum parameters.
-
-    This defines the valid values for enum parameters.
-
-    Attributes:
-        type: The constraint type, always "enum"
-        allowed_values: List of allowed string values
-        description: Human-readable description of the parameter
-    """
-
-    type: str = "enum"
-    allowed_values: List[str]
-    description: str
-
-    model_config = {
-        "arbitrary_types_allowed": True,
-    }
-
-
-class ParameterReference(BaseModel):
-    """Reference to a parameter constraint.
-
-    This is used in model capabilities to reference constraints.
-
-    Attributes:
-        ref: Reference to a constraint (e.g., "numeric_constraints.temperature")
-        max_value: Optional override for the max_value in the referenced constraint
-    """
+@dataclass
+class ParameterReference:
+    """Reference to a parameter constraint with optional metadata."""
 
     ref: str
+    description: str = ""
     max_value: Optional[float] = None
 
-    model_config = {
-        "arbitrary_types_allowed": True,
-    }
+
+class NumericConstraint:
+    """Constraint for numeric parameters."""
+
+    def __init__(
+        self,
+        min_value: float = 0.0,
+        max_value: Optional[float] = None,
+        allow_float: bool = True,
+        allow_int: bool = True,
+        description: str = "",
+    ):
+        """Initialize numeric constraint.
+
+        Args:
+            min_value: Minimum allowed value
+            max_value: Maximum allowed value, or None for no upper limit
+            allow_float: Whether floating point values are allowed
+            allow_int: Whether integer values are allowed
+            description: Description of the parameter
+        """
+        self.min_value = min_value
+        self.max_value = max_value
+        self.allow_float = allow_float
+        self.allow_int = allow_int
+        self.description = description
+
+    def validate(self, name: str, value: Any) -> None:
+        """Validate a value against this constraint.
+
+        Args:
+            name: Parameter name for error messages
+            value: Value to validate
+
+        Raises:
+            ModelRegistryError: If validation fails
+        """
+        # Validate numeric type
+        if not isinstance(value, (int, float)):
+            raise ModelRegistryError(
+                f"Parameter '{name}' must be a number, got {type(value).__name__}.\n"
+                "Allowed types: "
+                + (
+                    "float and integer"
+                    if self.allow_float and self.allow_int
+                    else ("float only" if self.allow_float else "integer only")
+                )
+            )
+
+        # Validate integer/float requirements
+        if isinstance(value, float) and not self.allow_float:
+            raise ModelRegistryError(
+                f"Parameter '{name}' must be an integer, got float {value}.\n"
+                f"Description: {self.description}"
+            )
+        if isinstance(value, int) and not self.allow_int:
+            raise ModelRegistryError(
+                f"Parameter '{name}' must be a float, got integer {value}.\n"
+                f"Description: {self.description}"
+            )
+
+        # Validate range
+        min_val = self.min_value
+        max_val = self.max_value
+
+        if value < min_val or (max_val is not None and value > max_val):
+            max_desc = str(max_val) if max_val is not None else "unlimited"
+            raise ModelRegistryError(
+                f"Parameter '{name}' must be between {min_val} and {max_desc}.\n"
+                f"Description: {self.description}\n"
+                f"Current value: {value}"
+            )
+
+
+class EnumConstraint:
+    """Constraint for enumerated parameters."""
+
+    def __init__(
+        self,
+        allowed_values: List[str],
+        description: str = "",
+    ):
+        """Initialize enum constraint.
+
+        Args:
+            allowed_values: List of allowed string values
+            description: Description of the parameter
+        """
+        self.allowed_values = allowed_values
+        self.description = description
+
+    def validate(self, name: str, value: Any) -> None:
+        """Validate a value against this constraint.
+
+        Args:
+            name: Parameter name for error messages
+            value: Value to validate
+
+        Raises:
+            ModelRegistryError: If validation fails
+        """
+        # Validate type
+        if not isinstance(value, str):
+            raise ModelRegistryError(
+                f"Parameter '{name}' must be a string, got {type(value).__name__}.\n"
+                f"Description: {self.description}"
+            )
+
+        # Validate allowed values
+        if value not in self.allowed_values:
+            raise ModelRegistryError(
+                f"Invalid value '{value}' for parameter '{name}'.\n"
+                f"Description: {self.description}\n"
+                f"Allowed values: {', '.join(map(str, sorted(self.allowed_values)))}"
+            )
