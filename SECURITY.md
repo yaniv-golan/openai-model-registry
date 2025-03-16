@@ -5,7 +5,7 @@
 We take the security of OpenAI Model Registry seriously. If you believe you've found a security vulnerability, please follow these steps:
 
 1. **Do not disclose the vulnerability publicly** until it has been addressed by the maintainers.
-2. Email the details to [security@example.com](mailto:security@example.com) with:
+2. Email the details to [yaniv@golan.name](mailto:yaniv@golan.name) with:
    - A description of the vulnerability and potential impact
    - Steps to reproduce the issue
    - Any supporting materials (code examples, proof-of-concept, etc.)
