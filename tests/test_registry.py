@@ -16,7 +16,7 @@ from openai_model_registry.registry import (
 )
 
 
-@pytest.fixture  # type: ignore
+@pytest.fixture
 def test_config_dir(tmp_path: Path) -> Path:
     """Create a test configuration directory.
 
@@ -26,7 +26,7 @@ def test_config_dir(tmp_path: Path) -> Path:
     return tmp_path
 
 
-@pytest.fixture  # type: ignore
+@pytest.fixture
 def registry(
     test_config_dir: Path
 ) -> Generator[ModelRegistry, None, None]:

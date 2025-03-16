@@ -43,6 +43,7 @@ follow_imports = "normal"
 strict = true
 show_error_codes = true
 warn_unused_configs = true
+disallow_untyped_decorators = false
 
 # Path configuration
 mypy_path = ["src", "tests"]

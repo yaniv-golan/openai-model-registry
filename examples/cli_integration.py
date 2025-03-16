@@ -123,10 +123,10 @@ def validate_model_parameters(model: str, params: Dict[str, Any]) -> None:
         raise CLIError(f"Error validating model parameters: {str(e)}") from e
 
 
-@click.group()  # type: ignore
-@click.version_option()  # type: ignore
-@click.option("--quiet", is_flag=True, help="Suppress non-essential output")  # type: ignore
-@click.pass_context  # type: ignore
+@click.group()
+@click.version_option()
+@click.option("--quiet", is_flag=True, help="Suppress non-essential output")
+@click.pass_context
 def cli(ctx: Context, quiet: bool) -> None:
     """A sample CLI application using OpenAI Model Registry."""
     ctx.ensure_object(dict)
@@ -138,24 +138,24 @@ def cli(ctx: Context, quiet: bool) -> None:
         click.echo(update_msg, err=True)
 
 
-@cli.command("update-registry")  # type: ignore
-@click.option(  # type: ignore
+@cli.command("update-registry")
+@click.option(
     "--url",
     help="URL to fetch registry updates from",
     default=None,
 )
-@click.option(  # type: ignore
+@click.option(
     "--force",
     is_flag=True,
     help="Force update even if registry is current",
 )
-@click.option(  # type: ignore
+@click.option(
     "--auto-confirm",
     "-y",
     is_flag=True,
     help="Automatically confirm update without prompting",
 )
-@click.pass_context  # type: ignore
+@click.pass_context
 def update_registry_command(
     ctx: Context, url: Optional[str], force: bool, auto_confirm: bool
 ) -> None:
@@ -191,12 +191,12 @@ def update_registry_command(
         raise CLIError(f"Failed to update model registry: {str(e)}") from e
 
 
-@cli.command("completion")  # type: ignore
-@click.option("--model", required=True, help="OpenAI model to use")  # type: ignore
-@click.option("--prompt", required=True, help="Text prompt")  # type: ignore
-@click.option("--temperature", type=float, default=0.7, help="Sampling temperature")  # type: ignore
-@click.option("--max-tokens", type=int, help="Maximum tokens to generate")  # type: ignore
-@click.pass_context  # type: ignore
+@cli.command("completion")
+@click.option("--model", required=True, help="OpenAI model to use")
+@click.option("--prompt", required=True, help="Text prompt")
+@click.option("--temperature", type=float, default=0.7, help="Sampling temperature")
+@click.option("--max-tokens", type=int, help="Maximum tokens to generate")
+@click.pass_context
 def completion_command(
     ctx: Context,
     model: str,
