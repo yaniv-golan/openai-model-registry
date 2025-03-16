@@ -9,10 +9,9 @@ import os
 import re
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional, Set, Union, cast
+from typing import Any, Dict, List, Optional, Set, Union
 
 import yaml
-from pydantic import BaseModel, Field, ValidationError
 
 from .config_paths import (
     MODEL_REGISTRY_FILENAME,
@@ -31,8 +30,6 @@ from .constraints import (
 from .errors import (
     InvalidDateError,
     ModelNotSupportedError,
-    ModelRegistryError,
-    TokenParameterError,
     VersionTooOldError,
 )
 from .logging import LogEvent, LogLevel, _log
@@ -47,6 +44,34 @@ def _default_log_callback(
 ) -> None:
     """Default logging callback that uses the standard logging module."""
     logger.log(level, f"{event}: {data}")
+
+
+class RegistryConfig:
+    """Configuration for the model registry."""
+
+    def __init__(
+        self,
+        registry_path: Optional[str] = None,
+        constraints_path: Optional[str] = None,
+        auto_update: bool = False,
+        cache_size: int = 100,
+    ):
+        """Initialize registry configuration.
+
+        Args:
+            registry_path: Custom path to registry YAML file. If None,
+                           default location is used.
+            constraints_path: Custom path to constraints YAML file. If None,
+                              default location is used.
+            auto_update: Whether to automatically update the registry.
+            cache_size: Size of model capabilities cache.
+        """
+        self.registry_path = registry_path or get_model_registry_path()
+        self.constraints_path = (
+            constraints_path or get_parameter_constraints_path()
+        )
+        self.auto_update = auto_update
+        self.cache_size = cache_size
 
 
 class RegistryUpdateStatus(Enum):
@@ -92,184 +117,175 @@ class RefreshResult:
     message: str
 
 
-class ModelCapabilities(BaseModel):
-    """Model capabilities and constraints."""
+class ModelCapabilities:
+    """Represents the capabilities of a model."""
 
-    context_window: int
-    max_output_tokens: int
-    supports_structured: bool = True
-    supports_streaming: bool = True
-    supported_parameters: List[ParameterReference]
-    description: str = ""
-    min_version: Optional[ModelVersion] = None
-    openai_model_name: Optional[str] = None
-    aliases: List[str] = Field(default_factory=list)
-
-    # Add model_config to allow ModelVersion as an arbitrary type
-    model_config = {
-        "arbitrary_types_allowed": True,
-    }
-
-    def validate_parameter(
+    def __init__(
         self,
-        param_name: str,
-        value: Any,
-        *,
-        used_params: Optional[Set[str]] = None,
-    ) -> None:
-        """Validate that a parameter is supported and its value is valid.
+        model_name: str,
+        openai_model_name: str,
+        context_window: int,
+        max_output_tokens: int,
+        supports_vision: bool = False,
+        supports_functions: bool = False,
+        supports_streaming: bool = False,
+        supports_structured: bool = False,
+        min_version: Optional[ModelVersion] = None,
+        aliases: Optional[List[str]] = None,
+        supported_parameters: Optional[List[ParameterReference]] = None,
+        constraints: Optional[
+            Dict[str, Union[NumericConstraint, EnumConstraint]]
+        ] = None,
+    ):
+        """Initialize model capabilities.
 
         Args:
-            param_name: Name of the parameter to validate
-            value: Value to validate
-            used_params: Optional set to track which parameters have been used
+            model_name: The model identifier in the registry
+            openai_model_name: The model name to use with OpenAI API
+            context_window: Maximum context window size in tokens
+            max_output_tokens: Maximum output tokens
+            supports_vision: Whether the model supports vision inputs
+            supports_functions: Whether the model supports function calling
+            supports_streaming: Whether the model supports streaming
+            supports_structured: Whether the model supports structured output
+            min_version: Minimum version for dated model variants
+            aliases: List of aliases for this model
+            supported_parameters: List of parameter references supported by this model
+            constraints: Dictionary of constraints for validation
+        """
+        self.model_name = model_name
+        self.openai_model_name = openai_model_name
+        self.context_window = context_window
+        self.max_output_tokens = max_output_tokens
+        self.supports_vision = supports_vision
+        self.supports_functions = supports_functions
+        self.supports_streaming = supports_streaming
+        self.supports_structured = supports_structured
+        self.min_version = min_version
+        self.aliases = aliases or []
+        self.supported_parameters = supported_parameters or []
+        self._constraints = constraints or {}
+
+    def get_constraint(
+        self, ref: str
+    ) -> Optional[Union[NumericConstraint, EnumConstraint]]:
+        """Get a constraint by reference.
+
+        Args:
+            ref: Constraint reference (key in constraints dict)
+
+        Returns:
+            The constraint or None if not found
+        """
+        return self._constraints.get(ref)
+
+    def validate_parameter(
+        self, name: str, value: Any, used_params: Optional[Set[str]] = None
+    ) -> None:
+        """Validate a parameter against constraints.
+
+        Args:
+            name: Parameter name
+            value: Parameter value to validate
+            used_params: Optional set to track used parameters
 
         Raises:
-            OpenAIClientError: If the parameter is not supported or invalid
+            ModelRegistryError: If validation fails
         """
-        # Add to used_params if provided
+        # Track used parameters if requested
         if used_params is not None:
-            if param_name in used_params:
-                raise ModelRegistryError(
-                    f"Parameter '{param_name}' has already been used. "
-                    f"It cannot be specified multiple times."
-                )
-            used_params.add(param_name)
+            used_params.add(name)
 
-        # Special handling for token limits
-        if param_name in {
-            "max_tokens",
-            "max_completion_tokens",
-            "max_output_tokens",
-        }:
-            # Ensure they're not too large for the model
-            if (
-                isinstance(value, (int, float))
-                and value > self.max_output_tokens
-            ):
-                raise TokenParameterError(
-                    f"Token limit '{param_name}' exceeds model maximum. "
-                    f"Maximum for {self.openai_model_name} is {self.max_output_tokens}, "
-                    f"but {value} was requested.",
-                    param_name,
-                    value,
-                )
-
-        # Find parameter reference
-        param_ref = None
-        for ref in self.supported_parameters:
-            if param_name in ref.ref:
-                param_ref = ref
-                break
-
-        if param_ref is None:
-            supported_params = [
-                ref.ref.split(".")[1] for ref in self.supported_parameters
-            ]
-            raise ModelRegistryError(
-                f"Parameter '{param_name}' is not supported by model '{self.openai_model_name}'.\n"
-                f"Supported parameters: {', '.join(sorted(supported_params))}"
-            )
-
-        # Get the constraint from the registry
-        constraint = ModelRegistry.get_instance().get_parameter_constraint(
-            param_ref.ref
+        # Find matching parameter reference
+        param_ref = next(
+            (
+                p
+                for p in self.supported_parameters
+                if p.ref.split(".")[-1] == name
+            ),
+            None,
         )
 
+        if not param_ref:
+            # Parameter not found in constraints, assume valid
+            return
+
+        constraint = self.get_constraint(param_ref.ref)
+        if not constraint:
+            # Constraint not found, assume valid
+            return
+
+        # Validate based on constraint type
         if isinstance(constraint, NumericConstraint):
-            # Validate numeric type
-            if not isinstance(value, (int, float)):
-                raise ModelRegistryError(
-                    f"Parameter '{param_name}' must be a number, got {type(value).__name__}.\n"
-                    "Allowed types: "
-                    + (
-                        "float and integer"
-                        if constraint.allow_float and constraint.allow_int
-                        else (
-                            "float only"
-                            if constraint.allow_float
-                            else "integer only"
-                        )
-                    )
-                )
-
-            # Validate integer/float requirements
-            if isinstance(value, float) and not constraint.allow_float:
-                raise ModelRegistryError(
-                    f"Parameter '{param_name}' must be an integer, got float {value}.\n"
-                    f"Description: {constraint.description}"
-                )
-            if isinstance(value, int) and not constraint.allow_int:
-                raise ModelRegistryError(
-                    f"Parameter '{param_name}' must be a float, got integer {value}.\n"
-                    f"Description: {constraint.description}"
-                )
-
-            # Use override max_value if specified
-            max_value = param_ref.max_value or constraint.max_value
-            if max_value is None:
-                max_value = self.max_output_tokens
-
-            # Validate range
-            if value < constraint.min_value or value > max_value:
-                raise ModelRegistryError(
-                    f"Parameter '{param_name}' must be between {constraint.min_value} and {max_value}.\n"
-                    f"Description: {constraint.description}\n"
-                    f"Current value: {value}"
-                )
-
+            constraint.validate(name, value)
         elif isinstance(constraint, EnumConstraint):
-            # Validate type
-            if not isinstance(value, str):
-                raise ModelRegistryError(
-                    f"Parameter '{param_name}' must be a string, got {type(value).__name__}.\n"
-                    f"Description: {constraint.description}"
-                )
+            constraint.validate(name, value)
 
-            # Validate allowed values
-            if value not in constraint.allowed_values:
-                raise ModelRegistryError(
-                    f"Invalid value '{value}' for parameter '{param_name}'.\n"
-                    f"Description: {constraint.description}\n"
-                    f"Allowed values: {', '.join(map(str, sorted(constraint.allowed_values)))}"
-                )
+    def validate_parameters(
+        self, params: Dict[str, Any], used_params: Optional[Set[str]] = None
+    ) -> None:
+        """Validate multiple parameters against constraints.
+
+        Args:
+            params: Dictionary of parameter names and values to validate
+            used_params: Optional set to track used parameters
+
+        Raises:
+            ModelRegistryError: If validation fails for any parameter
+        """
+        for name, value in params.items():
+            self.validate_parameter(name, value, used_params)
 
 
 class ModelRegistry:
     """Registry for model capabilities and validation."""
 
-    _instance: Optional["ModelRegistry"] = None
-    _config_path: Optional[str] = None
-    _constraints_path: Optional[str] = None
+    _default_instance: Optional["ModelRegistry"] = None
 
-    def __new__(cls) -> "ModelRegistry":
-        """Create or return the singleton instance."""
-        if cls._instance is None:
-            cls._instance = super().__new__(cls)
-        return cls._instance
+    @classmethod
+    def get_instance(cls) -> "ModelRegistry":
+        """Get the default registry instance with standard configuration.
 
-    def __init__(self) -> None:
-        """Initialize the model registry."""
-        if not hasattr(self, "_initialized"):
-            self._capabilities: Dict[str, ModelCapabilities] = {}
-            self._constraints: Dict[
-                str, Union[NumericConstraint, EnumConstraint]
-            ] = {}
+        This method is maintained for backward compatibility.
+        New code should use get_default() instead.
 
-            # Get paths using XDG standard and fallbacks
-            self._config_path = get_model_registry_path()
-            self._constraints_path = get_parameter_constraints_path()
+        Returns:
+            The default ModelRegistry instance
+        """
+        return cls.get_default()
 
-            # Auto-copy default configs to user directory if they don't exist
+    @classmethod
+    def get_default(cls) -> "ModelRegistry":
+        """Get the default registry instance with standard configuration.
+
+        Returns:
+            The default ModelRegistry instance
+        """
+        if cls._default_instance is None:
+            cls._default_instance = cls()
+        return cls._default_instance
+
+    def __init__(self, config: Optional[RegistryConfig] = None):
+        """Initialize a new registry instance.
+
+        Args:
+            config: Configuration for this registry instance. If None, default
+                   configuration is used.
+        """
+        self.config = config or RegistryConfig()
+        self._capabilities: Dict[str, ModelCapabilities] = {}
+        self._constraints: Dict[
+            str, Union[NumericConstraint, EnumConstraint]
+        ] = {}
+
+        # Auto-copy default configs to user directory if they don't exist
+        if not config or not config.registry_path:
             copy_default_to_user_config(MODEL_REGISTRY_FILENAME)
+        if not config or not config.constraints_path:
             copy_default_to_user_config(PARAM_CONSTRAINTS_FILENAME)
 
-            if not self._config_path or not self._constraints_path:
-                raise ValueError("Registry paths not set")
-
-            self._load_constraints()
-            self._load_capabilities()
-            self._initialized = True
+        self._load_constraints()
+        self._load_capabilities()
 
     def _load_config(self) -> Optional[Dict[str, Any]]:
         """Load model configuration from file.
@@ -277,11 +293,8 @@ class ModelRegistry:
         Returns:
             Optional[Dict[str, Any]]: The loaded configuration data, or None if loading failed
         """
-        if not self._config_path:
-            raise ValueError("Config path not set")
-
         try:
-            with open(self._config_path, "r") as f:
+            with open(self.config.registry_path, "r") as f:
                 data = yaml.safe_load(f)
                 if not isinstance(data, dict):
                     return None
@@ -293,41 +306,47 @@ class ModelRegistry:
                 LogEvent.MODEL_REGISTRY,
                 {
                     "message": "Model registry config file not found, using defaults",
-                    "path": self._config_path,
+                    "path": self.config.registry_path,
                 },
             )
             return None
         except Exception as e:
             _log(
                 _default_log_callback,
-                LogLevel.WARNING,
+                LogLevel.ERROR,
                 LogEvent.MODEL_REGISTRY,
                 {
-                    "message": "Failed to load model registry config, using fallbacks",
+                    "message": "Failed to load model registry config",
+                    "path": self.config.registry_path,
                     "error": str(e),
-                    "path": self._config_path,
                 },
             )
             return None
 
     def _load_constraints(self) -> None:
         """Load parameter constraints from file."""
-        if not self._constraints_path:
-            raise ValueError("Constraints path not set")
-
         try:
-            with open(self._constraints_path, "r") as f:
+            with open(self.config.constraints_path, "r") as f:
                 data = yaml.safe_load(f)
+                if not isinstance(data, dict):
+                    return
 
-            # Load numeric constraints
-            for name, config in data.get("numeric_constraints", {}).items():
-                key = f"numeric_constraints.{name}"
-                self._constraints[key] = NumericConstraint(**config)
+                # Create constraints from config
+                for name, constraint in data.items():
+                    constraint_type = constraint.get("type", "")
 
-            # Load enum constraints
-            for name, config in data.get("enum_constraints", {}).items():
-                key = f"enum_constraints.{name}"
-                self._constraints[key] = EnumConstraint(**config)
+                    if constraint_type == "numeric":
+                        self._constraints[name] = NumericConstraint(
+                            min_value=constraint.get("min"),
+                            max_value=constraint.get("max"),
+                            allow_float=constraint.get("allow_float", True),
+                            description=constraint.get("description", ""),
+                        )
+                    elif constraint_type == "enum":
+                        self._constraints[name] = EnumConstraint(
+                            allowed_values=constraint.get("values", []),
+                            description=constraint.get("description", ""),
+                        )
 
         except FileNotFoundError:
             _log(
@@ -335,8 +354,8 @@ class ModelRegistry:
                 LogLevel.WARNING,
                 LogEvent.MODEL_REGISTRY,
                 {
-                    "message": "Parameter constraints file not found, using defaults",
-                    "path": self._constraints_path,
+                    "message": "Parameter constraints file not found",
+                    "path": self.config.constraints_path,
                 },
             )
         except Exception as e:
@@ -346,92 +365,106 @@ class ModelRegistry:
                 LogEvent.MODEL_REGISTRY,
                 {
                     "message": "Failed to load parameter constraints",
+                    "path": self.config.constraints_path,
                     "error": str(e),
                 },
             )
-            raise
 
     def _load_capabilities(self) -> None:
-        """Load model capabilities from YAML."""
-        # Clear existing capabilities
-        self._capabilities.clear()
-
-        # Load configuration
+        """Load model capabilities from config."""
         data = self._load_config()
-        if data is None:
-            # If loading failed, use fallback models
-            data = self._fallback_models
+        if not data:
+            _log(
+                _default_log_callback,
+                LogLevel.WARNING,
+                LogEvent.MODEL_REGISTRY,
+                {
+                    "message": "No model registry data loaded, using empty registry",
+                },
+            )
+            return
 
-        try:
-            # Process dated models
-            dated_models = cast(Dict[str, Any], data.get("dated_models", {}))
-            for model, config in dated_models.items():
-                try:
-                    # Handle min_version
-                    if "min_version" in config:
-                        # Convert to ModelVersion if needed
-                        if isinstance(config["min_version"], dict):
-                            config["min_version"] = ModelVersion(
-                                **config["min_version"]
-                            )
+        # Process model data
+        models_data = data.get("models", {})
+        for model_name, model_config in models_data.items():
+            try:
+                # Extract aliases
+                aliases = model_config.get("aliases", [])
 
-                    # Set model name
-                    config["openai_model_name"] = model
-
-                    # Create and store capabilities
-                    self._capabilities[model] = ModelCapabilities(**config)
-                except ValidationError as e:
-                    _log(
-                        _default_log_callback,
-                        LogLevel.ERROR,
-                        LogEvent.MODEL_REGISTRY,
-                        {
-                            "message": f"Failed to load model {model}",
-                            "error": str(e),
-                        },
-                    )
-
-            # Process aliases
-            aliases_dict = data.get("aliases", {})
-            if isinstance(aliases_dict, dict):
-                for alias, target in aliases_dict.items():
-                    if target in self._capabilities:
-                        # Get the target model capabilities
-                        target_model = self._capabilities[target]
-
-                        # Create alias in capabilities
-                        self._capabilities[alias] = target_model
-
-                        # Add alias to the target model's aliases list
-                        if alias not in target_model.aliases:
-                            target_model.aliases.append(alias)
-                    else:
+                # Extract min version if present
+                min_version_str = model_config.get("min_version")
+                min_version = None
+                if min_version_str:
+                    try:
+                        min_version = ModelVersion.from_string(min_version_str)
+                    except ValueError:
                         _log(
                             _default_log_callback,
                             LogLevel.WARNING,
                             LogEvent.MODEL_REGISTRY,
                             {
-                                "message": f"Alias {alias} targets non-existent model {target}",
+                                "message": "Invalid min_version format for model",
+                                "model": model_name,
+                                "min_version": min_version_str,
                             },
                         )
 
-        except Exception as e:
-            _log(
-                _default_log_callback,
-                LogLevel.ERROR,
-                LogEvent.MODEL_REGISTRY,
-                {
-                    "message": "Failed to load model capabilities",
-                    "error": str(e),
-                },
-            )
+                # Create parameters list from references
+                param_refs = []
+                for _, param_config in model_config.get(
+                    "parameters", {}
+                ).items():
+                    constraint_ref = param_config.get("constraint")
+                    if constraint_ref:
+                        param_ref = ParameterReference(ref=constraint_ref)
+                        param_ref.description = param_config.get(
+                            "description", ""
+                        )
+                        param_refs.append(param_ref)
 
-    @classmethod
-    def get_instance(cls) -> "ModelRegistry":
-        """Get or create the singleton instance."""
-        if cls._instance is None:
-            cls._instance = cls()
-        return cls._instance
+                # Create capabilities object
+                capabilities = ModelCapabilities(
+                    model_name=model_name,
+                    aliases=aliases,
+                    openai_model_name=model_config.get(
+                        "openai_name", model_name
+                    ),
+                    context_window=model_config.get("context_window", 0),
+                    max_output_tokens=model_config.get("max_output_tokens", 0),
+                    supports_vision=model_config.get("supports_vision", False),
+                    supports_functions=model_config.get(
+                        "supports_functions", False
+                    ),
+                    supports_streaming=model_config.get(
+                        "supports_streaming", False
+                    ),
+                    supports_structured=model_config.get(
+                        "supports_structured", False
+                    ),
+                    min_version=min_version,
+                    supported_parameters=param_refs,
+                    constraints=self._constraints,
+                )
+
+                # Add to registry
+                self._capabilities[model_name] = capabilities
+
+                # Also register under aliases
+                for alias in aliases:
+                    self._capabilities[alias] = capabilities
+
+            except Exception as e:
+                _log(
+                    _default_log_callback,
+                    LogLevel.ERROR,
+                    LogEvent.MODEL_REGISTRY,
+                    {
+                        "message": "Failed to load model capabilities",
+                        "model": model_name,
+                        "error": str(e),
+                    },
+                )
+                # Continue with other models
 
     def get_capabilities(self, model: str) -> ModelCapabilities:
         """Get capabilities for a model.
@@ -549,8 +582,19 @@ class ModelRegistry:
 
             if base_model_caps:
                 # Create a copy with the requested model name
-                new_caps = base_model_caps.model_copy(
-                    update={"openai_model_name": model}
+                new_caps = ModelCapabilities(
+                    model_name=base_model_caps.model_name,
+                    openai_model_name=model,
+                    context_window=base_model_caps.context_window,
+                    max_output_tokens=base_model_caps.max_output_tokens,
+                    supports_vision=base_model_caps.supports_vision,
+                    supports_functions=base_model_caps.supports_functions,
+                    supports_streaming=base_model_caps.supports_streaming,
+                    supports_structured=base_model_caps.supports_structured,
+                    min_version=base_model_caps.min_version,
+                    aliases=base_model_caps.aliases,
+                    supported_parameters=base_model_caps.supported_parameters,
+                    constraints=base_model_caps._constraints,
                 )
                 return new_caps
 
@@ -628,9 +672,9 @@ class ModelRegistry:
         Returns:
             Optional[str]: Path to the metadata file, or None if config_path is not set
         """
-        if not self._config_path:
+        if not self.config.registry_path:
             return None
-        return f"{self._config_path}.meta"
+        return f"{self.config.registry_path}.meta"
 
     def _save_cache_metadata(self, metadata: Dict[str, str]) -> None:
         """Save cache metadata to file.
@@ -1017,9 +1061,7 @@ class ModelRegistry:
     @classmethod
     def cleanup(cls) -> None:
         """Clean up the registry instance."""
-        cls._instance = None
-        cls._config_path = None
-        cls._constraints_path = None
+        cls._default_instance = None
 
     @property
     def models(self) -> Dict[str, ModelCapabilities]:
