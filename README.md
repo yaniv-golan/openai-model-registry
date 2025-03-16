@@ -330,7 +330,7 @@ Result of a registry update operation.
 
 ### Error Classes
 
-#### `OpenAIClientError`
+#### `ModelRegistryError`
 
 Base class for all registry-related errors.
 

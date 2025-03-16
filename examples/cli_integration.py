@@ -13,8 +13,8 @@ from click import Context
 from openai_model_registry import ModelRegistry
 from openai_model_registry.errors import (
     ModelNotSupportedError,
+    ModelRegistryError,
     ModelVersionError,
-    OpenAIClientError,
     TokenParameterError,
 )
 
@@ -117,7 +117,7 @@ def validate_model_parameters(model: str, params: Dict[str, Any]) -> None:
         raise CLIError(str(e)) from e
     except TokenParameterError as e:
         raise CLIError(f"Invalid parameter: {str(e)}") from e
-    except OpenAIClientError as e:
+    except ModelRegistryError as e:
         raise CLIError(f"Error validating model parameters: {str(e)}") from e
     except Exception as e:
         raise CLIError(f"Error validating model parameters: {str(e)}") from e

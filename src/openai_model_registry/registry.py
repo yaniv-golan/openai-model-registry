@@ -31,7 +31,7 @@ from .constraints import (
 from .errors import (
     InvalidDateError,
     ModelNotSupportedError,
-    OpenAIClientError,
+    ModelRegistryError,
     TokenParameterError,
     VersionTooOldError,
 )
@@ -130,7 +130,7 @@ class ModelCapabilities(BaseModel):
         # Add to used_params if provided
         if used_params is not None:
             if param_name in used_params:
-                raise OpenAIClientError(
+                raise ModelRegistryError(
                     f"Parameter '{param_name}' has already been used. "
                     f"It cannot be specified multiple times."
                 )
@@ -166,7 +166,7 @@ class ModelCapabilities(BaseModel):
             supported_params = [
                 ref.ref.split(".")[1] for ref in self.supported_parameters
             ]
-            raise OpenAIClientError(
+            raise ModelRegistryError(
                 f"Parameter '{param_name}' is not supported by model '{self.openai_model_name}'.\n"
                 f"Supported parameters: {', '.join(sorted(supported_params))}"
             )
@@ -179,7 +179,7 @@ class ModelCapabilities(BaseModel):
         if isinstance(constraint, NumericConstraint):
             # Validate numeric type
             if not isinstance(value, (int, float)):
-                raise OpenAIClientError(
+                raise ModelRegistryError(
                     f"Parameter '{param_name}' must be a number, got {type(value).__name__}.\n"
                     "Allowed types: "
                     + (
@@ -195,12 +195,12 @@ class ModelCapabilities(BaseModel):
 
             # Validate integer/float requirements
             if isinstance(value, float) and not constraint.allow_float:
-                raise OpenAIClientError(
+                raise ModelRegistryError(
                     f"Parameter '{param_name}' must be an integer, got float {value}.\n"
                     f"Description: {constraint.description}"
                 )
             if isinstance(value, int) and not constraint.allow_int:
-                raise OpenAIClientError(
+                raise ModelRegistryError(
                     f"Parameter '{param_name}' must be a float, got integer {value}.\n"
                     f"Description: {constraint.description}"
                 )
@@ -212,7 +212,7 @@ class ModelCapabilities(BaseModel):
 
             # Validate range
             if value < constraint.min_value or value > max_value:
-                raise OpenAIClientError(
+                raise ModelRegistryError(
                     f"Parameter '{param_name}' must be between {constraint.min_value} and {max_value}.\n"
                     f"Description: {constraint.description}\n"
                     f"Current value: {value}"
@@ -221,14 +221,14 @@ class ModelCapabilities(BaseModel):
         elif isinstance(constraint, EnumConstraint):
             # Validate type
             if not isinstance(value, str):
-                raise OpenAIClientError(
+                raise ModelRegistryError(
                     f"Parameter '{param_name}' must be a string, got {type(value).__name__}.\n"
                     f"Description: {constraint.description}"
                 )
 
             # Validate allowed values
             if value not in constraint.allowed_values:
-                raise OpenAIClientError(
+                raise ModelRegistryError(
                     f"Invalid value '{value}' for parameter '{param_name}'.\n"
                     f"Description: {constraint.description}\n"
                     f"Allowed values: {', '.join(map(str, sorted(constraint.allowed_values)))}"

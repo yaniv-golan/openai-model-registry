@@ -17,8 +17,8 @@ from .constraints import (
 from .errors import (
     InvalidDateError,
     ModelNotSupportedError,
+    ModelRegistryError,
     ModelVersionError,
-    OpenAIClientError,
     TokenParameterError,
     VersionTooOldError,
 )
@@ -46,7 +46,7 @@ __all__ = [
     "EnumConstraint",
     "ParameterReference",
     # Errors
-    "OpenAIClientError",
+    "ModelRegistryError",
     "ModelNotSupportedError",
     "ModelVersionError",
     "InvalidDateError",

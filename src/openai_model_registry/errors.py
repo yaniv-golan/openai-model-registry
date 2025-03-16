@@ -7,7 +7,7 @@ for various validation and compatibility issues.
 from typing import Any, Dict, List, Optional, Set, Union
 
 
-class OpenAIClientError(Exception):
+class ModelRegistryError(Exception):
     """Base class for all registry-related errors.
 
     This is the parent class for all registry-specific exceptions.
@@ -16,7 +16,7 @@ class OpenAIClientError(Exception):
     pass
 
 
-class ModelVersionError(OpenAIClientError):
+class ModelVersionError(ModelRegistryError):
     """Base class for version-related errors.
 
     This is raised for any errors related to model versions.
@@ -65,7 +65,7 @@ class VersionTooOldError(ModelVersionError):
         self.alias = alias
 
 
-class ModelNotSupportedError(OpenAIClientError):
+class ModelNotSupportedError(ModelRegistryError):
     """Raised when a model is not supported by the registry.
 
     This error indicates that the requested model is not in the registry of
@@ -96,7 +96,7 @@ class ModelNotSupportedError(OpenAIClientError):
         return self.message
 
 
-class TokenParameterError(OpenAIClientError):
+class TokenParameterError(ModelRegistryError):
     """Raised when there's an issue with token-related parameters.
 
     This error is used for issues with max_tokens, completion_tokens, etc.

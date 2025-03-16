@@ -7,12 +7,14 @@ from typing import Generator
 import pytest
 import yaml
 
+from openai_model_registry import (
+    ModelRegistry,
+    ModelRegistryError,
+    ModelVersion,
+    TokenParameterError,
+)
 from openai_model_registry.errors import (
     ModelNotSupportedError,
-    OpenAIClientError,
-)
-from openai_model_registry.registry import (
-    ModelRegistry,
 )
 
 
@@ -176,11 +178,11 @@ def test_parameter_validation(registry: ModelRegistry) -> None:
     capabilities.validate_parameter("max_completion_tokens", 100)
 
     # Invalid parameters
-    with pytest.raises(OpenAIClientError):
+    with pytest.raises(ModelRegistryError):
         capabilities.validate_parameter("temperature", 3.0)
 
-    with pytest.raises(OpenAIClientError):
+    with pytest.raises(ModelRegistryError):
         capabilities.validate_parameter("max_completion_tokens", 0)
 
-    with pytest.raises(OpenAIClientError):
+    with pytest.raises(ModelRegistryError):
         capabilities.validate_parameter("unsupported_param", 1.0)
