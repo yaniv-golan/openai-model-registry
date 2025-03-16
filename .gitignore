@@ -45,4 +45,7 @@ htmlcov/
 *.swo
 
 # Cache metadata
-*.yml.meta 
+*.yml.meta
+
+# Local history
+.history/

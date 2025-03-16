@@ -46,4 +46,4 @@ enum_constraints:
   reasoning_effort:
     type: enum
     allowed_values: [low, medium, high]
-    description: Controls the model's reasoning depth 
+    description: Controls the model's reasoning depth

@@ -2,7 +2,7 @@
 
 import os
 from pathlib import Path
-from typing import Any, Dict, Generator, Optional
+from typing import Generator
 
 import pytest
 import yaml
@@ -12,31 +12,29 @@ from openai_model_registry.errors import (
     OpenAIClientError,
 )
 from openai_model_registry.registry import (
-    ModelCapabilities,
     ModelRegistry,
 )
-from openai_model_registry.model_version import ModelVersion
 
 
-@pytest.fixture
+@pytest.fixture  # type: ignore
 def test_config_dir(tmp_path: Path) -> Path:
     """Create a test configuration directory.
-    
+
     Returns:
         Path to the temporary directory
     """
     return tmp_path
 
 
-@pytest.fixture
+@pytest.fixture  # type: ignore
 def registry(
     test_config_dir: Path
 ) -> Generator[ModelRegistry, None, None]:
     """Create a test registry with temporary config files.
-    
+
     Args:
         test_config_dir: Temporary directory for config files
-        
+
     Returns:
         ModelRegistry instance for testing
     """
@@ -46,7 +44,7 @@ def registry(
 
     # Cleanup any existing registry first
     ModelRegistry._instance = None
-    
+
     # Create parameter constraints file
     constraints_path = test_config_dir / "parameter_constraints.yml"
     constraints_content = {
@@ -76,10 +74,10 @@ def registry(
             }
         },
     }
-    
+
     with open(constraints_path, "w") as f:
         yaml.dump(constraints_content, f)
-    
+
     # Create model capabilities file
     models_path = test_config_dir / "models.yml"
     models_content = {
@@ -115,30 +113,30 @@ def registry(
             "gpt-4o": "gpt-4o-2024-08-06",
         },
     }
-    
+
     with open(models_path, "w") as f:
         yaml.dump(models_content, f)
-    
+
     # Set environment variables
     os.environ["MODEL_REGISTRY_PATH"] = str(models_path)
     os.environ["PARAMETER_CONSTRAINTS_PATH"] = str(constraints_path)
-    
+
     # Create and return registry
     registry = ModelRegistry()
-    
+
     yield registry
-    
+
     # Restore original environment variables
     if original_registry_path:
         os.environ["MODEL_REGISTRY_PATH"] = original_registry_path
     else:
         os.environ.pop("MODEL_REGISTRY_PATH", None)
-        
+
     if original_constraints_path:
         os.environ["PARAMETER_CONSTRAINTS_PATH"] = original_constraints_path
     else:
         os.environ.pop("PARAMETER_CONSTRAINTS_PATH", None)
-    
+
     # Reset the singleton
     ModelRegistry._instance = None
 
@@ -158,7 +156,7 @@ def test_get_capabilities(registry: ModelRegistry) -> None:
     assert capabilities.context_window == 4096
     assert capabilities.max_output_tokens == 2048
     assert capabilities.supports_structured is True
-    
+
     # Test getting by dated model
     capabilities = registry.get_capabilities("test-model-2024-01-01")
     assert capabilities.context_window == 4096
@@ -174,17 +172,17 @@ def test_unsupported_model(registry: ModelRegistry) -> None:
 def test_parameter_validation(registry: ModelRegistry) -> None:
     """Test parameter validation."""
     capabilities = registry.get_capabilities("test-model")
-    
+
     # Valid parameters
     capabilities.validate_parameter("temperature", 0.7)
     capabilities.validate_parameter("max_completion_tokens", 100)
-    
+
     # Invalid parameters
     with pytest.raises(OpenAIClientError):
         capabilities.validate_parameter("temperature", 3.0)
-        
+
     with pytest.raises(OpenAIClientError):
         capabilities.validate_parameter("max_completion_tokens", 0)
-        
+
     with pytest.raises(OpenAIClientError):
-        capabilities.validate_parameter("unsupported_param", 1.0) 
+        capabilities.validate_parameter("unsupported_param", 1.0)
