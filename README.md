@@ -87,6 +87,54 @@ Update the local registry data:
 openai-model-registry-update
 ```
 
+## Registry Configuration
+
+### Local Registry
+
+The registry data is stored locally in the following locations:
+
+- **Model Registry**: `{package_directory}/config/models.yml`
+  - Override with environment variable: `MODEL_REGISTRY_PATH`
+
+- **Parameter Constraints**: `{package_directory}/config/parameter_constraints.yml`
+  - Override with environment variable: `PARAMETER_CONSTRAINTS_PATH`
+
+Example of setting custom paths:
+
+```python
+import os
+
+# Set custom registry paths
+os.environ["MODEL_REGISTRY_PATH"] = "/path/to/custom/models.yml"
+os.environ["PARAMETER_CONSTRAINTS_PATH"] = "/path/to/custom/parameter_constraints.yml"
+
+# Then initialize the registry
+from openai_model_registry import ModelRegistry
+registry = ModelRegistry.get_instance()
+```
+
+### Remote Registry
+
+When updating the registry, data is fetched from:
+
+- **Default Remote URL**: `https://raw.githubusercontent.com/openai-model-registry/openai-model-registry/main/src/openai_model_registry/config/models.yml`
+
+You can specify a custom URL when updating:
+
+```python
+# Using a custom URL
+registry.refresh_from_remote(url="https://example.com/custom-models.yml")
+
+# Check for updates from a custom source
+result = registry.check_for_updates(url="https://example.com/custom-models.yml")
+```
+
+Or via command line:
+
+```bash
+openai-model-registry-update --url https://example.com/custom-models.yml
+```
+
 ## License
 
 MIT License - See [LICENSE](./LICENSE) for details.
