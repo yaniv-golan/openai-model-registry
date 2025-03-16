@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: "Golan"
+    given-names: "Yaniv"
+    email: "yaniv@golan.name"
+title: "OpenAI Model Registry"
+version: 1.0.0
+date-released: 2024-03-16
+url: "https://github.com/yaniv-golan/openai-model-registry"
+repository-code: "https://github.com/yaniv-golan/openai-model-registry"
+license: MIT
+abstract: >-
+  A lightweight Python package for validating OpenAI model parameters 
+  and capabilities. Provides a centralized registry of model information,
+  validates parameters against model-specific schemas, and retrieves
+  model capabilities.
+keywords:
+  - openai
+  - llm
+  - machine-learning
+  - nlp
+  - validation 

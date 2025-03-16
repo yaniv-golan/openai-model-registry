@@ -1,0 +1,62 @@
+site_name: OpenAI Model Registry
+site_description: A lightweight Python package for validating OpenAI model parameters and capabilities
+site_author: Yaniv Golan
+site_url: https://yaniv-golan.github.io/openai-model-registry/
+
+repo_name: yaniv-golan/openai-model-registry
+repo_url: https://github.com/yaniv-golan/openai-model-registry
+
+theme:
+  name: material
+  palette:
+    primary: teal
+    accent: deep orange
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.expand
+    - navigation.indexes
+    - search.highlight
+    - search.share
+    - content.code.copy
+
+markdown_extensions:
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed
+  - pymdownx.critic
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - admonition
+  - footnotes
+  - toc:
+      permalink: true
+
+plugins:
+  - search
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          selection:
+            docstring_style: google
+          rendering:
+            show_source: true
+            show_root_heading: true
+            show_root_full_path: false
+
+nav:
+  - Home: index.md
+  - User Guide:
+      - Overview: user-guide/index.md
+      - Getting Started: user-guide/getting-started.md
+      - Model Capabilities: user-guide/model-capabilities.md
+      - Parameter Validation: user-guide/parameter-validation.md
+      - Advanced Usage: user-guide/advanced-usage.md
+  - API Reference:
+      - Overview: api/index.md
+      - ModelRegistry: api/model-registry.md
+      - ModelCapabilities: api/model-capabilities.md
+  - Contributing: ../CONTRIBUTING.md
+  - Changelog: ../CHANGELOG.md 
