@@ -7,7 +7,7 @@ from typing import Optional, Union
 import click
 
 from ..errors import ModelNotSupportedError, ModelVersionError
-from ..registry import ModelRegistry, RegistryUpdateStatus
+from ..registry import ModelRegistry, RefreshStatus
 
 
 def refresh_registry(
@@ -42,78 +42,42 @@ def refresh_registry(
         if check_only:
             result = registry.check_for_updates(url)
             if result.success:
-                if result.status == RegistryUpdateStatus.UPDATE_AVAILABLE:
+                if result.status == RefreshStatus.UPDATE_AVAILABLE:
                     print("✅ Registry update is available")
                     if verbose:
                         print(f"\nStatus: {result.status.value}")
                         print(f"Message: {result.message}")
-                        if result.url:
-                            print(f"URL: {result.url}")
-                        print(f"Local registry file: {registry._config_path}")
-                elif result.status == RegistryUpdateStatus.ALREADY_CURRENT:
-                    print("✅ Registry is already up to date")
+                elif result.status == RefreshStatus.ALREADY_CURRENT:
+                    print("✓ Registry is already up to date")
                     if verbose:
                         print(f"\nStatus: {result.status.value}")
                         print(f"Message: {result.message}")
-                        if result.url:
-                            print(f"URL: {result.url}")
-                        print(f"Local registry file: {registry._config_path}")
                 return 0
             else:
-                print(f"❌ Failed to check for updates: {result.message}")
-                if verbose:
-                    if result.error:
-                        print(f"Error details: {str(result.error)}")
-                    print(f"Local registry file: {registry._config_path}")
+                print(f"❌ Error checking for updates: {result.message}")
                 return 1
 
-        if not force:
-            if not click.confirm(
-                "Update model configurations from remote?", default=True
-            ):
-                return 0
+        # For actual update (when not in validate or check_only mode)
+        result = registry.check_for_updates(url)
+        if not force and result.status == RefreshStatus.ALREADY_CURRENT:
+            print("✓ Registry is already up to date")
+            if verbose:
+                print(f"\nStatus: {result.status.value}")
+                print(f"Message: {result.message}")
+            return 0
 
-        # Update from remote
-        result = registry.refresh_from_remote(url, force=force)
-
+        # Perform the update
+        result = registry.refresh_from_remote(
+            url=url, force=force, validate_only=validate
+        )
         if result.success:
-            if result.status == RegistryUpdateStatus.UPDATED:
-                print("✅ Registry updated successfully")
-                if verbose:
-                    # Show available models
-                    aliases = sorted(
-                        [
-                            name
-                            for name, caps in registry.models.items()
-                            if not name.count("-") >= 3
-                        ]
-                    )
-                    dated_models = sorted(
-                        [
-                            name
-                            for name, caps in registry.models.items()
-                            if name.count("-") >= 3
-                        ]
-                    )
-
-                    print("\nAvailable models:")
-                    print("  Aliases:")
-                    for alias in aliases:
-                        print(f"    - {alias}")
-                    print("\n  Dated models:")
-                    for model in dated_models:
-                        print(f"    - {model}")
-
-                    print(f"\nLocal registry file: {registry._config_path}")
-            elif result.status == RegistryUpdateStatus.ALREADY_CURRENT:
-                print("✅ Registry is already up to date")
-                if verbose:
-                    print(f"\nLocal registry file: {registry._config_path}")
+            print("✅ Registry updated successfully")
+            if verbose:
+                print(f"\nStatus: {result.status.value}")
+                print(f"Message: {result.message}")
             return 0
         else:
-            print(f"❌ Failed to update registry: {result.message}")
-            if verbose and result.error:
-                print(f"Error details: {str(result.error)}")
+            print(f"❌ Error updating registry: {result.message}")
             return 1
 
     except ModelNotSupportedError as e:

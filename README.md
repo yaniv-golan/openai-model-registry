@@ -91,13 +91,24 @@ openai-model-registry-update
 
 ### Local Registry
 
-The registry data is stored locally in the following locations:
+The registry data is stored locally following the [XDG Base Directory Specification](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html), with the following lookup order:
 
-- **Model Registry**: `{package_directory}/config/models.yml`
-  - Override with environment variable: `MODEL_REGISTRY_PATH`
+1. **Environment Variables** (if set):
+   - `MODEL_REGISTRY_PATH` for model registry
+   - `PARAMETER_CONSTRAINTS_PATH` for parameter constraints
 
-- **Parameter Constraints**: `{package_directory}/config/parameter_constraints.yml`
-  - Override with environment variable: `PARAMETER_CONSTRAINTS_PATH`
+2. **User Configuration Directory**:
+   - Linux: `~/.config/openai-model-registry/`
+   - macOS: `~/Library/Application Support/openai-model-registry/`
+   - Windows: `%LOCALAPPDATA%\openai-model-registry\`
+
+3. **Package Installation Directory** (fallback):
+   - `{package_directory}/config/`
+
+The specific files used are:
+
+- **Model Registry**: `models.yml`
+- **Parameter Constraints**: `parameter_constraints.yml`
 
 Example of setting custom paths:
 
@@ -186,3 +197,175 @@ The repository uses GitHub Actions for continuous integration and deployment:
 - **Release**: Automatically publishes to PyPI when a new release is created
 
 See the workflows in the `.github/workflows` directory for more details.
+
+## API Reference
+
+The OpenAI Model Registry provides a comprehensive API for working with OpenAI models, their capabilities, and parameter validation.
+
+### Core Classes
+
+#### `ModelRegistry`
+
+The central singleton class that maintains the registry of models and their capabilities.
+
+```python
+from openai_model_registry import ModelRegistry
+
+# Get the singleton instance
+registry = ModelRegistry.get_instance()
+```
+
+**Key Methods:**
+
+- `get_capabilities(model: str) -> ModelCapabilities`: Get the capabilities for a model
+- `get_parameter_constraint(ref: str) -> Union[NumericConstraint, EnumConstraint]`: Get a parameter constraint by reference
+- `refresh_from_remote(url: Optional[str] = None, force: bool = False) -> RegistryUpdateResult`: Update the registry from a remote source
+- `check_for_updates(url: Optional[str] = None) -> RegistryUpdateResult`: Check if updates are available
+
+#### `ModelCapabilities`
+
+Represents the capabilities and constraints of a specific model.
+
+```python
+# Get model capabilities
+capabilities = registry.get_capabilities("gpt-4o")
+
+# Access properties
+context_window = capabilities.context_window
+max_tokens = capabilities.max_output_tokens
+supports_streaming = capabilities.supports_streaming
+```
+
+**Properties:**
+
+- `context_window: int`: Maximum context window size in tokens
+- `max_output_tokens: int`: Maximum output tokens the model can generate
+- `supports_structured: bool`: Whether the model supports structured output (JSON mode)
+- `supports_streaming: bool`: Whether the model supports streaming responses
+- `supported_parameters: List[ParameterReference]`: List of supported parameter references
+- `description: str`: Human-readable description of the model
+- `min_version: Optional[ModelVersion]`: Minimum supported version for dated models
+- `openai_model_name: Optional[str]`: The model name as used in the OpenAI API
+- `aliases: List[str]`: List of aliases for this model
+
+**Methods:**
+
+- `validate_parameter(param_name: str, value: Any) -> None`: Validate a parameter against the model's constraints
+
+### Parameter Constraints
+
+#### `NumericConstraint`
+
+Defines constraints for numeric parameters like temperature or top_p.
+
+**Properties:**
+
+- `min_value: float`: Minimum allowed value
+- `max_value: Optional[float]`: Maximum allowed value (can be None for model-dependent limits)
+- `description: str`: Human-readable description
+- `allow_float: bool`: Whether float values are allowed
+- `allow_int: bool`: Whether integer values are allowed
+
+#### `EnumConstraint`
+
+Defines constraints for string-enum parameters like reasoning_effort.
+
+**Properties:**
+
+- `allowed_values: List[str]`: List of allowed string values
+- `description: str`: Human-readable description
+
+### Version Handling
+
+#### `ModelVersion`
+
+Represents a model version in the format YYYY-MM-DD.
+
+```python
+from openai_model_registry import ModelVersion
+
+# Create a version
+version = ModelVersion(2024, 8, 1)
+
+# Parse from string
+version = ModelVersion.from_string("2024-08-01")
+
+# Compare versions
+is_newer = version > ModelVersion(2024, 7, 15)
+```
+
+**Properties:**
+
+- `year: int`: Year component
+- `month: int`: Month component
+- `day: int`: Day component
+
+**Methods:**
+
+- `from_string(version_str: str) -> ModelVersion`: Create a version from a string
+- `parse_from_model(model: str) -> Optional[Tuple[str, ModelVersion]]`: Parse a model name into base name and version
+
+#### `RegistryUpdateStatus`
+
+Enum representing the status of a registry update operation.
+
+**Values:**
+
+- `UP_TO_DATE`: Registry is already up to date
+- `UPDATE_AVAILABLE`: Updates are available
+- `UPDATED`: Registry was successfully updated
+- `ERROR`: An error occurred during the update
+
+#### `RegistryUpdateResult`
+
+Result of a registry update operation.
+
+**Properties:**
+
+- `status: RegistryUpdateStatus`: Status of the update
+- `message: str`: Human-readable message
+- `success: bool`: Whether the operation was successful
+- `old_version: Optional[str]`: Previous registry version
+- `new_version: Optional[str]`: New registry version
+
+### Error Classes
+
+#### `OpenAIClientError`
+
+Base class for all registry-related errors.
+
+#### `ModelVersionError`
+
+Base class for version-related errors.
+
+#### `InvalidDateError`
+
+Raised when a model version has an invalid date format.
+
+#### `VersionTooOldError`
+
+Raised when a model version is older than the minimum supported version.
+
+**Properties:**
+
+- `model: str`: The requested model
+- `min_version: str`: The minimum supported version
+- `alias: Optional[str]`: A suggested alias to use instead
+
+#### `ModelNotSupportedError`
+
+Raised when a model is not supported by the registry.
+
+**Properties:**
+
+- `model: Optional[str]`: The requested model
+- `available_models: Optional[Union[List[str], Set[str], Dict[str, Any]]]`: Available models
+
+#### `TokenParameterError`
+
+Raised when there's an issue with token-related parameters.
+
+**Properties:**
+
+- `param_name: str`: The parameter name
+- `value: Any`: The invalid value

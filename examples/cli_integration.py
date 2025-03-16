@@ -194,7 +194,9 @@ def update_registry_command(
 @cli.command("completion")
 @click.option("--model", required=True, help="OpenAI model to use")
 @click.option("--prompt", required=True, help="Text prompt")
-@click.option("--temperature", type=float, default=0.7, help="Sampling temperature")
+@click.option(
+    "--temperature", type=float, default=0.7, help="Sampling temperature"
+)
 @click.option("--max-tokens", type=int, help="Maximum tokens to generate")
 @click.pass_context
 def completion_command(

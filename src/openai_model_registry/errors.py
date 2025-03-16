@@ -80,8 +80,12 @@ class ModelNotSupportedError(OpenAIClientError):
     """
 
     def __init__(
-        self, message: str, model: Optional[str] = None,
-        available_models: Optional[Union[List[str], Set[str], Dict[str, Any]]] = None
+        self,
+        message: str,
+        model: Optional[str] = None,
+        available_models: Optional[
+            Union[List[str], Set[str], Dict[str, Any]]
+        ] = None,
     ) -> None:
         super().__init__(message)
         self.model = model

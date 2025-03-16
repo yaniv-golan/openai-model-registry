@@ -11,7 +11,6 @@ __version__ = "1.0.0"
 # Import main components for easier access
 from .constraints import (
     EnumConstraint,
-    FixedParameterSet,
     NumericConstraint,
     ParameterReference,
 )
@@ -38,18 +37,14 @@ __all__ = [
     "ModelRegistry",
     "ModelCapabilities",
     "get_registry",
-
     # Version handling
     "ModelVersion",
     "RegistryUpdateStatus",
     "RegistryUpdateResult",
-
     # Constraints
     "NumericConstraint",
     "EnumConstraint",
     "ParameterReference",
-    "FixedParameterSet",
-
     # Errors
     "OpenAIClientError",
     "ModelNotSupportedError",

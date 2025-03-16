@@ -901,7 +901,7 @@ version = "4.3.6"
 description = "A small Python package for determining appropriate platform-specific dirs, e.g. a `user data dir`."
 optional = false
 python-versions = ">=3.8"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "platformdirs-4.3.6-py3-none-any.whl", hash = "sha256:73e575e1408ab8103900836b97580d5307456908a03e92031bab39e4554cc3fb"},
     {file = "platformdirs-4.3.6.tar.gz", hash = "sha256:357fb2acbc885b0419afd3ce3ed34564c13c9b95c89360cd9563f73aa5e2b907"},
@@ -1570,4 +1570,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<4.0"
-content-hash = "8905bfaf14a39ecd6e1bcd007d654ae956ff670db741596b446e57069482d4f2"
+content-hash = "87409cadd4a4567786f1007a66d0cea856e5f62cb270bdf70d382b5720143313"

@@ -57,12 +57,15 @@ def main() -> None:
 
         try:
             o1_caps.validate_parameter("reasoning_effort", "invalid")
-            print("  ❌ reasoning_effort=invalid - Should have failed but passed")
+            print(
+                "  ❌ reasoning_effort=invalid - Should have failed but passed"
+            )
         except Exception as e:
             print(f"  ✅ reasoning_effort=invalid - Correctly failed with: {e}")
 
     except Exception as e:
         print(f"  ❌ O1 model test failed: {e}")
+
 
 if __name__ == "__main__":
     main()

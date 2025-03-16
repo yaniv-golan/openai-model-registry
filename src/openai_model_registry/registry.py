@@ -7,18 +7,24 @@ for managing model capabilities, version validation, and parameter constraints.
 import logging
 import os
 import re
-import time
 from dataclasses import dataclass
 from enum import Enum
-from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Union, cast
 
 import yaml
 from pydantic import BaseModel, Field, ValidationError
 
+from .config_paths import (
+    MODEL_REGISTRY_FILENAME,
+    PARAM_CONSTRAINTS_FILENAME,
+    copy_default_to_user_config,
+    ensure_user_config_dir_exists,
+    get_model_registry_path,
+    get_parameter_constraints_path,
+    get_user_config_dir,
+)
 from .constraints import (
     EnumConstraint,
-    FixedParameterSet,
     NumericConstraint,
     ParameterReference,
 )
@@ -56,6 +62,16 @@ class RegistryUpdateStatus(Enum):
     UPDATE_AVAILABLE = "update_available"
 
 
+class RefreshStatus(Enum):
+    """Status of a registry refresh operation."""
+
+    UPDATED = "updated"
+    ALREADY_CURRENT = "already_current"
+    ERROR = "error"
+    VALIDATED = "validated"
+    UPDATE_AVAILABLE = "update_available"
+
+
 @dataclass
 class RegistryUpdateResult:
     """Result of a registry update operation."""
@@ -65,6 +81,15 @@ class RegistryUpdateResult:
     message: str
     url: Optional[str] = None
     error: Optional[Exception] = None
+
+
+@dataclass
+class RefreshResult:
+    """Result of a registry refresh operation."""
+
+    success: bool
+    status: RefreshStatus
+    message: str
 
 
 class ModelCapabilities(BaseModel):
@@ -112,9 +137,16 @@ class ModelCapabilities(BaseModel):
             used_params.add(param_name)
 
         # Special handling for token limits
-        if param_name in {"max_tokens", "max_completion_tokens", "max_output_tokens"}:
+        if param_name in {
+            "max_tokens",
+            "max_completion_tokens",
+            "max_output_tokens",
+        }:
             # Ensure they're not too large for the model
-            if isinstance(value, (int, float)) and value > self.max_output_tokens:
+            if (
+                isinstance(value, (int, float))
+                and value > self.max_output_tokens
+            ):
                 raise TokenParameterError(
                     f"Token limit '{param_name}' exceeds model maximum. "
                     f"Maximum for {self.openai_model_name} is {self.max_output_tokens}, "
@@ -223,21 +255,14 @@ class ModelRegistry:
             self._constraints: Dict[
                 str, Union[NumericConstraint, EnumConstraint]
             ] = {}
-            self._fixed_parameters: Dict[str, FixedParameterSet] = {}
 
-            # Get paths from environment or defaults
-            self._config_path = os.getenv(
-                "MODEL_REGISTRY_PATH",
-                str(Path(__file__).parent / "config" / "models.yml"),
-            )
-            self._constraints_path = os.getenv(
-                "PARAMETER_CONSTRAINTS_PATH",
-                str(
-                    Path(__file__).parent
-                    / "config"
-                    / "parameter_constraints.yml"
-                ),
-            )
+            # Get paths using XDG standard and fallbacks
+            self._config_path = get_model_registry_path()
+            self._constraints_path = get_parameter_constraints_path()
+
+            # Auto-copy default configs to user directory if they don't exist
+            copy_default_to_user_config(MODEL_REGISTRY_FILENAME)
+            copy_default_to_user_config(PARAM_CONSTRAINTS_FILENAME)
 
             if not self._config_path or not self._constraints_path:
                 raise ValueError("Registry paths not set")
@@ -303,11 +328,6 @@ class ModelRegistry:
             for name, config in data.get("enum_constraints", {}).items():
                 key = f"enum_constraints.{name}"
                 self._constraints[key] = EnumConstraint(**config)
-
-            # Load fixed parameter sets
-            for name, config in data.get("fixed_parameter_sets", {}).items():
-                key = f"fixed_parameter_sets.{name}"
-                self._fixed_parameters[key] = FixedParameterSet(**config)
 
         except FileNotFoundError:
             _log(
@@ -637,355 +657,295 @@ class ModelRegistry:
                 },
             )
 
+    def _fetch_remote_config(self, url: str) -> Optional[Dict[str, Any]]:
+        """Fetch the remote configuration from the specified URL.
+
+        Args:
+            url: URL to fetch the configuration from
+
+        Returns:
+            Parsed configuration dictionary or None if fetch failed
+        """
+        try:
+            import requests
+        except ImportError:
+            _log(
+                _default_log_callback,
+                LogLevel.ERROR,
+                LogEvent.MODEL_REGISTRY,
+                {"error": "Could not import requests module"},
+            )
+            return None
+
+        try:
+            response = requests.get(url)
+            if response.status_code != 200:
+                _log(
+                    _default_log_callback,
+                    LogLevel.ERROR,
+                    LogEvent.MODEL_REGISTRY,
+                    {
+                        "error": f"HTTP error {response.status_code}",
+                        "url": url,
+                    },
+                )
+                return None
+
+            # Parse the YAML content
+            config = yaml.safe_load(response.text)
+            if not isinstance(config, dict):
+                _log(
+                    _default_log_callback,
+                    LogLevel.ERROR,
+                    LogEvent.MODEL_REGISTRY,
+                    {
+                        "error": "Remote config is not a dictionary",
+                        "url": url,
+                    },
+                )
+                return None
+
+            return config
+        except (requests.RequestException, yaml.YAMLError) as e:
+            _log(
+                _default_log_callback,
+                LogLevel.ERROR,
+                LogEvent.MODEL_REGISTRY,
+                {
+                    "error": f"Failed to fetch or parse remote config: {str(e)}",
+                    "url": url,
+                },
+            )
+            return None
+
+    def _validate_remote_config(self, config: Dict[str, Any]) -> None:
+        """Validate the remote configuration before applying it.
+
+        Args:
+            config: Configuration dictionary to validate
+
+        Raises:
+            ValueError: If the configuration is invalid
+        """
+        # Check version
+        if "version" not in config:
+            raise ValueError("Remote configuration missing version field")
+
+        # Check required sections
+        if "dated_models" not in config:
+            raise ValueError(
+                "Remote configuration missing dated_models section"
+            )
+
+        if "aliases" not in config:
+            raise ValueError("Remote configuration missing aliases section")
+
+        # Validate dated models
+        for model_id, model_data in config["dated_models"].items():
+            required_fields = [
+                "context_window",
+                "max_output_tokens",
+                "supported_parameters",
+            ]
+            for field in required_fields:
+                if field not in model_data:
+                    raise ValueError(
+                        f"Model {model_id} missing required field: {field}"
+                    )
+
+            # Validate version information
+            if "min_version" not in model_data:
+                raise ValueError(f"Model {model_id} missing min_version")
+
+            min_version = model_data["min_version"]
+            for field in ["year", "month", "day"]:
+                if field not in min_version:
+                    raise ValueError(
+                        f"Model {model_id} min_version missing {field}"
+                    )
+
     def refresh_from_remote(
-        self, url: Optional[str] = None, force: bool = False
-    ) -> RegistryUpdateResult:
-        """Refresh registry from remote source using conditional requests.
+        self,
+        url: Optional[str] = None,
+        force: bool = False,
+        validate_only: bool = False,
+    ) -> RefreshResult:
+        """Refresh the registry configuration from remote source.
 
         Args:
-            url: Optional custom URL to fetch configuration from.
-                If not provided, uses the default GitHub repository URL.
-            force: If True, bypasses the conditional check and forces an update.
+            url: Optional custom URL to fetch registry from
+            force: Force refresh even if version is current
+            validate_only: Only validate remote config without updating
 
         Returns:
-            RegistryUpdateResult with status and details
+            Result of the refresh operation
+        """
+        # Check for updates
+        result = self.check_for_updates(url=url)
+
+        if not force and result.status == RefreshStatus.ALREADY_CURRENT:
+            return RefreshResult(
+                success=True,
+                status=RefreshStatus.ALREADY_CURRENT,
+                message="Registry is already up to date",
+            )
+
+        try:
+            # Get remote config
+            config_url = url or (
+                "https://raw.githubusercontent.com/openai-model-registry/"
+                "openai-model-registry/main/src/openai_model_registry/config/models.yml"
+            )
+            remote_config = self._fetch_remote_config(config_url)
+            if not remote_config:
+                raise ValueError("Failed to fetch remote configuration")
+
+            # Validate the remote config
+            self._validate_remote_config(remote_config)
+
+            if validate_only:
+                # Only validation was requested
+                return RefreshResult(
+                    success=True,
+                    status=RefreshStatus.VALIDATED,
+                    message="Remote registry configuration validated successfully",
+                )
+
+            # Write to user config directory instead of package directory
+            ensure_user_config_dir_exists()
+            target_path = get_user_config_dir() / MODEL_REGISTRY_FILENAME
+
+            # Write the updated config
+            with open(target_path, "w") as f:
+                yaml.dump(remote_config, f)
+
+            # Reload the registry with new configuration
+            self._load_constraints()
+            self._load_capabilities()
+
+            # Log success
+            _log(
+                _default_log_callback,
+                LogLevel.INFO,
+                LogEvent.MODEL_REGISTRY,
+                {
+                    "message": f"Registry updated from {config_url}",
+                    "version": remote_config.get("version", "unknown"),
+                },
+            )
+
+            return RefreshResult(
+                success=True,
+                status=RefreshStatus.UPDATED,
+                message="Registry updated successfully",
+            )
+
+        except Exception as e:
+            error_msg = f"Error refreshing registry: {str(e)}"
+            _log(
+                _default_log_callback,
+                LogLevel.ERROR,
+                LogEvent.MODEL_REGISTRY,
+                {"message": error_msg},
+            )
+            return RefreshResult(
+                success=False,
+                status=RefreshStatus.ERROR,
+                message=error_msg,
+            )
+
+    def check_for_updates(self, url: Optional[str] = None) -> RefreshResult:
+        """Check if updates are available for the model registry.
+
+        Args:
+            url: Optional custom URL to check for updates
+
+        Returns:
+            Result of the update check
         """
         try:
             import requests
-        except ImportError as e:
-            return RegistryUpdateResult(
+        except ImportError:
+            return RefreshResult(
                 success=False,
-                status=RegistryUpdateStatus.IMPORT_ERROR,
+                status=RefreshStatus.ERROR,
                 message="Could not import requests module",
-                error=e,
             )
 
-        # Set up the URL and headers
+        # Set up the URL
         config_url = url or (
             "https://raw.githubusercontent.com/openai-model-registry/"
             "openai-model-registry/main/src/openai_model_registry/config/models.yml"
         )
 
-        headers = self._get_conditional_headers(force)
-
-        _log(
-            _default_log_callback,
-            LogLevel.INFO,
-            LogEvent.MODEL_REGISTRY,
-            {
-                "message": "Fetching model registry configuration",
-                "url": config_url,
-                "conditional": bool(
-                    headers
-                ),  # True if any conditional headers are present
-                "headers": headers,
-            },
-        )
-
         try:
-            # Make the request
-            response = requests.get(config_url, headers=headers)
-
-            # Log response headers
-            _log(
-                _default_log_callback,
-                LogLevel.DEBUG,
-                LogEvent.MODEL_REGISTRY,
-                {
-                    "message": "Received response from server",
-                    "status_code": response.status_code,
-                    "response_headers": dict(response.headers),
-                },
-            )
-
-            # Handle different response statuses
-            if response.status_code == 304:  # Not Modified
-                _log(
-                    _default_log_callback,
-                    LogLevel.INFO,
-                    LogEvent.MODEL_REGISTRY,
-                    {
-                        "message": "Registry is already up to date (not modified)"
-                    },
-                )
-                return RegistryUpdateResult(
+            # Load current configuration to compare versions
+            current_config = self._load_config()
+            if not current_config or "version" not in current_config:
+                # Can't determine current version, assume update needed
+                return RefreshResult(
                     success=True,
-                    status=RegistryUpdateStatus.ALREADY_CURRENT,
-                    message="Registry is already up to date",
-                    url=config_url,
+                    status=RefreshStatus.UPDATE_AVAILABLE,
+                    message="Current version unknown, update recommended",
                 )
 
-            elif response.status_code == 200:  # OK
-                if self._config_path is None:
-                    return RegistryUpdateResult(
+            # Get remote version (just the version info)
+            try:
+                response = requests.head(config_url)
+                if response.status_code == 404:
+                    return RefreshResult(
                         success=False,
-                        status=RegistryUpdateStatus.UNKNOWN_ERROR,
-                        message="Config path not set",
-                        url=config_url,
+                        status=RefreshStatus.ERROR,
+                        message=f"Registry not found at {config_url}",
                     )
 
-                try:
-                    # Ensure directory exists
-                    os.makedirs(
-                        os.path.dirname(self._config_path), exist_ok=True
+                # If we can't determine remote version with HEAD, get the full config
+                response = requests.get(config_url)
+                if response.status_code != 200:
+                    return RefreshResult(
+                        success=False,
+                        status=RefreshStatus.ERROR,
+                        message=f"HTTP error {response.status_code}",
                     )
 
-                    # Write content
-                    with open(self._config_path, "w") as f:
-                        f.write(response.text)
-
-                    # Save ETag and Last-Modified
-                    metadata = {}
-                    if "ETag" in response.headers:
-                        metadata["etag"] = response.headers["ETag"]
-                    if "Last-Modified" in response.headers:
-                        metadata["last_modified"] = response.headers[
-                            "Last-Modified"
-                        ]
-
-                    # Save the metadata
-                    self._save_cache_metadata(metadata)
-
-                    # Also update file mtime if Last-Modified header exists
-                    if "Last-Modified" in response.headers:
-                        try:
-                            last_modified_str = response.headers[
-                                "Last-Modified"
-                            ]
-                            last_modified_time = time.strptime(
-                                last_modified_str, "%a, %d %b %Y %H:%M:%S GMT"
-                            )
-                            last_modified_timestamp = time.mktime(
-                                last_modified_time
-                            )
-                            os.utime(
-                                self._config_path,
-                                (
-                                    last_modified_timestamp,
-                                    last_modified_timestamp,
-                                ),
-                            )
-
-                            _log(
-                                _default_log_callback,
-                                LogLevel.DEBUG,
-                                LogEvent.MODEL_REGISTRY,
-                                {
-                                    "message": "Updated file modification time from server header",
-                                    "last_modified_from_server": last_modified_str,
-                                    "timestamp_applied": last_modified_timestamp,
-                                },
-                            )
-                        except (ValueError, OSError) as e:
-                            _log(
-                                _default_log_callback,
-                                LogLevel.WARNING,
-                                LogEvent.MODEL_REGISTRY,
-                                {
-                                    "message": "Could not update file modification time from response header",
-                                    "error": str(e),
-                                },
-                            )
-
-                    # Reload capabilities
-                    self._load_capabilities()
-
-                    _log(
-                        _default_log_callback,
-                        LogLevel.INFO,
-                        LogEvent.MODEL_REGISTRY,
-                        {"message": "Successfully updated model registry"},
+                remote_config = yaml.safe_load(response.text)
+                if not remote_config or "version" not in remote_config:
+                    return RefreshResult(
+                        success=False,
+                        status=RefreshStatus.ERROR,
+                        message="Invalid remote configuration format",
                     )
 
-                    return RegistryUpdateResult(
+                # Compare versions
+                current_version = current_config["version"]
+                remote_version = remote_config["version"]
+
+                if current_version == remote_version:
+                    return RefreshResult(
                         success=True,
-                        status=RegistryUpdateStatus.UPDATED,
-                        message="Registry updated successfully",
-                        url=config_url,
+                        status=RefreshStatus.ALREADY_CURRENT,
+                        message=f"Registry is already up to date (version {current_version})",
                     )
-                except (OSError, IOError) as e:
-                    _log(
-                        _default_log_callback,
-                        LogLevel.ERROR,
-                        LogEvent.MODEL_REGISTRY,
-                        {
-                            "message": f"Could not write to {self._config_path}",
-                            "error": str(e),
-                        },
-                    )
-                    return RegistryUpdateResult(
-                        success=False,
-                        status=RegistryUpdateStatus.PERMISSION_ERROR,
-                        message=f"Could not write to {self._config_path}",
-                        error=e,
-                        url=config_url,
+                else:
+                    # Version differs, update available
+                    return RefreshResult(
+                        success=True,
+                        status=RefreshStatus.UPDATE_AVAILABLE,
+                        message=f"Update available: {current_version} -> {remote_version}",
                     )
 
-            elif response.status_code == 404:  # Not Found
-                _log(
-                    _default_log_callback,
-                    LogLevel.ERROR,
-                    LogEvent.MODEL_REGISTRY,
-                    {
-                        "message": "Registry not found",
-                        "status_code": response.status_code,
-                    },
-                )
-                return RegistryUpdateResult(
+            except (requests.RequestException, yaml.YAMLError) as e:
+                return RefreshResult(
                     success=False,
-                    status=RegistryUpdateStatus.NOT_FOUND,
-                    message=f"Registry not found at {config_url}",
-                    url=config_url,
+                    status=RefreshStatus.ERROR,
+                    message=f"Failed to check for updates: {str(e)}",
                 )
-
-            else:  # Other error codes
-                _log(
-                    _default_log_callback,
-                    LogLevel.ERROR,
-                    LogEvent.MODEL_REGISTRY,
-                    {
-                        "message": "Failed to fetch configuration",
-                        "status_code": response.status_code,
-                        "response": response.text,
-                    },
-                )
-                return RegistryUpdateResult(
-                    success=False,
-                    status=RegistryUpdateStatus.NETWORK_ERROR,
-                    message=f"HTTP error {response.status_code}: {response.text}",
-                    url=config_url,
-                )
-
-        except requests.RequestException as e:
-            _log(
-                _default_log_callback,
-                LogLevel.ERROR,
-                LogEvent.MODEL_REGISTRY,
-                {
-                    "message": "Network error when refreshing model registry",
-                    "error": str(e),
-                },
-            )
-            return RegistryUpdateResult(
-                success=False,
-                status=RegistryUpdateStatus.NETWORK_ERROR,
-                message=f"Network error: {str(e)}",
-                error=e,
-                url=config_url,
-            )
 
         except Exception as e:
-            _log(
-                _default_log_callback,
-                LogLevel.ERROR,
-                LogEvent.MODEL_REGISTRY,
-                {
-                    "message": "Failed to refresh model registry",
-                    "error": str(e),
-                },
-            )
-            return RegistryUpdateResult(
+            return RefreshResult(
                 success=False,
-                status=RegistryUpdateStatus.UNKNOWN_ERROR,
-                message=f"Unexpected error: {str(e)}",
-                error=e,
-                url=config_url,
-            )
-
-    def check_for_updates(
-        self, url: Optional[str] = None
-    ) -> RegistryUpdateResult:
-        """Check if an updated registry is available without downloading it.
-
-        Args:
-            url: Optional custom URL to check for updates.
-
-        Returns:
-            RegistryUpdateResult with status indicating if an update is available
-        """
-        try:
-            import requests
-        except ImportError as e:
-            return RegistryUpdateResult(
-                success=False,
-                status=RegistryUpdateStatus.IMPORT_ERROR,
-                message="Could not import requests module",
-                error=e,
-            )
-
-        # Set up the URL and headers
-        config_url = url or (
-            "https://raw.githubusercontent.com/openai-model-registry/"
-            "openai-model-registry/main/src/openai_model_registry/config/models.yml"
-        )
-
-        # Get conditional headers
-        headers = self._get_conditional_headers()
-
-        # Add Range header to request only the first byte
-        # This makes the request lightweight while still using GET
-        headers["Range"] = "bytes=0-0"
-
-        _log(
-            _default_log_callback,
-            LogLevel.INFO,
-            LogEvent.MODEL_REGISTRY,
-            {
-                "message": "Checking for registry updates",
-                "url": config_url,
-                "headers": headers,
-            },
-        )
-
-        try:
-            # Make the request
-            response = requests.get(config_url, headers=headers)
-
-            # Check status code
-            if response.status_code == 304:  # Not Modified
-                return RegistryUpdateResult(
-                    success=True,
-                    status=RegistryUpdateStatus.ALREADY_CURRENT,
-                    message="Registry is already up to date",
-                    url=config_url,
-                )
-            elif response.status_code in {200, 206}:  # OK or Partial Content
-                return RegistryUpdateResult(
-                    success=True,
-                    status=RegistryUpdateStatus.UPDATE_AVAILABLE,
-                    message="Registry update is available",
-                    url=config_url,
-                )
-            elif response.status_code == 404:  # Not Found
-                return RegistryUpdateResult(
-                    success=False,
-                    status=RegistryUpdateStatus.NOT_FOUND,
-                    message=f"Registry not found at {config_url}",
-                    url=config_url,
-                )
-            else:  # Other error codes
-                return RegistryUpdateResult(
-                    success=False,
-                    status=RegistryUpdateStatus.NETWORK_ERROR,
-                    message=f"HTTP error {response.status_code}",
-                    url=config_url,
-                )
-
-        except requests.RequestException as e:
-            return RegistryUpdateResult(
-                success=False,
-                status=RegistryUpdateStatus.NETWORK_ERROR,
-                message=f"Network error: {str(e)}",
-                error=e,
-                url=config_url,
-            )
-        except Exception as e:
-            return RegistryUpdateResult(
-                success=False,
-                status=RegistryUpdateStatus.UNKNOWN_ERROR,
-                message=f"Unexpected error: {str(e)}",
-                error=e,
-                url=config_url,
+                status=RefreshStatus.ERROR,
+                message=f"Unexpected error checking for updates: {str(e)}",
             )
 
     # Fallback models provide default capabilities when config is missing

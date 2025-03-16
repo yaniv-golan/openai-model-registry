@@ -18,11 +18,15 @@ def print_model_info(model_name: str) -> None:
         print(f"Model: {model_name}")
         print(f"  Context window: {capabilities.context_window}")
         print(f"  Max output tokens: {capabilities.max_output_tokens}")
-        print(f"  Supports structured output: {capabilities.supports_structured}")
+        print(
+            f"  Supports structured output: {capabilities.supports_structured}"
+        )
         print(f"  Supports streaming: {capabilities.supports_streaming}")
 
         # Get supported parameters
-        params = [ref.ref.split(".")[1] for ref in capabilities.supported_parameters]
+        params = [
+            ref.ref.split(".")[1] for ref in capabilities.supported_parameters
+        ]
         print(f"  Supported parameters: {', '.join(sorted(params))}")
 
         # Print aliases if any

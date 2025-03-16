@@ -4,8 +4,6 @@ This module defines the constraint types used to validate parameters for model c
 """
 
 from typing import (
-    Any,
-    Dict,
     List,
     Optional,
 )
@@ -71,26 +69,6 @@ class ParameterReference(BaseModel):
 
     ref: str
     max_value: Optional[float] = None
-
-    model_config = {
-        "arbitrary_types_allowed": True,
-    }
-
-
-class FixedParameterSet(BaseModel):
-    """A set of fixed parameters with predefined values.
-
-    This is used for defining parameter sets that are applied together.
-
-    Attributes:
-        name: Name of the parameter set
-        description: Human-readable description
-        parameters: Dictionary of parameter names to values
-    """
-
-    name: str
-    description: str
-    parameters: Dict[str, Any]
 
     model_config = {
         "arbitrary_types_allowed": True,

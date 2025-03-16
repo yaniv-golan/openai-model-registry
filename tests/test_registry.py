@@ -27,9 +27,7 @@ def test_config_dir(tmp_path: Path) -> Path:
 
 
 @pytest.fixture
-def registry(
-    test_config_dir: Path
-) -> Generator[ModelRegistry, None, None]:
+def registry(test_config_dir: Path) -> Generator[ModelRegistry, None, None]:
     """Create a test registry with temporary config files.
 
     Args:

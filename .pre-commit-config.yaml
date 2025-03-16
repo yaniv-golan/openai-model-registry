@@ -29,6 +29,7 @@ repos:
             types-requests,
             "pydantic>=2.6.3",
             pytest,
-            click
+            click,
+            platformdirs,
         ]
         args: [--strict]

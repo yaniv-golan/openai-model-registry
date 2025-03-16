@@ -32,7 +32,10 @@ class LogEvent(str, Enum):
 
 
 def _log(
-    callback: LogCallback, level: LogLevel, event: LogEvent, data: Dict[str, Any]
+    callback: LogCallback,
+    level: LogLevel,
+    event: LogEvent,
+    data: Dict[str, Any],
 ) -> None:
     """Log an event with the provided callback.
 
