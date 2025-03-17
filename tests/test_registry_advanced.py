@@ -9,6 +9,7 @@ import pytest
 import yaml
 
 from openai_model_registry.errors import (
+    ConstraintNotFoundError,
     InvalidDateError,
     ModelNotSupportedError,
     ModelRegistryError,
@@ -301,7 +302,7 @@ class TestModelCapabilities:
         assert constraint.max_value == 10
 
         # Test with non-existent constraint
-        with pytest.raises(KeyError):
+        with pytest.raises(ConstraintNotFoundError):
             simple_registry.get_parameter_constraint("nonexistent_constraint")
 
     def test_models_property(self, simple_registry: ModelRegistry) -> None:
@@ -417,11 +418,28 @@ class TestRegistryRefresh:
         """Test check_for_updates with a 404 HTTP error using more direct mocking."""
         registry = ModelRegistry()
 
-        with patch("requests.head") as mock_head:
+        # Create a mock config result with version information
+        mock_config_result = MagicMock()
+        mock_config_result.success = True
+        mock_config_result.__getitem__ = (
+            lambda self, key: "1.0.0" if key == "version" else None
+        )
+        mock_config_result.__contains__ = lambda self, key: key == "version"
+
+        with patch.object(
+            registry, "_load_config", return_value=mock_config_result
+        ), patch("requests.head") as mock_head, patch(
+            "requests.get"
+        ) as mock_get:
             # Create a mock response with 404
-            mock_response = MagicMock()
-            mock_response.status_code = 404
-            mock_head.return_value = mock_response
+            mock_head_response = MagicMock()
+            mock_head_response.status_code = 404
+            mock_head.return_value = mock_head_response
+
+            # We don't expect get to be called with 404 from head
+            mock_get_response = MagicMock()
+            mock_get_response.status_code = 200
+            mock_get.return_value = mock_get_response
 
             # Test with specified URL to avoid using the default URL
             result = registry.check_for_updates(
@@ -432,6 +450,9 @@ class TestRegistryRefresh:
             mock_head.assert_called_once_with(
                 "https://test.example.com/config.yml", timeout=10
             )
+
+            # Verify get was not called
+            mock_get.assert_not_called()
 
             # Verify error handling
             assert result.success is False
@@ -486,8 +507,13 @@ class TestRegistryErrors:
         # The registry should be initialized with empty capabilities
         assert registry._capabilities == {}
 
-        # Load config should return None
-        assert registry._load_config() is None
+        # Load config should return a ConfigResult with success=False
+        result = registry._load_config()
+        assert result is not None
+        assert result.success is False
+        assert result.data is None
+        assert result.error is not None and "file not found" in result.error.lower()
+        assert isinstance(result.exception, FileNotFoundError)
 
     def test_load_config_invalid_format(self, test_config_dir: Path) -> None:
         """Test loading config with invalid format."""
@@ -503,8 +529,13 @@ class TestRegistryErrors:
             )
         )
 
-        # Load config should return None for non-dict data
-        assert registry._load_config() is None
+        # Load config should return a ConfigResult with success=False for non-dict data
+        result = registry._load_config()
+        assert result is not None
+        assert result.success is False
+        assert result.data is None
+        assert result.error is not None and "invalid configuration format" in result.error.lower()
+        assert result.error is not None and "expected dictionary" in result.error.lower()
 
     def test_init_with_copy_error(self) -> None:
         """Test ModelRegistry initialization with config file copy error."""
