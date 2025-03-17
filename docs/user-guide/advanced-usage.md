@@ -205,6 +205,31 @@ The library provides a hierarchical set of exceptions:
   - `NetworkError`: Error during network operations
   - `ModelNotSupportedError`: Model not supported by registry
 
+## Logging Configuration
+
+The library uses standard Python logging. You can configure it like any other Python logger:
+
+```python
+import logging
+from openai_model_registry import get_logger
+
+# Configure the root logger
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
+
+# Get the library logger
+logger = get_logger()
+
+# Add custom handlers if needed
+file_handler = logging.FileHandler("registry.log")
+file_handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
+logger.addHandler(file_handler)
+```
+
+The package logger name is "openai_model_registry".
+
 ## Performance Optimization
 
 For applications that make frequent validation calls, consider caching capabilities:
