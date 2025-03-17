@@ -6,7 +6,16 @@ both model aliases and dated versions, with version validation and fallback supp
 """
 
 # Version of the package
-__version__ = "1.0.0"
+try:
+    from importlib.metadata import version as _version
+
+    __version__ = _version("openai-model-registry")
+except ImportError:
+    # Require importlib.metadata which is standard in Python 3.8+
+    raise ImportError(
+        "Failed to determine package version. This package requires Python 3.8+ "
+        "where importlib.metadata is available, or must be installed as a package."
+    )
 
 # Import main components for easier access
 from .constraints import (
