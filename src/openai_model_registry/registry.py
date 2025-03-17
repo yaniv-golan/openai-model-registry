@@ -869,7 +869,9 @@ class ModelRegistry:
                 {
                     "message": "Could not save cache metadata",
                     "error": str(e),
-                    "path": meta_path,
+                    "path": str(
+                        meta_path
+                    ),  # Convert to string in case meta_path is None
                 },
             )
 
