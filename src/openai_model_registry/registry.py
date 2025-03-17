@@ -14,6 +14,7 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Union
 
 import yaml
+from packaging import version  # Add this import for semantic versioning
 
 from .config_paths import (
     MODEL_REGISTRY_FILENAME,
@@ -1205,19 +1206,50 @@ class ModelRegistry:
                 current_version = current_config["version"]
                 remote_version = remote_config["version"]
 
-                if current_version == remote_version:
-                    return RefreshResult(
-                        success=True,
-                        status=RefreshStatus.ALREADY_CURRENT,
-                        message=f"Registry is already up to date (version {current_version})",
+                # Parse versions using semantic versioning
+                try:
+                    current_ver = version.parse(str(current_version))
+                    remote_ver = version.parse(str(remote_version))
+
+                    if current_ver >= remote_ver:
+                        return RefreshResult(
+                            success=True,
+                            status=RefreshStatus.ALREADY_CURRENT,
+                            message=f"Registry is already up to date (version {current_version})",
+                        )
+                    else:
+                        # Remote version is newer
+                        return RefreshResult(
+                            success=True,
+                            status=RefreshStatus.UPDATE_AVAILABLE,
+                            message=f"Update available: {current_version} -> {remote_version}",
+                        )
+                except (TypeError, ValueError) as e:
+                    # Fallback to string comparison if version parsing fails
+                    _log(
+                        _default_log_callback,
+                        LogLevel.WARNING,
+                        LogEvent.MODEL_REGISTRY,
+                        {
+                            "message": f"Failed to parse versions as semantic versions: {e}",
+                            "current_version": str(current_version),
+                            "remote_version": str(remote_version),
+                        },
                     )
-                else:
-                    # Version differs, update available
-                    return RefreshResult(
-                        success=True,
-                        status=RefreshStatus.UPDATE_AVAILABLE,
-                        message=f"Update available: {current_version} -> {remote_version}",
-                    )
+
+                    if current_version == remote_version:
+                        return RefreshResult(
+                            success=True,
+                            status=RefreshStatus.ALREADY_CURRENT,
+                            message=f"Registry is already up to date (version {current_version})",
+                        )
+                    else:
+                        # Version differs, update available
+                        return RefreshResult(
+                            success=True,
+                            status=RefreshStatus.UPDATE_AVAILABLE,
+                            message=f"Update available: {current_version} -> {remote_version}",
+                        )
 
             except (requests.RequestException, yaml.YAMLError) as e:
                 return RefreshResult(
