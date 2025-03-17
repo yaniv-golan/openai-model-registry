@@ -24,10 +24,18 @@ from .constraints import (
     ParameterReference,
 )
 from .errors import (
+    ConfigFileNotFoundError,
+    ConfigurationError,
+    ConstraintNotFoundError,
+    InvalidConfigFormatError,
     InvalidDateError,
+    ModelFormatError,
     ModelNotSupportedError,
     ModelRegistryError,
     ModelVersionError,
+    NetworkError,
+    ParameterNotSupportedError,
+    ParameterValidationError,
     TokenParameterError,
     VersionTooOldError,
 )
@@ -58,9 +66,17 @@ __all__ = [
     "ParameterReference",
     # Errors
     "ModelRegistryError",
-    "ModelNotSupportedError",
+    "ConfigurationError",
+    "ConfigFileNotFoundError",
+    "InvalidConfigFormatError",
     "ModelVersionError",
     "InvalidDateError",
+    "ModelFormatError",
     "VersionTooOldError",
+    "ParameterValidationError",
+    "ParameterNotSupportedError",
     "TokenParameterError",
+    "ConstraintNotFoundError",
+    "NetworkError",
+    "ModelNotSupportedError",
 ]

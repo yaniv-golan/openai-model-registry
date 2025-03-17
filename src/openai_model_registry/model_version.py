@@ -6,7 +6,9 @@ in the format YYYY-MM-DD.
 
 import re
 from datetime import date
-from typing import Optional, Tuple
+from typing import Tuple
+
+from .errors import InvalidDateError, ModelFormatError
 
 
 class ModelVersion:
@@ -116,11 +118,11 @@ class ModelVersion:
             A new ModelVersion instance
 
         Raises:
-            ValueError: If the string is not a valid version
+            InvalidDateError: If the string is not a valid version
         """
         parts = version_str.split("-")
         if len(parts) != 3:
-            raise ValueError(
+            raise InvalidDateError(
                 f"Invalid version format: {version_str}. "
                 f"Expected YYYY-MM-DD."
             )
@@ -130,44 +132,52 @@ class ModelVersion:
             month = int(parts[1])
             day = int(parts[2])
         except ValueError:
-            raise ValueError(
+            raise InvalidDateError(
                 f"Invalid version components in {version_str}. "
                 f"Year, month, and day must be integers."
             )
 
         # Basic validation
         if not (1000 <= year <= 9999):
-            raise ValueError(f"Invalid year: {year}. Must be 1000-9999.")
+            raise InvalidDateError(f"Invalid year: {year}. Must be 1000-9999.")
         if not (1 <= month <= 12):
-            raise ValueError(f"Invalid month: {month}. Must be 1-12.")
+            raise InvalidDateError(f"Invalid month: {month}. Must be 1-12.")
         if not (1 <= day <= 31):
-            raise ValueError(f"Invalid day: {day}. Must be 1-31.")
+            raise InvalidDateError(f"Invalid day: {day}. Must be 1-31.")
 
         # Calendar validation
         try:
             date(year, month, day)
         except ValueError as e:
-            raise ValueError(f"Invalid date: {version_str}. {str(e)}")
+            raise InvalidDateError(f"Invalid date: {version_str}. {str(e)}")
 
         return cls(year, month, day)
 
     @staticmethod
-    def parse_from_model(model: str) -> Optional[Tuple[str, "ModelVersion"]]:
+    def parse_from_model(model: str) -> Tuple[str, "ModelVersion"]:
         """Parse a model name into base name and version.
 
         Args:
             model: Full model name with version (e.g., "gpt-4o-2024-08-06")
 
         Returns:
-            Optional tuple of (base_name, version) if valid, None otherwise
+            Tuple of (base_name, version)
             Example: ("gpt-4o", ModelVersion(2024, 8, 6))
+
+        Raises:
+            ModelFormatError: If the model name does not follow the expected format
+            InvalidDateError: If the date part of the model name is invalid
         """
         # Format: "{base_model}-{YYYY}-{MM}-{DD}"
         pattern = re.compile(r"^([\w-]+?)-(\d{4}-\d{2}-\d{2})$")
         match = pattern.match(model)
 
         if not match:
-            return None
+            raise ModelFormatError(
+                f"Invalid model format: {model}. Expected format: "
+                f"base-name-YYYY-MM-DD (e.g., gpt-4o-2024-08-06)",
+                model=model,
+            )
 
         base_model = match.group(1)
         version_str = match.group(2)
@@ -175,8 +185,11 @@ class ModelVersion:
         try:
             version = ModelVersion.from_string(version_str)
             return base_model, version
-        except ValueError:
-            return None
+        except InvalidDateError as e:
+            raise ModelFormatError(
+                f"Invalid version in model name {model}: {e}",
+                model=model,
+            ) from e
 
     @staticmethod
     def is_dated_model(model_name: str) -> bool:

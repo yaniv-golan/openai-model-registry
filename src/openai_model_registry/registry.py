@@ -4,7 +4,7 @@ This module provides the ModelRegistry class, which is the central component
 for managing model capabilities, version validation, and parameter constraints.
 """
 
-import copy  # Added import for deep copying objects
+import copy
 import functools
 import logging
 import os
@@ -15,7 +15,7 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Union
 
 import yaml
-from packaging import version  # Add this import for semantic versioning
+from packaging import version
 
 from .config_paths import (
     MODEL_REGISTRY_FILENAME,
@@ -26,14 +26,17 @@ from .config_paths import (
     get_parameter_constraints_path,
     get_user_config_dir,
 )
+from .config_result import ConfigResult
 from .constraints import (
     EnumConstraint,
     NumericConstraint,
     ParameterReference,
 )
 from .errors import (
+    ConstraintNotFoundError,
     InvalidDateError,
     ModelNotSupportedError,
+    ParameterNotSupportedError,
     VersionTooOldError,
 )
 from .logging import LogEvent, LogLevel, _log
@@ -194,7 +197,9 @@ class ModelCapabilities:
             used_params: Optional set to track used parameters
 
         Raises:
-            ModelRegistryError: If validation fails
+            ParameterNotSupportedError: If the parameter is not supported
+            ConstraintNotFoundError: If a constraint reference is invalid
+            ModelRegistryError: If validation fails for other reasons
         """
         # Track used parameters if requested
         if used_params is not None:
@@ -211,19 +216,32 @@ class ModelCapabilities:
         )
 
         if not param_ref:
-            # Parameter not found in constraints, assume valid
-            return
+            # If we're validating a parameter explicitly, it should be supported
+            raise ParameterNotSupportedError(
+                f"Parameter '{name}' is not supported for model '{self.model_name}'",
+                param_name=name,
+                value=value,
+                model=self.model_name,
+            )
 
         constraint = self.get_constraint(param_ref.ref)
         if not constraint:
-            # Constraint not found, assume valid
-            return
+            # If a parameter references a constraint, the constraint should exist
+            raise ConstraintNotFoundError(
+                f"Constraint reference '{param_ref.ref}' not found for parameter '{name}'",
+                ref=param_ref.ref,
+            )
 
         # Validate based on constraint type
         if isinstance(constraint, NumericConstraint):
             constraint.validate(name=name, value=value)
         elif isinstance(constraint, EnumConstraint):
             constraint.validate(name=name, value=value)
+        else:
+            # This shouldn't happen with proper type checking, but just in case
+            raise TypeError(
+                f"Unknown constraint type for '{name}': {type(constraint).__name__}"
+            )
 
     def validate_parameters(
         self, params: Dict[str, Any], used_params: Optional[Set[str]] = None
@@ -324,41 +342,69 @@ class ModelRegistry:
         self._load_constraints()
         self._load_capabilities()
 
-    def _load_config(self) -> Optional[Dict[str, Any]]:
+    def _load_config(self) -> ConfigResult:
         """Load model configuration from file.
 
         Returns:
-            Optional[Dict[str, Any]]: The loaded configuration data, or None if loading failed
+            ConfigResult: Result of the configuration loading operation
         """
         try:
             with open(self.config.registry_path, "r") as f:
                 data = yaml.safe_load(f)
                 if not isinstance(data, dict):
-                    return None
-                return data
-        except FileNotFoundError:
+                    error_msg = (
+                        f"Invalid configuration format in {self.config.registry_path}: "
+                        f"expected dictionary, got {type(data).__name__}"
+                    )
+                    _log(
+                        _default_log_callback,
+                        LogLevel.ERROR,
+                        LogEvent.MODEL_REGISTRY,
+                        {
+                            "message": error_msg,
+                            "path": self.config.registry_path,
+                        },
+                    )
+                    return ConfigResult(
+                        success=False,
+                        error=error_msg,
+                        path=self.config.registry_path,
+                    )
+                return ConfigResult(
+                    success=True, data=data, path=self.config.registry_path
+                )
+        except FileNotFoundError as e:
+            error_msg = f"Model registry config file not found: {self.config.registry_path}"
             _log(
                 _default_log_callback,
                 LogLevel.WARNING,
                 LogEvent.MODEL_REGISTRY,
-                {
-                    "message": "Model registry config file not found, using defaults",
-                    "path": self.config.registry_path,
-                },
+                {"message": error_msg, "path": self.config.registry_path},
             )
-            return None
+            return ConfigResult(
+                success=False,
+                error=error_msg,
+                exception=e,
+                path=self.config.registry_path,
+            )
         except Exception as e:
+            error_msg = f"Failed to load model registry config: {e}"
             _log(
                 _default_log_callback,
                 LogLevel.ERROR,
                 LogEvent.MODEL_REGISTRY,
                 {
-                    "message": "Failed to load model registry config",
+                    "message": error_msg,
                     "path": self.config.registry_path,
                     "error": str(e),
                 },
             )
-            return None
+            return ConfigResult(
+                success=False,
+                error=error_msg,
+                exception=e,
+                path=self.config.registry_path,
+            )
 
     def _load_constraints(self) -> None:
         """Load parameter constraints from file."""
@@ -549,20 +595,43 @@ class ModelRegistry:
 
     def _load_capabilities(self) -> None:
         """Load model capabilities from config."""
-        data = self._load_config()
-        if not data:
+        config_result = self._load_config()
+        if not config_result.success:
             _log(
                 _default_log_callback,
                 LogLevel.WARNING,
                 LogEvent.MODEL_REGISTRY,
                 {
                     "message": "No model registry data loaded, using empty registry",
+                    "error": config_result.error,
                 },
             )
             return
 
         # Process model data
-        models_data = data.get("models", {})
+        if config_result.data is None:
+            _log(
+                _default_log_callback,
+                LogLevel.ERROR,
+                LogEvent.MODEL_REGISTRY,
+                {
+                    "message": "Failed to load configuration data",
+                },
+            )
+            return
+
+        models_data = config_result.data.get("models", {})
+        if not models_data:
+            _log(
+                _default_log_callback,
+                LogLevel.WARNING,
+                LogEvent.MODEL_REGISTRY,
+                {
+                    "message": "No models defined in registry configuration",
+                    "path": config_result.path,
+                },
+            )
+
         for model_name, model_config in models_data.items():
             try:
                 # Extract aliases
@@ -805,10 +874,13 @@ class ModelRegistry:
             The constraint object (NumericConstraint or EnumConstraint)
 
         Raises:
-            KeyError: If the constraint is not found
+            ConstraintNotFoundError: If the constraint is not found
         """
         if ref not in self._constraints:
-            raise KeyError(f"Constraint not found: {ref}")
+            raise ConstraintNotFoundError(
+                f"Constraint reference '{ref}' not found in registry",
+                ref=ref,
+            )
         return self._constraints[ref]
 
     def _get_conditional_headers(self, force: bool = False) -> Dict[str, str]:
@@ -1160,7 +1232,23 @@ class ModelRegistry:
         try:
             # Load current configuration to compare versions
             current_config = self._load_config()
-            if not current_config or "version" not in current_config:
+
+            # Handle ConfigResult vs dict return type
+            if isinstance(current_config, dict):
+                config_data = current_config
+                has_version = "version" in config_data
+            else:
+                # It's a ConfigResult
+                if not current_config.success or current_config.data is None:
+                    return RefreshResult(
+                        success=True,
+                        status=RefreshStatus.UPDATE_AVAILABLE,
+                        message="Current version unknown, update recommended",
+                    )
+                config_data = current_config.data  # type: ignore
+                has_version = "version" in config_data
+
+            if not has_version:
                 # Can't determine current version, assume update needed
                 return RefreshResult(
                     success=True,
@@ -1197,8 +1285,13 @@ class ModelRegistry:
                         message=f"HTTP error {response.status_code} during GET request",
                     )
 
-                remote_config = yaml.safe_load(response.text)
-                if not remote_config or "version" not in remote_config:
+                # Load the remote config as a dict
+                config_dict = yaml.safe_load(response.text)
+                if (
+                    not config_dict
+                    or not isinstance(config_dict, dict)
+                    or "version" not in config_dict
+                ):
                     return RefreshResult(
                         success=False,
                         status=RefreshStatus.ERROR,
@@ -1206,8 +1299,8 @@ class ModelRegistry:
                     )
 
                 # Compare versions
-                current_version = current_config["version"]
-                remote_version = remote_config["version"]
+                current_version = config_data["version"]
+                remote_version = config_dict["version"]
 
                 # Parse versions using semantic versioning
                 try:
