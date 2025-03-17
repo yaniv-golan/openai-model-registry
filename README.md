@@ -84,7 +84,7 @@ def prepare_prompt(model_name, prompt, max_output=None):
 
 - **Model Information**: Get context window size, token limits, and supported features
 - **Parameter Validation**: Check if parameter values are valid for specific models
-- **Version Support**: Works with date-based models (e.g., "gpt-4-0125")
+- **Version Support**: Works with date-based models (e.g., "o3-mini-2025-01-31")
 - **Offline Usage**: Functions without internet using local registry data
 - **Updates**: Optional updates to keep model information current
 
