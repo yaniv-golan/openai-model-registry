@@ -64,8 +64,8 @@ Enum parameters accept only specific string values from a predefined list.
 
 Examples of enum parameters:
 
-- `response_format`: Format of the model's output (e.g., "text", "json_object")
-- `reasoning_effort` (O1 model): Level of reasoning effort (e.g., "auto", "low", "medium", "high")
+- `response_format`: Format of the model's output (e.g., "text", "json_schema")
+- `reasoning_effort` (O1 model): Level of reasoning effort (e.g., "low", "medium", "high")
 
 ## Model-Specific Parameters
 
