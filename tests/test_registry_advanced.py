@@ -8,6 +8,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 import yaml
 
+from openai_model_registry.config_result import ConfigResult
 from openai_model_registry.errors import (
     ConstraintNotFoundError,
     InvalidDateError,
@@ -319,6 +320,59 @@ class TestModelCapabilities:
         assert (
             len(simple_registry._capabilities) == original_len
         )  # Original unchanged
+
+    def test_duplicate_alias_detection(
+        self, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        """Test that duplicate aliases are properly detected and handled."""
+        # Create a simple registry configuration with duplicate aliases
+        test_config = {
+            "models": {
+                "model-a": {
+                    "aliases": ["shared-alias", "unique-a"],
+                    "context_window": 1000,
+                    "max_output_tokens": 100,
+                },
+                "model-b": {
+                    "aliases": ["shared-alias", "unique-b"],
+                    "context_window": 2000,
+                    "max_output_tokens": 200,
+                },
+            }
+        }
+
+        # Create a registry with this config
+        with patch.object(ModelRegistry, "_load_config") as mock_load:
+            config_data = {"version": "1.0.0", **test_config}
+            mock_load.return_value = ConfigResult(
+                success=True, data=config_data, path="test_path"
+            )
+
+            # Clear any existing registry
+            ModelRegistry._default_instance = None
+
+            registry = ModelRegistry()
+
+            # Force capabilities loading to trigger the alias detection
+            registry._load_capabilities()
+
+            # Check that model-a's capabilities are used for the shared alias
+            assert (
+                registry._capabilities["shared-alias"].context_window == 1000
+            )
+            assert (
+                registry._capabilities["shared-alias"].model_name == "model-a"
+            )
+
+            # Check that unique aliases are properly assigned
+            assert registry._capabilities["unique-a"].model_name == "model-a"
+            assert registry._capabilities["unique-b"].model_name == "model-b"
+
+            # Verify the warning was logged about duplicate alias
+            assert "Duplicate model alias detected" in caplog.text
+            assert "shared-alias" in caplog.text
+            assert "model-a" in caplog.text
+            assert "model-b" in caplog.text
 
 
 class TestRegistryRefresh:
