@@ -6,7 +6,6 @@ for managing model capabilities, version validation, and parameter constraints.
 
 import copy
 import functools
-import logging
 import os
 import re
 import threading
@@ -39,18 +38,18 @@ from .errors import (
     ParameterNotSupportedError,
     VersionTooOldError,
 )
-from .logging import LogEvent, LogLevel, _log
+from .logging import (
+    LogEvent,
+    get_logger,
+    log_debug,
+    log_error,
+    log_info,
+    log_warning,
+)
 from .model_version import ModelVersion
 
 # Create module logger
-logger = logging.getLogger(__name__)
-
-
-def _default_log_callback(
-    level: int, event: str, data: Dict[str, Any]
-) -> None:
-    """Default logging callback that uses the standard logging module."""
-    logger.log(level, f"{event}: {data}")
+logger = get_logger("registry")
 
 
 class RegistryConfig:
@@ -315,28 +314,20 @@ class ModelRegistry:
             try:
                 copy_default_to_user_config(MODEL_REGISTRY_FILENAME)
             except OSError as e:
-                _log(
-                    _default_log_callback,
-                    LogLevel.WARNING,
+                log_warning(
                     LogEvent.MODEL_REGISTRY,
-                    {
-                        "message": f"Failed to copy default model registry config: {e}",
-                        "error": str(e),
-                    },
+                    f"Failed to copy default model registry config: {e}",
+                    error=str(e),
                 )
 
         if not config or not config.constraints_path:
             try:
                 copy_default_to_user_config(PARAM_CONSTRAINTS_FILENAME)
             except OSError as e:
-                _log(
-                    _default_log_callback,
-                    LogLevel.WARNING,
+                log_warning(
                     LogEvent.MODEL_REGISTRY,
-                    {
-                        "message": f"Failed to copy default parameter constraints config: {e}",
-                        "error": str(e),
-                    },
+                    f"Failed to copy default constraint config: {e}",
+                    error=str(e),
                 )
 
         self._load_constraints()
@@ -356,14 +347,10 @@ class ModelRegistry:
                         f"Invalid configuration format in {self.config.registry_path}: "
                         f"expected dictionary, got {type(data).__name__}"
                     )
-                    _log(
-                        _default_log_callback,
-                        LogLevel.ERROR,
+                    log_error(
                         LogEvent.MODEL_REGISTRY,
-                        {
-                            "message": error_msg,
-                            "path": self.config.registry_path,
-                        },
+                        error_msg,
+                        path=self.config.registry_path,
                     )
                     return ConfigResult(
                         success=False,
@@ -375,11 +362,10 @@ class ModelRegistry:
                 )
         except FileNotFoundError as e:
             error_msg = f"Model registry config file not found: {self.config.registry_path}"
-            _log(
-                _default_log_callback,
-                LogLevel.WARNING,
+            log_warning(
                 LogEvent.MODEL_REGISTRY,
-                {"message": error_msg, "path": self.config.registry_path},
+                error_msg,
+                path=self.config.registry_path,
             )
             return ConfigResult(
                 success=False,
@@ -389,15 +375,11 @@ class ModelRegistry:
             )
         except Exception as e:
             error_msg = f"Failed to load model registry config: {e}"
-            _log(
-                _default_log_callback,
-                LogLevel.ERROR,
+            log_error(
                 LogEvent.MODEL_REGISTRY,
-                {
-                    "message": error_msg,
-                    "path": self.config.registry_path,
-                    "error": str(e),
-                },
+                error_msg,
+                path=self.config.registry_path,
+                error=str(e),
             )
             return ConfigResult(
                 success=False,
@@ -412,40 +394,28 @@ class ModelRegistry:
             with open(self.config.constraints_path, "r") as f:
                 data = yaml.safe_load(f)
                 if not isinstance(data, dict):
-                    _log(
-                        _default_log_callback,
-                        LogLevel.ERROR,
+                    log_error(
                         LogEvent.MODEL_REGISTRY,
-                        {
-                            "error": "Constraints file must contain a dictionary"
-                        },
+                        "Constraints file must contain a dictionary",
                     )
                     return
 
                 # Create constraints from config
                 for name, constraint in data.items():
                     if not isinstance(constraint, dict):
-                        _log(
-                            _default_log_callback,
-                            LogLevel.ERROR,
+                        log_error(
                             LogEvent.MODEL_REGISTRY,
-                            {
-                                "error": f"Constraint '{name}' must be a dictionary",
-                                "constraint": constraint,
-                            },
+                            f"Constraint '{name}' must be a dictionary",
+                            constraint=constraint,
                         )
                         continue
 
                     constraint_type = constraint.get("type", "")
                     if not constraint_type:
-                        _log(
-                            _default_log_callback,
-                            LogLevel.ERROR,
+                        log_error(
                             LogEvent.MODEL_REGISTRY,
-                            {
-                                "error": f"Constraint '{name}' missing required 'type' field",
-                                "constraint": constraint,
-                            },
+                            f"Constraint '{name}' missing required 'type' field",
+                            constraint=constraint,
                         )
                         continue
 
@@ -460,43 +430,31 @@ class ModelRegistry:
                         if min_value is not None and not isinstance(
                             min_value, (int, float)
                         ):
-                            _log(
-                                _default_log_callback,
-                                LogLevel.ERROR,
+                            log_error(
                                 LogEvent.MODEL_REGISTRY,
-                                {
-                                    "error": f"Constraint '{name}' has non-numeric 'min' value",
-                                    "min_value": min_value,
-                                },
+                                f"Constraint '{name}' has non-numeric 'min' value",
+                                min_value=min_value,
                             )
                             continue
 
                         if max_value is not None and not isinstance(
                             max_value, (int, float)
                         ):
-                            _log(
-                                _default_log_callback,
-                                LogLevel.ERROR,
+                            log_error(
                                 LogEvent.MODEL_REGISTRY,
-                                {
-                                    "error": f"Constraint '{name}' has non-numeric 'max' value",
-                                    "max_value": max_value,
-                                },
+                                f"Constraint '{name}' has non-numeric 'max' value",
+                                max_value=max_value,
                             )
                             continue
 
                         if not isinstance(allow_float, bool) or not isinstance(
                             allow_int, bool
                         ):
-                            _log(
-                                _default_log_callback,
-                                LogLevel.ERROR,
+                            log_error(
                                 LogEvent.MODEL_REGISTRY,
-                                {
-                                    "error": f"Constraint '{name}' has non-boolean 'allow_float' or 'allow_int'",
-                                    "allow_float": allow_float,
-                                    "allow_int": allow_int,
-                                },
+                                f"Constraint '{name}' has non-boolean 'allow_float' or 'allow_int'",
+                                allow_float=allow_float,
+                                allow_int=allow_int,
                             )
                             continue
 
@@ -516,27 +474,19 @@ class ModelRegistry:
 
                         # Required field validation
                         if allowed_values is None:
-                            _log(
-                                _default_log_callback,
-                                LogLevel.ERROR,
+                            log_error(
                                 LogEvent.MODEL_REGISTRY,
-                                {
-                                    "error": f"Constraint '{name}' missing required 'values' field",
-                                    "constraint": constraint,
-                                },
+                                f"Constraint '{name}' missing required 'values' field",
+                                constraint=constraint,
                             )
                             continue
 
                         # Type validation
                         if not isinstance(allowed_values, list):
-                            _log(
-                                _default_log_callback,
-                                LogLevel.ERROR,
+                            log_error(
                                 LogEvent.MODEL_REGISTRY,
-                                {
-                                    "error": f"Constraint '{name}' has non-list 'values' field",
-                                    "allowed_values": allowed_values,
-                                },
+                                f"Constraint '{name}' has non-list 'values' field",
+                                allowed_values=allowed_values,
                             )
                             continue
 
@@ -544,14 +494,10 @@ class ModelRegistry:
                         if not all(
                             isinstance(val, str) for val in allowed_values
                         ):
-                            _log(
-                                _default_log_callback,
-                                LogLevel.ERROR,
+                            log_error(
                                 LogEvent.MODEL_REGISTRY,
-                                {
-                                    "error": f"Constraint '{name}' has non-string values in 'values' list",
-                                    "allowed_values": allowed_values,
-                                },
+                                f"Constraint '{name}' has non-string values in 'values' list",
+                                allowed_values=allowed_values,
                             )
                             continue
 
@@ -561,75 +507,51 @@ class ModelRegistry:
                             description=description,
                         )
                     else:
-                        _log(
-                            _default_log_callback,
-                            LogLevel.ERROR,
+                        log_error(
                             LogEvent.MODEL_REGISTRY,
-                            {
-                                "error": f"Unknown constraint type '{constraint_type}' for '{name}'",
-                                "constraint": constraint,
-                            },
+                            f"Unknown constraint type '{constraint_type}' for '{name}'",
+                            constraint=constraint,
                         )
 
         except FileNotFoundError:
-            _log(
-                _default_log_callback,
-                LogLevel.WARNING,
+            log_warning(
                 LogEvent.MODEL_REGISTRY,
-                {
-                    "message": "Parameter constraints file not found",
-                    "path": self.config.constraints_path,
-                },
+                "Parameter constraints file not found",
+                path=self.config.constraints_path,
             )
         except Exception as e:
-            _log(
-                _default_log_callback,
-                LogLevel.ERROR,
+            log_error(
                 LogEvent.MODEL_REGISTRY,
-                {
-                    "message": "Failed to load parameter constraints",
-                    "path": self.config.constraints_path,
-                    "error": str(e),
-                },
+                "Failed to load parameter constraints",
+                path=self.config.constraints_path,
+                error=str(e),
             )
 
     def _load_capabilities(self) -> None:
         """Load model capabilities from config."""
         config_result = self._load_config()
         if not config_result.success:
-            _log(
-                _default_log_callback,
-                LogLevel.WARNING,
+            log_warning(
                 LogEvent.MODEL_REGISTRY,
-                {
-                    "message": "No model registry data loaded, using empty registry",
-                    "error": config_result.error,
-                },
+                "No model registry data loaded, using empty registry",
+                error=config_result.error,
             )
             return
 
         # Process model data
         if config_result.data is None:
-            _log(
-                _default_log_callback,
-                LogLevel.ERROR,
+            log_error(
                 LogEvent.MODEL_REGISTRY,
-                {
-                    "message": "Failed to load configuration data",
-                },
+                "Failed to load configuration data",
             )
             return
 
         models_data = config_result.data.get("models", {})
         if not models_data:
-            _log(
-                _default_log_callback,
-                LogLevel.WARNING,
+            log_warning(
                 LogEvent.MODEL_REGISTRY,
-                {
-                    "message": "No models defined in registry configuration",
-                    "path": config_result.path,
-                },
+                "No models defined in registry configuration",
+                path=config_result.path,
             )
 
         for model_name, model_config in models_data.items():
@@ -644,15 +566,11 @@ class ModelRegistry:
                     try:
                         min_version = ModelVersion.from_string(min_version_str)
                     except ValueError:
-                        _log(
-                            _default_log_callback,
-                            LogLevel.WARNING,
+                        log_warning(
                             LogEvent.MODEL_REGISTRY,
-                            {
-                                "message": "Invalid min_version format for model",
-                                "model": model_name,
-                                "min_version": min_version_str,
-                            },
+                            "Invalid min_version format for model",
+                            model=model_name,
+                            min_version=min_version_str,
                         )
 
                 # Create parameters list from references
@@ -706,18 +624,14 @@ class ModelRegistry:
                         alias in self._capabilities
                         and self._capabilities[alias].model_name != model_name
                     ):
-                        _log(
-                            _default_log_callback,
-                            LogLevel.WARNING,
+                        log_warning(
                             LogEvent.MODEL_REGISTRY,
-                            {
-                                "message": "Duplicate model alias detected",
-                                "alias": alias,
-                                "original_model": self._capabilities[
-                                    alias
-                                ].model_name,
-                                "new_model": model_name,
-                            },
+                            "Duplicate model alias detected",
+                            alias=alias,
+                            original_model=self._capabilities[
+                                alias
+                            ].model_name,
+                            new_model=model_name,
                         )
                         # Skip this alias to prevent overwriting the existing model
                         continue
@@ -725,15 +639,11 @@ class ModelRegistry:
                     self._capabilities[alias] = capabilities
 
             except Exception as e:
-                _log(
-                    _default_log_callback,
-                    LogLevel.ERROR,
+                log_error(
                     LogEvent.MODEL_REGISTRY,
-                    {
-                        "message": "Failed to load model capabilities",
-                        "model": model_name,
-                        "error": str(e),
-                    },
+                    "Failed to load model capabilities",
+                    model=model_name,
+                    error=str(e),
                 )
                 # Continue with other models
 
@@ -929,14 +839,10 @@ class ModelRegistry:
                                 "last_modified"
                             ]
             except Exception as e:
-                _log(
-                    _default_log_callback,
-                    LogLevel.DEBUG,
+                log_debug(
                     LogEvent.MODEL_REGISTRY,
-                    {
-                        "message": "Could not load cache metadata, skipping conditional headers",
-                        "error": str(e),
-                    },
+                    "Could not load cache metadata, skipping conditional headers",
+                    error=str(e),
                 )
         return headers
 
@@ -964,17 +870,13 @@ class ModelRegistry:
             with open(meta_path, "w") as f:
                 yaml.safe_dump(metadata, f)
         except Exception as e:
-            _log(
-                _default_log_callback,
-                LogLevel.WARNING,
+            log_warning(
                 LogEvent.MODEL_REGISTRY,
-                {
-                    "message": "Could not save cache metadata",
-                    "error": str(e),
-                    "path": str(
-                        meta_path
-                    ),  # Convert to string in case meta_path is None
-                },
+                "Could not save cache metadata",
+                error=str(e),
+                path=str(
+                    meta_path
+                ),  # Convert to string in case meta_path is None
             )
 
     def _fetch_remote_config(self, url: str) -> Optional[Dict[str, Any]]:
@@ -989,11 +891,9 @@ class ModelRegistry:
         try:
             import requests
         except ImportError:
-            _log(
-                _default_log_callback,
-                LogLevel.ERROR,
+            log_error(
                 LogEvent.MODEL_REGISTRY,
-                {"error": "Could not import requests module"},
+                "Could not import requests module",
             )
             return None
 
@@ -1002,28 +902,20 @@ class ModelRegistry:
             response = requests.get(url, timeout=10)
             try:
                 if response.status_code != 200:
-                    _log(
-                        _default_log_callback,
-                        LogLevel.ERROR,
+                    log_error(
                         LogEvent.MODEL_REGISTRY,
-                        {
-                            "error": f"HTTP error {response.status_code}",
-                            "url": url,
-                        },
+                        f"HTTP error {response.status_code}",
+                        url=url,
                     )
                     return None
 
                 # Parse the YAML content
                 config = yaml.safe_load(response.text)
                 if not isinstance(config, dict):
-                    _log(
-                        _default_log_callback,
-                        LogLevel.ERROR,
+                    log_error(
                         LogEvent.MODEL_REGISTRY,
-                        {
-                            "error": "Remote config is not a dictionary",
-                            "url": url,
-                        },
+                        "Remote config is not a dictionary",
+                        url=url,
                     )
                     return None
 
@@ -1032,14 +924,10 @@ class ModelRegistry:
                 # Ensure response is closed to prevent resource leaks
                 response.close()
         except (requests.RequestException, yaml.YAMLError) as e:
-            _log(
-                _default_log_callback,
-                LogLevel.ERROR,
+            log_error(
                 LogEvent.MODEL_REGISTRY,
-                {
-                    "error": f"Failed to fetch or parse remote config: {str(e)}",
-                    "url": url,
-                },
+                f"Failed to fetch or parse remote config: {str(e)}",
+                url=url,
             )
             return None
 
@@ -1145,15 +1033,11 @@ class ModelRegistry:
                 with open(target_path, "w") as f:
                     yaml.dump(remote_config, f)
             except PermissionError as e:
-                _log(
-                    _default_log_callback,
-                    LogLevel.ERROR,
+                log_error(
                     LogEvent.MODEL_REGISTRY,
-                    {
-                        "message": "Permission denied when writing registry configuration",
-                        "path": str(target_path),
-                        "error": str(e),
-                    },
+                    "Permission denied when writing registry configuration",
+                    path=str(target_path),
+                    error=str(e),
                 )
                 return RefreshResult(
                     success=False,
@@ -1161,15 +1045,11 @@ class ModelRegistry:
                     message=f"Permission denied when writing to {target_path}",
                 )
             except OSError as e:
-                _log(
-                    _default_log_callback,
-                    LogLevel.ERROR,
+                log_error(
                     LogEvent.MODEL_REGISTRY,
-                    {
-                        "message": "File system error when writing registry configuration",
-                        "path": str(target_path),
-                        "error": str(e),
-                    },
+                    "File system error when writing registry configuration",
+                    path=str(target_path),
+                    error=str(e),
                 )
                 return RefreshResult(
                     success=False,
@@ -1183,14 +1063,10 @@ class ModelRegistry:
 
             # Verify that the reload was successful
             if not self._capabilities:
-                _log(
-                    _default_log_callback,
-                    LogLevel.ERROR,
+                log_error(
                     LogEvent.MODEL_REGISTRY,
-                    {
-                        "message": "Failed to reload registry after update",
-                        "path": str(target_path),
-                    },
+                    "Failed to reload registry after update",
+                    path=str(target_path),
                 )
                 return RefreshResult(
                     success=False,
@@ -1199,14 +1075,10 @@ class ModelRegistry:
                 )
 
             # Log success
-            _log(
-                _default_log_callback,
-                LogLevel.INFO,
+            log_info(
                 LogEvent.MODEL_REGISTRY,
-                {
-                    "message": f"Registry updated from {config_url}",
-                    "version": remote_config.get("version", "unknown"),
-                },
+                "Registry updated from remote",
+                version=remote_config.get("version", "unknown"),
             )
 
             return RefreshResult(
@@ -1217,11 +1089,9 @@ class ModelRegistry:
 
         except Exception as e:
             error_msg = f"Error refreshing registry: {str(e)}"
-            _log(
-                _default_log_callback,
-                LogLevel.ERROR,
+            log_error(
                 LogEvent.MODEL_REGISTRY,
-                {"message": error_msg},
+                error_msg,
             )
             return RefreshResult(
                 success=False,
@@ -1356,15 +1226,11 @@ class ModelRegistry:
                                 )
                         except (TypeError, ValueError) as e:
                             # Fallback to string comparison if version parsing fails
-                            _log(
-                                _default_log_callback,
-                                LogLevel.WARNING,
+                            log_warning(
                                 LogEvent.MODEL_REGISTRY,
-                                {
-                                    "message": f"Failed to parse versions as semantic versions: {e}",
-                                    "current_version": str(current_version),
-                                    "remote_version": str(remote_version),
-                                },
+                                f"Failed to parse versions as semantic versions: {e}",
+                                current_version=str(current_version),
+                                remote_version=str(remote_version),
                             )
 
                             if current_version == remote_version:

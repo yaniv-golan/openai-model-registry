@@ -5,20 +5,10 @@ This module provides standardized logging functionality for registry operations.
 
 import logging
 from enum import Enum
-from typing import Any, Callable, Dict
+from typing import Any, Optional
 
-# Type for log callback functions
-LogCallback = Callable[[int, str, Dict[str, Any]], None]
-
-
-class LogLevel(int, Enum):
-    """Log levels for the registry."""
-
-    DEBUG = logging.DEBUG
-    INFO = logging.INFO
-    WARNING = logging.WARNING
-    ERROR = logging.ERROR
-    CRITICAL = logging.CRITICAL
+# Create the logger
+logger = logging.getLogger("openai_model_registry")
 
 
 class LogEvent(str, Enum):
@@ -31,25 +21,75 @@ class LogEvent(str, Enum):
     REGISTRY_UPDATE = "registry_update"
 
 
-def _log(
-    callback: LogCallback,
-    level: LogLevel,
-    event: LogEvent,
-    data: Dict[str, Any],
-) -> None:
-    """Log an event with the provided callback.
+def get_logger(name: Optional[str] = None) -> logging.Logger:
+    """Get a logger for a module.
 
     Args:
-        callback: Function to call with the log data
-        level: Severity level
-        event: Event type
-        data: Dictionary of event data
+        name: Optional name for the logger. If None, returns the root package logger.
+
+    Returns:
+        A configured logger instance
     """
-    try:
-        callback(level, str(event), data)
-    except Exception as e:
-        # Fallback to standard logging if callback fails
-        logging.error(
-            f"Logging callback failed with error: {e}. Original log: "
-            f"level={level}, event={event}, data={data}"
-        )
+    if name:
+        return logging.getLogger(f"openai_model_registry.{name}")
+    return logger
+
+
+def log_debug(event: LogEvent, message: str, **kwargs: Any) -> None:
+    """Log a debug message.
+
+    Args:
+        event: The event type
+        message: The message to log
+        **kwargs: Additional data to include in the log
+    """
+    extra = {"event": str(event), **kwargs}
+    logger.debug(f"{message}", extra=extra)
+
+
+def log_info(event: LogEvent, message: str, **kwargs: Any) -> None:
+    """Log an info message.
+
+    Args:
+        event: The event type
+        message: The message to log
+        **kwargs: Additional data to include in the log
+    """
+    extra = {"event": str(event), **kwargs}
+    logger.info(f"{message}", extra=extra)
+
+
+def log_warning(event: LogEvent, message: str, **kwargs: Any) -> None:
+    """Log a warning message.
+
+    Args:
+        event: The event type
+        message: The message to log
+        **kwargs: Additional data to include in the log
+    """
+    extra = {"event": str(event), **kwargs}
+    logger.warning(f"{message}", extra=extra)
+
+
+def log_error(event: LogEvent, message: str, **kwargs: Any) -> None:
+    """Log an error message.
+
+    Args:
+        event: The event type
+        message: The message to log
+        **kwargs: Additional data to include in the log
+    """
+    extra = {"event": str(event), **kwargs}
+    logger.error(f"{message}", extra=extra)
+
+
+def log_critical(event: LogEvent, message: str, **kwargs: Any) -> None:
+    """Log a critical message.
+
+    Args:
+        event: The event type
+        message: The message to log
+        **kwargs: Additional data to include in the log
+    """
+    extra = {"event": str(event), **kwargs}
+    logger.critical(f"{message}", extra=extra)

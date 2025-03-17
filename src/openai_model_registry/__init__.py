@@ -39,6 +39,10 @@ from .errors import (
     TokenParameterError,
     VersionTooOldError,
 )
+from .logging import (
+    LogEvent,
+    get_logger,
+)
 from .model_version import ModelVersion
 from .registry import (
     ModelCapabilities,
@@ -79,4 +83,7 @@ __all__ = [
     "ConstraintNotFoundError",
     "NetworkError",
     "ModelNotSupportedError",
+    # Logging
+    "LogEvent",
+    "get_logger",
 ]
