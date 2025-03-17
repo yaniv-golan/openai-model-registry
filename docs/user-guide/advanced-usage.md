@@ -137,12 +137,18 @@ capabilities.validate_parameter("top_p", 0.9, used_params)
 print(f"Used parameters: {used_params}")
 ```
 
-## Error Handling Strategies
+## Error Handling
 
-For robust applications, you might want to implement error handling strategies:
+The library uses a consistent exception-based approach for error handling. Each error type provides detailed context to help diagnose and handle specific error conditions:
 
 ```python
-from openai_model_registry import ModelRegistry, ModelRegistryError, ModelNotSupportedError
+from openai_model_registry import (
+    ModelRegistry,
+    ModelRegistryError,
+    ModelNotSupportedError,
+    ParameterNotSupportedError,
+    ConstraintNotFoundError
+)
 
 try:
     registry = ModelRegistry.get_default()
@@ -151,23 +157,53 @@ try:
     try:
         capabilities = registry.get_capabilities("nonexistent-model")
     except ModelNotSupportedError as e:
-        print(f"Model not found: {e}")
+        print(f"Model not found: {e.model}")
+        print(f"Available models: {e.available_models}")
         # Fallback to a default model
         capabilities = registry.get_capabilities("gpt-4o")
 
-    # Validate parameters with error handling
+    # Validate parameters with specific error handling
     try:
         capabilities.validate_parameter("temperature", 3.0)
+    except ParameterNotSupportedError as e:
+        print(f"Parameter '{e.param_name}' is not supported for model '{e.model}'")
+        # Skip this parameter
     except ModelRegistryError as e:
         print(f"Parameter validation failed: {e}")
         # Use a default valid value
         print("Using default temperature of 0.7")
         temperature = 0.7
 
+    # Get constraint information
+    try:
+        constraint = registry.get_parameter_constraint("numeric_constraints.temperature")
+        print(f"Min value: {constraint.min_value}, Max value: {constraint.max_value}")
+    except ConstraintNotFoundError as e:
+        print(f"Constraint reference '{e.ref}' not found")
+
 except Exception as e:
     print(f"Unexpected error: {e}")
     # Implement fallback mechanism
 ```
+
+### Exception Hierarchy
+
+The library provides a hierarchical set of exceptions:
+
+- `ModelRegistryError`: Base class for all registry errors
+  - `ConfigurationError`: Base class for configuration-related errors
+    - `ConfigFileNotFoundError`: Configuration file not found
+    - `InvalidConfigFormatError`: Invalid configuration format
+  - `ModelVersionError`: Base class for version-related errors
+    - `InvalidDateError`: Invalid date format in a model version
+    - `ModelFormatError`: Invalid model name format
+    - `VersionTooOldError`: Model version is too old
+  - `ParameterValidationError`: Base class for parameter validation errors
+    - `ParameterNotSupportedError`: Parameter not supported for model
+    - `TokenParameterError`: Token-related parameter error
+  - `ConstraintNotFoundError`: Constraint reference not found
+  - `NetworkError`: Error during network operations
+  - `ModelNotSupportedError`: Model not supported by registry
 
 ## Performance Optimization
 
