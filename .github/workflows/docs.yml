@@ -57,7 +57,8 @@ jobs:
             echo "  - mkdocstrings:" >> mkdocs.yml
             echo "      handlers:" >> mkdocs.yml
             echo "        python:" >> mkdocs.yml
-            echo "          docstring_style: google" >> mkdocs.yml
+            echo "          options:" >> mkdocs.yml
+            echo "            docstring_style: google" >> mkdocs.yml
           fi
           poetry run mkdocs build
 
