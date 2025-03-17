@@ -11,10 +11,15 @@ dated_models:
     supports_streaming: true
     supported_parameters:
       - ref: "numeric_constraints.temperature"
+        max_value: null
       - ref: "numeric_constraints.top_p"
+        max_value: null
       - ref: "numeric_constraints.frequency_penalty"
+        max_value: null
       - ref: "numeric_constraints.presence_penalty"
+        max_value: null
       - ref: "numeric_constraints.max_completion_tokens"
+        max_value: null
     description: "Initial release with 16k output support"
     min_version:
       year: 2024
@@ -28,15 +33,42 @@ dated_models:
     supports_streaming: true
     supported_parameters:
       - ref: "numeric_constraints.temperature"
+        max_value: null
       - ref: "numeric_constraints.top_p"
+        max_value: null
       - ref: "numeric_constraints.frequency_penalty"
+        max_value: null
       - ref: "numeric_constraints.presence_penalty"
+        max_value: null
       - ref: "numeric_constraints.max_completion_tokens"
+        max_value: null
     description: "First release of mini variant"
     min_version:
       year: 2024
       month: 7
       day: 18
+
+  gpt-4.5-preview-2025-02-27:
+    context_window: 128000
+    max_output_tokens: 16384
+    supports_structured: true
+    supports_streaming: true
+    supported_parameters:
+      - ref: "numeric_constraints.temperature"
+        max_value: null
+      - ref: "numeric_constraints.top_p"
+        max_value: null
+      - ref: "numeric_constraints.frequency_penalty"
+        max_value: null
+      - ref: "numeric_constraints.presence_penalty"
+        max_value: null
+      - ref: "numeric_constraints.max_completion_tokens"
+        max_value: null
+    description: "GPT-4.5 preview release"
+    min_version:
+      year: 2025
+      month: 2
+      day: 27
 
   o1-2024-12-17:
     context_window: 200000
@@ -45,15 +77,35 @@ dated_models:
     supports_streaming: true
     supported_parameters:
       - ref: "numeric_constraints.max_completion_tokens"
+        max_value: null
       - ref: "enum_constraints.reasoning_effort"
-    description: "Production O1 model optimized for structured output"
+        max_value: null
+    description: "Initial preview release"
     min_version:
       year: 2024
       month: 12
       day: 17
 
+  o3-mini-2025-01-31:
+    context_window: 200000
+    max_output_tokens: 100000
+    supports_structured: true
+    supports_streaming: true
+    supported_parameters:
+      - ref: "numeric_constraints.max_completion_tokens"
+        max_value: null
+      - ref: "enum_constraints.reasoning_effort"
+        max_value: null
+    description: "First o3-series model"
+    min_version:
+      year: 2025
+      month: 1
+      day: 31
+
 # Secondary section: aliases pointing to dated versions
 aliases:
   gpt-4o: "gpt-4o-2024-08-06"
   gpt-4o-mini: "gpt-4o-mini-2024-07-18"
+  gpt-4.5-preview: "gpt-4.5-preview-2025-02-27"
   o1: "o1-2024-12-17"
+  o3-mini: "o3-mini-2025-01-31"
