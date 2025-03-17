@@ -402,10 +402,10 @@ class TestRegistryRefresh:
 
                 # Verify the requests were made to the correct URL
                 mock_head.assert_called_once_with(
-                    "https://example.com/test.yml"
+                    "https://example.com/test.yml", timeout=10
                 )
                 mock_get.assert_called_once_with(
-                    "https://example.com/test.yml"
+                    "https://example.com/test.yml", timeout=10
                 )
 
                 # Verify result
@@ -430,7 +430,7 @@ class TestRegistryRefresh:
 
             # Verify the request was made to the correct URL
             mock_head.assert_called_once_with(
-                "https://test.example.com/config.yml"
+                "https://test.example.com/config.yml", timeout=10
             )
 
             # Verify error handling

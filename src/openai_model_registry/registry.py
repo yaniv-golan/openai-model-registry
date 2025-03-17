@@ -868,7 +868,8 @@ class ModelRegistry:
             return None
 
         try:
-            response = requests.get(url)
+            # Add a timeout of 10 seconds to prevent indefinite hanging
+            response = requests.get(url, timeout=10)
             if response.status_code != 200:
                 _log(
                     _default_log_callback,
@@ -1081,7 +1082,8 @@ class ModelRegistry:
 
             # Get remote version (just the version info)
             try:
-                response = requests.head(config_url)
+                # Add a timeout of 10 seconds to HEAD request
+                response = requests.head(config_url, timeout=10)
                 if response.status_code == 404:
                     return RefreshResult(
                         success=False,
@@ -1090,7 +1092,8 @@ class ModelRegistry:
                     )
 
                 # If we can't determine remote version with HEAD, get the full config
-                response = requests.get(config_url)
+                # Add a timeout of 10 seconds to GET request
+                response = requests.get(config_url, timeout=10)
                 if response.status_code != 200:
                     return RefreshResult(
                         success=False,
