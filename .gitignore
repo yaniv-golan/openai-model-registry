@@ -1,4 +1,4 @@
-# Python
+    # Python
 __pycache__/
 *.py[cod]
 *$py.class
@@ -51,3 +51,4 @@ htmlcov/
 
 # Local history
 .history/
+CLAUDE.md
