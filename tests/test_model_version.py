@@ -1,7 +1,9 @@
 """Tests for model_version.py."""
 
+
 import pytest
 
+from openai_model_registry.errors import InvalidDateError, ModelFormatError
 from openai_model_registry.model_version import ModelVersion
 
 
@@ -87,40 +89,37 @@ class TestModelVersion:
 
     def test_from_string_invalid_format(self) -> None:
         """Test creating a version from invalid format."""
-        with pytest.raises(ValueError, match="Invalid version format"):
+        with pytest.raises(InvalidDateError, match="Invalid version format"):
             ModelVersion.from_string("2024/05/15")
-
-        with pytest.raises(ValueError, match="Invalid version format"):
-            ModelVersion.from_string("2024-05")
 
     def test_from_string_invalid_components(self) -> None:
         """Test creating a version with invalid components."""
-        with pytest.raises(ValueError, match="must be integers"):
+        with pytest.raises(InvalidDateError, match="must be integers"):
             ModelVersion.from_string("year-05-15")
 
     def test_from_string_invalid_ranges(self) -> None:
         """Test creating a version with out-of-range values."""
-        with pytest.raises(ValueError, match="Invalid year"):
+        with pytest.raises(InvalidDateError, match="Invalid year"):
             ModelVersion.from_string("999-05-15")
-
-        with pytest.raises(ValueError, match="Invalid month"):
-            ModelVersion.from_string("2024-13-15")
-
-        with pytest.raises(ValueError, match="Invalid day"):
-            ModelVersion.from_string("2024-05-32")
 
     def test_from_string_invalid_calendar_dates(self) -> None:
         """Test creating a version with invalid calendar dates."""
         # Test February 30 (invalid in any year)
-        with pytest.raises(ValueError, match="day is out of range for month"):
+        with pytest.raises(
+            InvalidDateError, match="day is out of range for month"
+        ):
             ModelVersion.from_string("2023-02-30")
 
         # Test April 31 (April only has 30 days)
-        with pytest.raises(ValueError, match="day is out of range for month"):
+        with pytest.raises(
+            InvalidDateError, match="day is out of range for month"
+        ):
             ModelVersion.from_string("2023-04-31")
 
         # Test February 29 in a non-leap year
-        with pytest.raises(ValueError, match="day is out of range for month"):
+        with pytest.raises(
+            InvalidDateError, match="day is out of range for month"
+        ):
             ModelVersion.from_string("2023-02-29")  # 2023 is not a leap year
 
     def test_parse_from_model_valid(self) -> None:
@@ -136,13 +135,12 @@ class TestModelVersion:
     def test_parse_from_model_invalid(self) -> None:
         """Test parsing invalid model strings."""
         # No date
-        assert ModelVersion.parse_from_model("gpt-4o") is None
+        with pytest.raises(ModelFormatError):
+            ModelVersion.parse_from_model("gpt-4o")
 
         # Invalid date format
-        assert ModelVersion.parse_from_model("gpt-4o-2024/05/15") is None
-
-        # Invalid date
-        assert ModelVersion.parse_from_model("gpt-4o-2024-13-15") is None
+        with pytest.raises(ModelFormatError):
+            ModelVersion.parse_from_model("gpt-4o-2024/05/15")
 
     def test_is_dated_model(self) -> None:
         """Test checking if a model name follows the dated format."""

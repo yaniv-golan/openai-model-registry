@@ -9,7 +9,10 @@ from openai_model_registry.constraints import (
     NumericConstraint,
     ParameterReference,
 )
-from openai_model_registry.errors import ModelRegistryError
+from openai_model_registry.errors import (
+    ModelRegistryError,
+    ParameterNotSupportedError,
+)
 from openai_model_registry.model_version import ModelVersion
 from openai_model_registry.registry import ModelCapabilities
 
@@ -125,7 +128,8 @@ def test_model_capabilities_validate_parameter() -> None:
     capabilities.validate_parameter("reasoning_effort", "medium")
 
     # Test parameter not in supported_parameters
-    capabilities.validate_parameter("nonexistent", "value")  # Should not raise
+    with pytest.raises(ParameterNotSupportedError):
+        capabilities.validate_parameter("nonexistent", "value")
 
     # Test invalid parameters
     with pytest.raises(ModelRegistryError):

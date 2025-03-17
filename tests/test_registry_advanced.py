@@ -512,7 +512,10 @@ class TestRegistryErrors:
         assert result is not None
         assert result.success is False
         assert result.data is None
-        assert result.error is not None and "file not found" in result.error.lower()
+        assert (
+            result.error is not None
+            and "file not found" in result.error.lower()
+        )
         assert isinstance(result.exception, FileNotFoundError)
 
     def test_load_config_invalid_format(self, test_config_dir: Path) -> None:
@@ -534,8 +537,14 @@ class TestRegistryErrors:
         assert result is not None
         assert result.success is False
         assert result.data is None
-        assert result.error is not None and "invalid configuration format" in result.error.lower()
-        assert result.error is not None and "expected dictionary" in result.error.lower()
+        assert (
+            result.error is not None
+            and "invalid configuration format" in result.error.lower()
+        )
+        assert (
+            result.error is not None
+            and "expected dictionary" in result.error.lower()
+        )
 
     def test_init_with_copy_error(self) -> None:
         """Test ModelRegistry initialization with config file copy error."""

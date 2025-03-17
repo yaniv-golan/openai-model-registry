@@ -21,6 +21,7 @@ from openai_model_registry import (
     ModelRegistryError,
     ModelVersion,
     NumericConstraint,
+    ParameterNotSupportedError,
     ParameterReference,
 )
 
@@ -103,6 +104,10 @@ class TestBasicUsageExamples:
             capabilities.validate_parameter(
                 "reasoning_effort", "extreme"
             )  # Not in allowed values
+
+        # Example of unsupported parameter
+        with pytest.raises(ParameterNotSupportedError):
+            capabilities.validate_parameter("unsupported_param", "value")
 
 
 class TestModelVersionExamples:
