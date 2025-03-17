@@ -704,7 +704,7 @@ class ModelRegistry:
                         f"Model '{model}' not found. Available base models: "
                         f"{', '.join(sorted(available_base_models))}",
                         model=model,
-                        available_models=available_base_models,
+                        available_models=list(available_base_models),
                     )
 
             try:
@@ -780,7 +780,7 @@ class ModelRegistry:
             f"Model '{model}' not found. Available base models: "
             f"{', '.join(sorted(available_models))}",
             model=model,
-            available_models=available_models,
+            available_models=list(available_models),
         )
 
     def get_parameter_constraint(

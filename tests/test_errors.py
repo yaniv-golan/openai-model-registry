@@ -91,9 +91,11 @@ class TestErrorClasses:
         error = ModelNotSupportedError(
             "Model not supported",
             model="unsupported-model",
-            available_models=models_dict,
+            available_models=list(
+                models_dict.keys()
+            ),  # Convert dict keys to list
         )
-        assert isinstance(error.available_models, dict)
+        assert isinstance(error.available_models, list)
         if error.available_models:  # Type guard
             assert "gpt-4" in error.available_models
             assert "gpt-3.5-turbo" in error.available_models

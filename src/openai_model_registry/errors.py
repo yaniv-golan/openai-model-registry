@@ -4,7 +4,7 @@ This module defines the error types used by the model registry
 for various validation and compatibility issues.
 """
 
-from typing import Any, Dict, List, Optional, Set, Union
+from typing import Any, List, Optional
 
 
 class ModelRegistryError(Exception):
@@ -83,14 +83,23 @@ class ModelNotSupportedError(ModelRegistryError):
         self,
         message: str,
         model: Optional[str] = None,
-        available_models: Optional[
-            Union[List[str], Set[str], Dict[str, Any]]
-        ] = None,
+        available_models: Optional[List[str]] = None,
     ) -> None:
         super().__init__(message)
         self.model = model
         self.message = message
-        self.available_models = available_models
+        # Convert other collection types to list for consistency
+        if available_models is not None:
+            if isinstance(available_models, dict):
+                self.available_models: Optional[List[str]] = list(
+                    available_models.keys()
+                )
+            elif isinstance(available_models, set):
+                self.available_models = list(available_models)
+            else:
+                self.available_models = available_models
+        else:
+            self.available_models = None
 
     def __str__(self) -> str:
         return self.message
