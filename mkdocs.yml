@@ -38,15 +38,9 @@ markdown_extensions:
 plugins:
   - search
   - mkdocstrings:
-      default_handler: python
       handlers:
         python:
-          selection:
-            docstring_style: google
-          rendering:
-            show_source: true
-            show_root_heading: true
-            show_root_full_path: false
+          docstring_style: google
 
 nav:
   - Home: index.md
