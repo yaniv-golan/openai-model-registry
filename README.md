@@ -6,6 +6,8 @@
 [![codecov](https://codecov.io/gh/yaniv-golan/openai-model-registry/branch/main/graph/badge.svg)](https://codecov.io/gh/yaniv-golan/openai-model-registry)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+📚 **[View the Documentation](https://yaniv-golan.github.io/openai-model-registry/)** - Comprehensive guides and API reference
+
 A lightweight Python package for validating OpenAI model parameters and capabilities.
 
 ## Features
