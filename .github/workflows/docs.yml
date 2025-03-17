@@ -55,16 +55,15 @@ jobs:
             echo "plugins:" >> mkdocs.yml
             echo "  - search" >> mkdocs.yml
             echo "  - mkdocstrings:" >> mkdocs.yml
-            echo "      default_handler: python" >> mkdocs.yml
             echo "      handlers:" >> mkdocs.yml
             echo "        python:" >> mkdocs.yml
-            echo "          paths: [src]" >> mkdocs.yml
             echo "          options:" >> mkdocs.yml
-            echo "            docstring_style: google" >> mkdocs.yml
+            echo "            docstring_options:" >> mkdocs.yml
+            echo "              style: google" >> mkdocs.yml
             echo "            show_source: true" >> mkdocs.yml
             echo "            show_root_heading: true" >> mkdocs.yml
             echo "            show_category_heading: true" >> mkdocs.yml
-            echo "            docstring_section_style: table" >> mkdocs.yml
+            echo "            paths: [src]" >> mkdocs.yml
           fi
           poetry run mkdocs build
 
