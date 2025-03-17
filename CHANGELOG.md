@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2025-04-01
+
+### Added
+
+- Enhanced error handling with new exception hierarchy
+- Added `ParameterNotSupportedError` for more precise error reporting
+- Added `ConstraintNotFoundError` for missing constraint references
+- Added `ConfigResult` class for standardized configuration loading results
+- Added comprehensive exception documentation in advanced usage guide
+- Added type annotations to improve type safety and mypy compatibility
+- Added explicit error handling for network operations and configuration loading
+
+### Changed
+
+- Improved type safety throughout the codebase with proper annotations
+- Enhanced configuration loading with better error reporting and handling
+- Refactored model version validation to use specific exception types
+- Updated documentation to include detailed exception handling examples
+- Improved error messages with more context and troubleshooting information
+
+### Fixed
+
+- Fixed mypy type errors in registry and configuration handling
+- Fixed handling of configuration results in version comparison logic
+- Fixed documentation build configuration for mkdocstrings 0.29.0
+- Fixed potential issues with None values in configuration data
+
 ## [0.3.0] - 2025-03-17
 
 ### Added
