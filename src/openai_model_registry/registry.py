@@ -700,8 +700,28 @@ class ModelRegistry:
                 # Add to registry
                 self._capabilities[model_name] = capabilities
 
-                # Also register under aliases
+                # Also register under aliases - check for duplicates first
                 for alias in aliases:
+                    if (
+                        alias in self._capabilities
+                        and self._capabilities[alias].model_name != model_name
+                    ):
+                        _log(
+                            _default_log_callback,
+                            LogLevel.WARNING,
+                            LogEvent.MODEL_REGISTRY,
+                            {
+                                "message": "Duplicate model alias detected",
+                                "alias": alias,
+                                "original_model": self._capabilities[
+                                    alias
+                                ].model_name,
+                                "new_model": model_name,
+                            },
+                        )
+                        # Skip this alias to prevent overwriting the existing model
+                        continue
+
                     self._capabilities[alias] = capabilities
 
             except Exception as e:
