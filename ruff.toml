@@ -52,7 +52,7 @@ exclude = [
 
 [lint.isort]
 known-first-party = ["openai_model_registry"]
-known-third-party = ["pydantic", "yaml", "requests"]
+known-third-party = ["yaml", "requests"]
 
 [lint.pydocstyle]
 convention = "google"
