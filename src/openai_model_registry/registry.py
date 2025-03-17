@@ -5,6 +5,7 @@ for managing model capabilities, version validation, and parameter constraints.
 """
 
 import copy  # Added import for deep copying objects
+import functools
 import logging
 import os
 import re
@@ -281,6 +282,11 @@ class ModelRegistry:
         self._constraints: Dict[
             str, Union[NumericConstraint, EnumConstraint]
         ] = {}
+
+        # Set up caching for get_capabilities
+        self.get_capabilities = functools.lru_cache(
+            maxsize=self.config.cache_size
+        )(self._get_capabilities_impl)
 
         # Auto-copy default configs to user directory if they don't exist
         if not config or not config.registry_path:
@@ -638,8 +644,8 @@ class ModelRegistry:
                 )
                 # Continue with other models
 
-    def get_capabilities(self, model: str) -> ModelCapabilities:
-        """Get capabilities for a model.
+    def _get_capabilities_impl(self, model: str) -> ModelCapabilities:
+        """Implementation of get_capabilities without caching.
 
         Args:
             model: Model name, which can be:
