@@ -109,6 +109,20 @@ class TestModelVersion:
         with pytest.raises(ValueError, match="Invalid day"):
             ModelVersion.from_string("2024-05-32")
 
+    def test_from_string_invalid_calendar_dates(self) -> None:
+        """Test creating a version with invalid calendar dates."""
+        # Test February 30 (invalid in any year)
+        with pytest.raises(ValueError, match="day is out of range for month"):
+            ModelVersion.from_string("2023-02-30")
+
+        # Test April 31 (April only has 30 days)
+        with pytest.raises(ValueError, match="day is out of range for month"):
+            ModelVersion.from_string("2023-04-31")
+
+        # Test February 29 in a non-leap year
+        with pytest.raises(ValueError, match="day is out of range for month"):
+            ModelVersion.from_string("2023-02-29")  # 2023 is not a leap year
+
     def test_parse_from_model_valid(self) -> None:
         """Test parsing a valid model string."""
         result = ModelVersion.parse_from_model("gpt-4o-2024-05-15")

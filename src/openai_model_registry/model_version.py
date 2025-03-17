@@ -5,6 +5,7 @@ in the format YYYY-MM-DD.
 """
 
 import re
+from datetime import date
 from typing import Optional, Tuple
 
 
@@ -109,13 +110,13 @@ class ModelVersion:
         """Create a version from a string in YYYY-MM-DD format.
 
         Args:
-            version_str: Version string in YYYY-MM-DD format
+            version_str: The version string to parse
 
         Returns:
-            ModelVersion: Parsed version object
+            A new ModelVersion instance
 
         Raises:
-            ValueError: If the format is invalid
+            ValueError: If the string is not a valid version
         """
         parts = version_str.split("-")
         if len(parts) != 3:
@@ -141,6 +142,12 @@ class ModelVersion:
             raise ValueError(f"Invalid month: {month}. Must be 1-12.")
         if not (1 <= day <= 31):
             raise ValueError(f"Invalid day: {day}. Must be 1-31.")
+
+        # Calendar validation
+        try:
+            date(year, month, day)
+        except ValueError as e:
+            raise ValueError(f"Invalid date: {version_str}. {str(e)}")
 
         return cls(year, month, day)
 
