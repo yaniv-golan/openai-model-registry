@@ -1007,8 +1007,41 @@ class ModelRegistry:
             target_path = get_user_config_dir() / MODEL_REGISTRY_FILENAME
 
             # Write the updated config
-            with open(target_path, "w") as f:
-                yaml.dump(remote_config, f)
+            try:
+                with open(target_path, "w") as f:
+                    yaml.dump(remote_config, f)
+            except PermissionError as e:
+                _log(
+                    _default_log_callback,
+                    LogLevel.ERROR,
+                    LogEvent.MODEL_REGISTRY,
+                    {
+                        "message": "Permission denied when writing registry configuration",
+                        "path": str(target_path),
+                        "error": str(e),
+                    },
+                )
+                return RefreshResult(
+                    success=False,
+                    status=RefreshStatus.ERROR,
+                    message=f"Permission denied when writing to {target_path}",
+                )
+            except OSError as e:
+                _log(
+                    _default_log_callback,
+                    LogLevel.ERROR,
+                    LogEvent.MODEL_REGISTRY,
+                    {
+                        "message": "File system error when writing registry configuration",
+                        "path": str(target_path),
+                        "error": str(e),
+                    },
+                )
+                return RefreshResult(
+                    success=False,
+                    status=RefreshStatus.ERROR,
+                    message=f"Error writing to {target_path}: {str(e)}",
+                )
 
             # Reload the registry with new configuration
             self._load_constraints()
