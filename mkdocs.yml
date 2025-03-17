@@ -40,7 +40,13 @@ plugins:
   - mkdocstrings:
       handlers:
         python:
-          docstring_style: google
+          options:
+            docstring_options:
+              style: google
+            show_source: true
+            show_root_heading: true
+            show_category_heading: true
+            paths: [src]
 
 nav:
   - Home: index.md

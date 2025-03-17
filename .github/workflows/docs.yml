@@ -48,23 +48,7 @@ jobs:
             echo "" >> docs/index.md
             echo "Documentation generated from docstrings." >> docs/index.md
           fi
-          # Create mkdocs.yml if it doesn't exist
-          if [ ! -f mkdocs.yml ]; then
-            echo "site_name: OpenAI Model Registry" > mkdocs.yml
-            echo "theme: material" >> mkdocs.yml
-            echo "plugins:" >> mkdocs.yml
-            echo "  - search" >> mkdocs.yml
-            echo "  - mkdocstrings:" >> mkdocs.yml
-            echo "      handlers:" >> mkdocs.yml
-            echo "        python:" >> mkdocs.yml
-            echo "          options:" >> mkdocs.yml
-            echo "            docstring_options:" >> mkdocs.yml
-            echo "              style: google" >> mkdocs.yml
-            echo "            show_source: true" >> mkdocs.yml
-            echo "            show_root_heading: true" >> mkdocs.yml
-            echo "            show_category_heading: true" >> mkdocs.yml
-            echo "            paths: [src]" >> mkdocs.yml
-          fi
+          # Use the existing mkdocs.yml file
           poetry run mkdocs build
 
           # Verify site directory exists and has content
