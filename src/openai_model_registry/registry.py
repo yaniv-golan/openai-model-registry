@@ -1149,15 +1149,23 @@ class ModelRegistry:
                         status=RefreshStatus.ERROR,
                         message=f"Registry not found at {config_url}",
                     )
+                elif response.status_code != 200:
+                    return RefreshResult(
+                        success=False,
+                        status=RefreshStatus.ERROR,
+                        message=f"HTTP error {response.status_code} during HEAD request",
+                    )
 
-                # If we can't determine remote version with HEAD, get the full config
-                # Add a timeout of 10 seconds to GET request
+                # Check if version info is available in headers (future optimization)
+                # For now, we still need the GET request to get the version
+
+                # Make GET request to get the actual content
                 response = requests.get(config_url, timeout=10)
                 if response.status_code != 200:
                     return RefreshResult(
                         success=False,
                         status=RefreshStatus.ERROR,
-                        message=f"HTTP error {response.status_code}",
+                        message=f"HTTP error {response.status_code} during GET request",
                     )
 
                 remote_config = yaml.safe_load(response.text)
