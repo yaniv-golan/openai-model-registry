@@ -121,6 +121,29 @@ def test_numeric_constraint_validation() -> None:
     assert "must be a float" in str(exc_info.value)
 
 
+def test_numeric_constraint_special_float_values() -> None:
+    """Test NumericConstraint with special float values (NaN, infinity)."""
+    # Create constraint
+    constraint = NumericConstraint(
+        min_value=0.0,
+        max_value=1.0,
+        allow_float=True,
+        description="Must be between 0 and 1",
+    )
+
+    # Test NaN
+    with pytest.raises(ModelRegistryError, match="cannot be NaN"):
+        constraint.validate("test_param", float("nan"))
+
+    # Test positive infinity
+    with pytest.raises(ModelRegistryError, match="cannot be infinity"):
+        constraint.validate("test_param", float("inf"))
+
+    # Test negative infinity
+    with pytest.raises(ModelRegistryError, match="cannot be infinity"):
+        constraint.validate("test_param", float("-inf"))
+
+
 def test_enum_constraint_initialization() -> None:
     """Test EnumConstraint initialization."""
     # Test basic initialization

@@ -3,6 +3,7 @@
 This module defines the constraint types used to validate parameters for model calls.
 """
 
+import math
 from dataclasses import dataclass
 from typing import (
     Any,
@@ -81,6 +82,19 @@ class NumericConstraint:
                 f"Parameter '{name}' must be a float, got integer {value}.\n"
                 f"Description: {self.description}"
             )
+
+        # Handle special float values (NaN and infinity)
+        if isinstance(value, float):
+            if math.isnan(value):
+                raise ModelRegistryError(
+                    f"Parameter '{name}' cannot be NaN (not a number).\n"
+                    f"Description: {self.description}"
+                )
+            if math.isinf(value):
+                raise ModelRegistryError(
+                    f"Parameter '{name}' cannot be infinity.\n"
+                    f"Description: {self.description}"
+                )
 
         # Validate range
         min_val = self.min_value
