@@ -45,4 +45,11 @@ def _log(
         event: Event type
         data: Dictionary of event data
     """
-    callback(level, str(event), data)
+    try:
+        callback(level, str(event), data)
+    except Exception as e:
+        # Fallback to standard logging if callback fails
+        logging.error(
+            f"Logging callback failed with error: {e}. Original log: "
+            f"level={level}, event={event}, data={data}"
+        )
