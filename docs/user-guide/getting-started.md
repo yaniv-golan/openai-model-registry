@@ -18,7 +18,7 @@ Here's a simple example to get started:
 from openai_model_registry import ModelRegistry
 
 # Get the registry instance (singleton)
-registry = ModelRegistry.get_instance()
+registry = ModelRegistry.get_default()
 
 # Get capabilities for a specific model
 capabilities = registry.get_capabilities("gpt-4o")
@@ -39,7 +39,7 @@ try:
     # Valid parameter
     capabilities.validate_parameter("temperature", 0.7)
     print("Temperature 0.7 is valid")
-    
+
     # Invalid parameter
     capabilities.validate_parameter("temperature", 3.0)
     print("This won't be reached")

@@ -32,6 +32,8 @@ markdown_extensions:
   - footnotes
   - toc:
       permalink: true
+  - pymdownx.snippets:
+      base_path: ["."]
 
 plugins:
   - search
@@ -45,7 +47,6 @@ plugins:
             show_source: true
             show_root_heading: true
             show_root_full_path: false
-  - include-markdown
 
 nav:
   - Home: index.md

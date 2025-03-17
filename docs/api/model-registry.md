@@ -9,18 +9,30 @@ The `ModelRegistry` class is the primary entry point for accessing model capabil
       show_root_heading: false
       show_source: true
 
+::: openai_model_registry.registry.RegistryConfig
+    options:
+      show_root_heading: true
+      show_source: true
+
 ## Usage Examples
 
 ### Initializing the Registry
 
 ```python
 from openai_model_registry import ModelRegistry
+from openai_model_registry.registry import RegistryConfig
 
 # Get the default singleton instance
 registry = ModelRegistry.get_instance()
 
-# Or create a custom instance with a specific path
-custom_registry = ModelRegistry(registry_path="/path/to/registry")
+# Or create a custom instance with specific configuration
+config = RegistryConfig(
+    registry_path="/custom/path/registry.yml",
+    constraints_path="/custom/path/constraints.yml",
+    auto_update=False,
+    cache_size=200
+)
+custom_registry = ModelRegistry(config)
 ```
 
 ### Getting Model Capabilities
@@ -28,6 +40,7 @@ custom_registry = ModelRegistry(registry_path="/path/to/registry")
 ```python
 from openai_model_registry import ModelRegistry
 
+# Use the default registry
 registry = ModelRegistry.get_instance()
 
 # Get capabilities for a specific model
@@ -56,24 +69,23 @@ for model_name in sorted(all_models.keys()):
 
 ```python
 from openai_model_registry import ModelRegistry
-from openai_model_registry.registry import RegistryUpdateStatus
+from openai_model_registry.registry import RefreshStatus
 
 registry = ModelRegistry.get_instance()
 
+# Check for updates
+refresh_result = registry.check_for_updates()
+if refresh_result.status == RefreshStatus.UPDATE_AVAILABLE:
+    print("Update is available")
+
 # Update the registry from the default source
-update_result = registry.update_registry()
+update_result = registry.refresh_from_remote()
 
 # Check the result
-if update_result.status == RegistryUpdateStatus.SUCCESS:
+if update_result.success:
     print("Registry updated successfully")
-    if update_result.added_models:
-        print(f"New models: {', '.join(update_result.added_models)}")
-    if update_result.updated_models:
-        print(f"Updated models: {', '.join(update_result.updated_models)}")
-elif update_result.status == RegistryUpdateStatus.NO_CHANGE:
-    print("Registry is already up to date")
 else:
-    print(f"Update failed: {update_result.error}")
+    print(f"Update failed: {update_result.message}")
 ```
 
 ### Working with Model Versions
@@ -95,4 +107,12 @@ print(f"Day: {version.day}")
 newer_version = ModelVersion.from_string("2024-06-01")
 if newer_version > version:
     print(f"{newer_version} is newer than {version}")
+
+# Check if a model name follows the dated format pattern
+if hasattr(ModelVersion, "is_dated_model"):
+    is_dated = ModelVersion.is_dated_model("gpt-4o-2024-05-13")
+    print(f"Is a dated model: {is_dated}")  # True
+
+    is_dated = ModelVersion.is_dated_model("gpt-4o")
+    print(f"Is a dated model: {is_dated}")  # False
 ```

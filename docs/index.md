@@ -18,7 +18,7 @@ pip install openai-model-registry
 from openai_model_registry import ModelRegistry
 
 # Get the registry instance
-registry = ModelRegistry.get_instance()
+registry = ModelRegistry.get_default()
 
 # Get model capabilities
 capabilities = registry.get_capabilities("gpt-4o")

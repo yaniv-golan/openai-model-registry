@@ -2,19 +2,55 @@
 
 This guide covers advanced features and configuration options for the OpenAI Model Registry.
 
-## Custom Registry Location
+## Custom Registry Configuration
 
-By default, the registry loads its data from a predefined location. You can customize this location:
+By default, the registry loads its data from predefined locations. You can customize this with the `RegistryConfig` class:
 
 ```python
-from openai_model_registry import ModelRegistry
+from openai_model_registry import ModelRegistry, RegistryConfig
 
-# Initialize registry with a custom path
-registry = ModelRegistry(registry_path="/path/to/custom/registry")
+# Create a custom configuration
+config = RegistryConfig(
+    registry_path="/path/to/custom/registry.yml",
+    constraints_path="/path/to/custom/constraints.yml",
+    auto_update=True,
+    cache_size=200
+)
+
+# Initialize registry with the custom configuration
+registry = ModelRegistry(config)
 
 # Use the registry
 capabilities = registry.get_capabilities("gpt-4o")
 ```
+
+The `RegistryConfig` class supports the following options:
+
+- `registry_path`: Custom path to the registry YAML file
+- `constraints_path`: Custom path to the constraints YAML file
+- `auto_update`: Whether to automatically update the registry
+- `cache_size`: Size of the model capabilities cache
+
+## Multiple Registry Instances
+
+With the new API, you can create multiple registry instances with different configurations:
+
+```python
+from openai_model_registry import ModelRegistry, RegistryConfig
+
+# Create registries for different environments
+prod_config = RegistryConfig(registry_path="/path/to/prod/registry.yml")
+staging_config = RegistryConfig(registry_path="/path/to/staging/registry.yml")
+
+prod_registry = ModelRegistry(prod_config)
+staging_registry = ModelRegistry(staging_config)
+
+# Use different registries as needed
+prod_capabilities = prod_registry.get_capabilities("gpt-4o")
+staging_capabilities = staging_registry.get_capabilities("gpt-4o")
+```
+
+This is particularly useful for testing or when you need to support different configurations in the same application.
 
 ## Registry Updates
 
@@ -25,7 +61,7 @@ from openai_model_registry import ModelRegistry
 from openai_model_registry.registry import RegistryUpdateStatus
 
 # Get registry instance
-registry = ModelRegistry.get_instance()
+registry = ModelRegistry.get_default()
 
 # Update the registry
 update_result = registry.update_registry()
@@ -63,14 +99,14 @@ The registry uses parameter references to define relationships between parameter
 ```python
 from openai_model_registry import ModelRegistry
 
-registry = ModelRegistry.get_instance()
+registry = ModelRegistry.get_default()
 capabilities = registry.get_capabilities("gpt-4o")
 
 # Get all parameter references
 for param_ref in capabilities.supported_parameters:
     print(f"Parameter reference: {param_ref.ref}")
     print(f"  Description: {param_ref.description}")
-    
+
     # Access the constraint directly
     constraint = capabilities.get_constraint(param_ref.ref)
     if hasattr(constraint, "min_value"):
@@ -85,7 +121,7 @@ Some parameters have interdependencies or contextual validation requirements. Yo
 ```python
 from openai_model_registry import ModelRegistry
 
-registry = ModelRegistry.get_instance()
+registry = ModelRegistry.get_default()
 capabilities = registry.get_capabilities("gpt-4o")
 
 # Create a set to track used parameters
@@ -109,8 +145,8 @@ For robust applications, you might want to implement error handling strategies:
 from openai_model_registry import ModelRegistry, ModelRegistryError, ModelNotSupportedError
 
 try:
-    registry = ModelRegistry.get_instance()
-    
+    registry = ModelRegistry.get_default()
+
     # Try to get capabilities for a model
     try:
         capabilities = registry.get_capabilities("nonexistent-model")
@@ -118,7 +154,7 @@ try:
         print(f"Model not found: {e}")
         # Fallback to a default model
         capabilities = registry.get_capabilities("gpt-4o")
-        
+
     # Validate parameters with error handling
     try:
         capabilities.validate_parameter("temperature", 3.0)
@@ -127,7 +163,7 @@ try:
         # Use a default valid value
         print("Using default temperature of 0.7")
         temperature = 0.7
-        
+
 except Exception as e:
     print(f"Unexpected error: {e}")
     # Implement fallback mechanism
@@ -144,7 +180,7 @@ import functools
 # Create a cache of model capabilities
 @functools.lru_cache(maxsize=16)
 def get_cached_capabilities(model_name):
-    registry = ModelRegistry.get_instance()
+    registry = ModelRegistry.get_default()
     return registry.get_capabilities(model_name)
 
 # Use cached capabilities
