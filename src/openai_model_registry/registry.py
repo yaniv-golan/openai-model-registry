@@ -242,6 +242,9 @@ class ModelRegistry:
     """Registry for model capabilities and validation."""
 
     _default_instance: Optional["ModelRegistry"] = None
+    # Pre-compile regex patterns for improved performance
+    _DATE_PATTERN = re.compile(r"^(.*)-(\d{4}-\d{2}-\d{2})$")
+    _IS_DATED_MODEL_PATTERN = re.compile(r".*-\d{4}-\d{2}-\d{2}$")
 
     @classmethod
     def get_instance(cls) -> "ModelRegistry":
@@ -657,7 +660,7 @@ class ModelRegistry:
             return self._capabilities[model]
 
         # Check if this is a versioned model
-        version_match = re.match(r"^(.*)-(\d{4}-\d{2}-\d{2})$", model)
+        version_match = self._DATE_PATTERN.match(model)
         if version_match:
             base_name = version_match.group(1)
             version_str = version_match.group(2)
@@ -675,7 +678,7 @@ class ModelRegistry:
                 aliases = [
                     name
                     for name in self._capabilities.keys()
-                    if not re.match(r".*-\d{4}-\d{2}-\d{2}$", name)
+                    if not self._IS_DATED_MODEL_PATTERN.match(name)
                 ]
 
                 # Find if any alias might match the base model
@@ -695,7 +698,7 @@ class ModelRegistry:
                     available_base_models: set[str] = set(
                         k
                         for k in self._capabilities.keys()
-                        if not re.match(r".*-\d{4}-\d{2}-\d{2}$", k)
+                        if not self._IS_DATED_MODEL_PATTERN.match(k)
                     )
                     raise ModelNotSupportedError(
                         f"Model '{model}' not found. Available base models: "
@@ -771,7 +774,7 @@ class ModelRegistry:
         available_models: set[str] = set(
             k
             for k in self._capabilities.keys()
-            if not re.match(r".*-\d{4}-\d{2}-\d{2}$", k)
+            if not self._IS_DATED_MODEL_PATTERN.match(k)
         )
         raise ModelNotSupportedError(
             f"Model '{model}' not found. Available base models: "
