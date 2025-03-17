@@ -32,9 +32,30 @@ def get_user_config_dir() -> Path:
 
 
 def ensure_user_config_dir_exists() -> None:
-    """Ensure that the user config directory exists."""
+    """Ensure that the user config directory exists.
+
+    Raises:
+        OSError: If the directory cannot be created due to permission errors or other IO issues
+        PermissionError: If the directory exists but is not writable
+    """
     user_dir = get_user_config_dir()
+
+    # If directory already exists, check if it's writable
+    if user_dir.exists():
+        if not os.access(user_dir, os.W_OK):
+            raise PermissionError(
+                f"Config directory exists but is not writable: {user_dir}"
+            )
+        return
+
+    # Create the directory and its parents if needed
     os.makedirs(user_dir, exist_ok=True)
+
+    # Verify the directory is writable after creation
+    if not os.access(user_dir, os.W_OK):
+        raise PermissionError(
+            f"Created config directory but it is not writable: {user_dir}"
+        )
 
 
 def copy_default_to_user_config(filename: str) -> bool:
