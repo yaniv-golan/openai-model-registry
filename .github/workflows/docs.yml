@@ -11,6 +11,11 @@ on:
   # Allow manual triggering of the workflow
   workflow_dispatch:
 
+# Add permissions to allow GitHub Pages deployment
+permissions:
+  contents: write
+  pages: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -57,9 +62,14 @@ jobs:
           fi
           poetry run mkdocs build
 
+          # Verify site directory exists and has content
+          ls -la site
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         if: github.ref == 'refs/heads/main'
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./site
+          force_orphan: true  # Create a fresh gh-pages branch with each deployment
+          enable_jekyll: false
