@@ -330,23 +330,163 @@ class ModelRegistry:
             with open(self.config.constraints_path, "r") as f:
                 data = yaml.safe_load(f)
                 if not isinstance(data, dict):
+                    _log(
+                        _default_log_callback,
+                        LogLevel.ERROR,
+                        LogEvent.MODEL_REGISTRY,
+                        {
+                            "error": "Constraints file must contain a dictionary"
+                        },
+                    )
                     return
 
                 # Create constraints from config
                 for name, constraint in data.items():
+                    if not isinstance(constraint, dict):
+                        _log(
+                            _default_log_callback,
+                            LogLevel.ERROR,
+                            LogEvent.MODEL_REGISTRY,
+                            {
+                                "error": f"Constraint '{name}' must be a dictionary",
+                                "constraint": constraint,
+                            },
+                        )
+                        continue
+
                     constraint_type = constraint.get("type", "")
+                    if not constraint_type:
+                        _log(
+                            _default_log_callback,
+                            LogLevel.ERROR,
+                            LogEvent.MODEL_REGISTRY,
+                            {
+                                "error": f"Constraint '{name}' missing required 'type' field",
+                                "constraint": constraint,
+                            },
+                        )
+                        continue
 
                     if constraint_type == "numeric":
+                        min_value = constraint.get("min")
+                        max_value = constraint.get("max")
+                        allow_float = constraint.get("allow_float", True)
+                        allow_int = constraint.get("allow_int", True)
+                        description = constraint.get("description", "")
+
+                        # Type validation
+                        if min_value is not None and not isinstance(
+                            min_value, (int, float)
+                        ):
+                            _log(
+                                _default_log_callback,
+                                LogLevel.ERROR,
+                                LogEvent.MODEL_REGISTRY,
+                                {
+                                    "error": f"Constraint '{name}' has non-numeric 'min' value",
+                                    "min_value": min_value,
+                                },
+                            )
+                            continue
+
+                        if max_value is not None and not isinstance(
+                            max_value, (int, float)
+                        ):
+                            _log(
+                                _default_log_callback,
+                                LogLevel.ERROR,
+                                LogEvent.MODEL_REGISTRY,
+                                {
+                                    "error": f"Constraint '{name}' has non-numeric 'max' value",
+                                    "max_value": max_value,
+                                },
+                            )
+                            continue
+
+                        if not isinstance(allow_float, bool) or not isinstance(
+                            allow_int, bool
+                        ):
+                            _log(
+                                _default_log_callback,
+                                LogLevel.ERROR,
+                                LogEvent.MODEL_REGISTRY,
+                                {
+                                    "error": f"Constraint '{name}' has non-boolean 'allow_float' or 'allow_int'",
+                                    "allow_float": allow_float,
+                                    "allow_int": allow_int,
+                                },
+                            )
+                            continue
+
+                        # Create constraint
                         self._constraints[name] = NumericConstraint(
-                            min_value=constraint.get("min"),
-                            max_value=constraint.get("max"),
-                            allow_float=constraint.get("allow_float", True),
-                            description=constraint.get("description", ""),
+                            min_value=min_value
+                            if min_value is not None
+                            else 0.0,
+                            max_value=max_value,
+                            allow_float=allow_float,
+                            allow_int=allow_int,
+                            description=description,
                         )
                     elif constraint_type == "enum":
+                        allowed_values = constraint.get("values")
+                        description = constraint.get("description", "")
+
+                        # Required field validation
+                        if allowed_values is None:
+                            _log(
+                                _default_log_callback,
+                                LogLevel.ERROR,
+                                LogEvent.MODEL_REGISTRY,
+                                {
+                                    "error": f"Constraint '{name}' missing required 'values' field",
+                                    "constraint": constraint,
+                                },
+                            )
+                            continue
+
+                        # Type validation
+                        if not isinstance(allowed_values, list):
+                            _log(
+                                _default_log_callback,
+                                LogLevel.ERROR,
+                                LogEvent.MODEL_REGISTRY,
+                                {
+                                    "error": f"Constraint '{name}' has non-list 'values' field",
+                                    "allowed_values": allowed_values,
+                                },
+                            )
+                            continue
+
+                        # Validate all values are strings
+                        if not all(
+                            isinstance(val, str) for val in allowed_values
+                        ):
+                            _log(
+                                _default_log_callback,
+                                LogLevel.ERROR,
+                                LogEvent.MODEL_REGISTRY,
+                                {
+                                    "error": f"Constraint '{name}' has non-string values in 'values' list",
+                                    "allowed_values": allowed_values,
+                                },
+                            )
+                            continue
+
+                        # Create constraint
                         self._constraints[name] = EnumConstraint(
-                            allowed_values=constraint.get("values", []),
-                            description=constraint.get("description", ""),
+                            allowed_values=allowed_values,
+                            description=description,
+                        )
+                    else:
+                        _log(
+                            _default_log_callback,
+                            LogLevel.ERROR,
+                            LogEvent.MODEL_REGISTRY,
+                            {
+                                "error": f"Unknown constraint type '{constraint_type}' for '{name}'",
+                                "constraint": constraint,
+                            },
                         )
 
         except FileNotFoundError:
