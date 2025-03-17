@@ -370,9 +370,36 @@ class TestModelCapabilities:
 
             # Verify the warning was logged about duplicate alias
             assert "Duplicate model alias detected" in caplog.text
-            assert "shared-alias" in caplog.text
-            assert "model-a" in caplog.text
-            assert "model-b" in caplog.text
+
+            # Find relevant log record
+            duplicate_alias_logs = [
+                record
+                for record in caplog.records
+                if "Duplicate model alias detected" in record.getMessage()
+            ]
+            assert (
+                len(duplicate_alias_logs) > 0
+            ), "No duplicate alias warning was logged"
+
+            # Check that at least one log record contains the expected data
+            has_expected_data = False
+            for record in duplicate_alias_logs:
+                if hasattr(record, "alias") and record.alias == "shared-alias":
+                    has_expected_data = True
+                    assert hasattr(
+                        record, "new_model"
+                    ), "Log record missing new_model attribute"
+                    assert record.new_model == "model-b"
+                    # Check the original model info is also present
+                    assert hasattr(
+                        record, "original_model"
+                    ), "Log record missing original_model attribute"
+                    assert record.original_model == "model-a"
+                    break
+
+            assert (
+                has_expected_data
+            ), "Log record doesn't contain expected structured data"
 
 
 class TestRegistryRefresh:
