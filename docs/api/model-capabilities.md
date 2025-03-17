@@ -128,7 +128,7 @@ constraints: Dict[str, Union[NumericConstraint, EnumConstraint]] = {
         description="Custom temperature description"
     ),
     "response_format": EnumConstraint(
-        allowed_values=["text", "json_object"],
+        allowed_values=["text", "json_schema"],
         description="Custom response format description"
     )
 }
