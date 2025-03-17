@@ -1234,136 +1234,141 @@ class ModelRegistry:
         )
 
         try:
-            # Load current configuration to compare versions
-            current_config = self._load_config()
+            # Use a lock when checking and comparing versions to prevent race conditions
+            with self.__class__._instance_lock:
+                # Load current configuration to compare versions
+                current_config = self._load_config()
 
-            # Handle ConfigResult vs dict return type
-            if isinstance(current_config, dict):
-                config_data = current_config
-                has_version = "version" in config_data
-            else:
-                # It's a ConfigResult
-                if not current_config.success or current_config.data is None:
+                # Handle ConfigResult vs dict return type
+                if isinstance(current_config, dict):
+                    config_data = current_config
+                    has_version = "version" in config_data
+                else:
+                    # It's a ConfigResult
+                    if (
+                        not current_config.success
+                        or current_config.data is None
+                    ):
+                        return RefreshResult(
+                            success=True,
+                            status=RefreshStatus.UPDATE_AVAILABLE,
+                            message="Current version unknown, update recommended",
+                        )
+                    config_data = current_config.data  # type: ignore
+                    has_version = "version" in config_data
+
+                if not has_version:
+                    # Can't determine current version, assume update needed
                     return RefreshResult(
                         success=True,
                         status=RefreshStatus.UPDATE_AVAILABLE,
                         message="Current version unknown, update recommended",
                     )
-                config_data = current_config.data  # type: ignore
-                has_version = "version" in config_data
 
-            if not has_version:
-                # Can't determine current version, assume update needed
-                return RefreshResult(
-                    success=True,
-                    status=RefreshStatus.UPDATE_AVAILABLE,
-                    message="Current version unknown, update recommended",
-                )
-
-            # Get remote version (just the version info)
-            try:
-                # Add a timeout of 10 seconds to HEAD request
-                head_response = requests.head(config_url, timeout=10)
+                # Get remote version (just the version info)
                 try:
-                    if head_response.status_code == 404:
-                        return RefreshResult(
-                            success=False,
-                            status=RefreshStatus.ERROR,
-                            message=f"Registry not found at {config_url}",
-                        )
-                    elif head_response.status_code != 200:
-                        return RefreshResult(
-                            success=False,
-                            status=RefreshStatus.ERROR,
-                            message=f"HTTP error {head_response.status_code} during HEAD request",
-                        )
-
-                    # Check if version info is available in headers (future optimization)
-                    # For now, we still need the GET request to get the version
-                finally:
-                    # Ensure HEAD response is closed
-                    head_response.close()
-
-                # Make GET request to get the actual content
-                get_response = requests.get(config_url, timeout=10)
-                try:
-                    if get_response.status_code != 200:
-                        return RefreshResult(
-                            success=False,
-                            status=RefreshStatus.ERROR,
-                            message=f"HTTP error {get_response.status_code} during GET request",
-                        )
-
-                    # Load the remote config as a dict
-                    config_dict = yaml.safe_load(get_response.text)
-                    if (
-                        not config_dict
-                        or not isinstance(config_dict, dict)
-                        or "version" not in config_dict
-                    ):
-                        return RefreshResult(
-                            success=False,
-                            status=RefreshStatus.ERROR,
-                            message="Invalid remote configuration format",
-                        )
-
-                    # Compare versions
-                    current_version = config_data["version"]
-                    remote_version = config_dict["version"]
-
-                    # Parse versions using semantic versioning
+                    # Add a timeout of 10 seconds to HEAD request
+                    head_response = requests.head(config_url, timeout=10)
                     try:
-                        current_ver = version.parse(str(current_version))
-                        remote_ver = version.parse(str(remote_version))
+                        if head_response.status_code == 404:
+                            return RefreshResult(
+                                success=False,
+                                status=RefreshStatus.ERROR,
+                                message=f"Registry not found at {config_url}",
+                            )
+                        elif head_response.status_code != 200:
+                            return RefreshResult(
+                                success=False,
+                                status=RefreshStatus.ERROR,
+                                message=f"HTTP error {head_response.status_code} during HEAD request",
+                            )
 
-                        if current_ver >= remote_ver:
-                            return RefreshResult(
-                                success=True,
-                                status=RefreshStatus.ALREADY_CURRENT,
-                                message=f"Registry is already up to date (version {current_version})",
-                            )
-                        else:
-                            # Remote version is newer
-                            return RefreshResult(
-                                success=True,
-                                status=RefreshStatus.UPDATE_AVAILABLE,
-                                message=f"Update available: {current_version} -> {remote_version}",
-                            )
-                    except (TypeError, ValueError) as e:
-                        # Fallback to string comparison if version parsing fails
-                        _log(
-                            _default_log_callback,
-                            LogLevel.WARNING,
-                            LogEvent.MODEL_REGISTRY,
-                            {
-                                "message": f"Failed to parse versions as semantic versions: {e}",
-                                "current_version": str(current_version),
-                                "remote_version": str(remote_version),
-                            },
-                        )
+                        # Check if version info is available in headers (future optimization)
+                        # For now, we still need the GET request to get the version
+                    finally:
+                        # Ensure HEAD response is closed
+                        head_response.close()
 
-                        if current_version == remote_version:
+                    # Make GET request to get the actual content
+                    get_response = requests.get(config_url, timeout=10)
+                    try:
+                        if get_response.status_code != 200:
                             return RefreshResult(
-                                success=True,
-                                status=RefreshStatus.ALREADY_CURRENT,
-                                message=f"Registry is already up to date (version {current_version})",
+                                success=False,
+                                status=RefreshStatus.ERROR,
+                                message=f"HTTP error {get_response.status_code} during GET request",
                             )
-                        else:
-                            # Version differs, update available
+
+                        # Load the remote config as a dict
+                        config_dict = yaml.safe_load(get_response.text)
+                        if (
+                            not config_dict
+                            or not isinstance(config_dict, dict)
+                            or "version" not in config_dict
+                        ):
                             return RefreshResult(
-                                success=True,
-                                status=RefreshStatus.UPDATE_AVAILABLE,
-                                message=f"Update available: {current_version} -> {remote_version}",
+                                success=False,
+                                status=RefreshStatus.ERROR,
+                                message="Invalid remote configuration format",
                             )
-                finally:
-                    # Ensure GET response is closed
-                    get_response.close()
-            except (requests.RequestException, yaml.YAMLError) as e:
-                return RefreshResult(
-                    success=False,
-                    status=RefreshStatus.ERROR,
-                    message=f"Failed to check for updates: {str(e)}",
-                )
+
+                        # Compare versions
+                        current_version = config_data["version"]
+                        remote_version = config_dict["version"]
+
+                        # Parse versions using semantic versioning
+                        try:
+                            current_ver = version.parse(str(current_version))
+                            remote_ver = version.parse(str(remote_version))
+
+                            if current_ver >= remote_ver:
+                                return RefreshResult(
+                                    success=True,
+                                    status=RefreshStatus.ALREADY_CURRENT,
+                                    message=f"Registry is already up to date (version {current_version})",
+                                )
+                            else:
+                                # Remote version is newer
+                                return RefreshResult(
+                                    success=True,
+                                    status=RefreshStatus.UPDATE_AVAILABLE,
+                                    message=f"Update available: {current_version} -> {remote_version}",
+                                )
+                        except (TypeError, ValueError) as e:
+                            # Fallback to string comparison if version parsing fails
+                            _log(
+                                _default_log_callback,
+                                LogLevel.WARNING,
+                                LogEvent.MODEL_REGISTRY,
+                                {
+                                    "message": f"Failed to parse versions as semantic versions: {e}",
+                                    "current_version": str(current_version),
+                                    "remote_version": str(remote_version),
+                                },
+                            )
+
+                            if current_version == remote_version:
+                                return RefreshResult(
+                                    success=True,
+                                    status=RefreshStatus.ALREADY_CURRENT,
+                                    message=f"Registry is already up to date (version {current_version})",
+                                )
+                            else:
+                                # Version differs, update available
+                                return RefreshResult(
+                                    success=True,
+                                    status=RefreshStatus.UPDATE_AVAILABLE,
+                                    message=f"Update available: {current_version} -> {remote_version}",
+                                )
+                    finally:
+                        # Ensure GET response is closed
+                        get_response.close()
+                except (requests.RequestException, yaml.YAMLError) as e:
+                    return RefreshResult(
+                        success=False,
+                        status=RefreshStatus.ERROR,
+                        message=f"Failed to check for updates: {str(e)}",
+                    )
 
         except Exception as e:
             return RefreshResult(
