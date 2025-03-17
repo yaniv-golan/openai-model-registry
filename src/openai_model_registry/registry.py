@@ -1075,6 +1075,23 @@ class ModelRegistry:
             self._load_constraints()
             self._load_capabilities()
 
+            # Verify that the reload was successful
+            if not self._capabilities:
+                _log(
+                    _default_log_callback,
+                    LogLevel.ERROR,
+                    LogEvent.MODEL_REGISTRY,
+                    {
+                        "message": "Failed to reload registry after update",
+                        "path": str(target_path),
+                    },
+                )
+                return RefreshResult(
+                    success=False,
+                    status=RefreshStatus.ERROR,
+                    message="Registry update failed: could not load capabilities after update",
+                )
+
             # Log success
             _log(
                 _default_log_callback,
