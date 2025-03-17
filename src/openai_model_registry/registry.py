@@ -4,6 +4,7 @@ This module provides the ModelRegistry class, which is the central component
 for managing model capabilities, version validation, and parameter constraints.
 """
 
+import copy  # Added import for deep copying objects
 import logging
 import os
 import re
@@ -446,7 +447,9 @@ class ModelRegistry:
                     ),
                     min_version=min_version,
                     supported_parameters=param_refs,
-                    constraints=self._constraints,
+                    constraints=copy.deepcopy(
+                        self._constraints
+                    ),  # Deep copy to prevent shared reference
                 )
 
                 # Add to registry
