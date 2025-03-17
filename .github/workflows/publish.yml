@@ -1,4 +1,4 @@
-name: Publish to PyPI
+name: Publish Python Package
 
 on:
   release:
@@ -13,22 +13,17 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
-
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          version: 1.5.1
-          virtualenvs-create: true
+          python-version: '3.11'
 
       - name: Install dependencies
         run: |
-          poetry install
+          python -m pip install --upgrade pip
+          pip install build twine
 
       - name: Build and publish
         env:
-          PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
+          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: |
-          poetry config pypi-token.pypi $PYPI_TOKEN
-          poetry build
-          poetry publish
+          python -m build
+          twine upload dist/*
