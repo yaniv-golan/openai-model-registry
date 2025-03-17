@@ -31,6 +31,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed handling of configuration results in version comparison logic
 - Fixed documentation build configuration for mkdocstrings 0.29.0
 - Fixed potential issues with None values in configuration data
+- Fixed thread safety issue in registry cleanup method
+- Fixed resource leak in network requests by properly closing response objects
 
 ## [0.3.0] - 2025-03-17
 
