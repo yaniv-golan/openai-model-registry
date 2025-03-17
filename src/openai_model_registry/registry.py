@@ -281,9 +281,32 @@ class ModelRegistry:
 
         # Auto-copy default configs to user directory if they don't exist
         if not config or not config.registry_path:
-            copy_default_to_user_config(MODEL_REGISTRY_FILENAME)
+            try:
+                copy_default_to_user_config(MODEL_REGISTRY_FILENAME)
+            except OSError as e:
+                _log(
+                    _default_log_callback,
+                    LogLevel.WARNING,
+                    LogEvent.MODEL_REGISTRY,
+                    {
+                        "message": f"Failed to copy default model registry config: {e}",
+                        "error": str(e),
+                    },
+                )
+
         if not config or not config.constraints_path:
-            copy_default_to_user_config(PARAM_CONSTRAINTS_FILENAME)
+            try:
+                copy_default_to_user_config(PARAM_CONSTRAINTS_FILENAME)
+            except OSError as e:
+                _log(
+                    _default_log_callback,
+                    LogLevel.WARNING,
+                    LogEvent.MODEL_REGISTRY,
+                    {
+                        "message": f"Failed to copy default parameter constraints config: {e}",
+                        "error": str(e),
+                    },
+                )
 
         self._load_constraints()
         self._load_capabilities()

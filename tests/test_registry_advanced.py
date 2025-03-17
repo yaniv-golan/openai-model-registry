@@ -506,6 +506,26 @@ class TestRegistryErrors:
         # Load config should return None for non-dict data
         assert registry._load_config() is None
 
+    def test_init_with_copy_error(self) -> None:
+        """Test ModelRegistry initialization with config file copy error."""
+        # Mock the copy_default_to_user_config function to raise an OSError
+        with patch(
+            "openai_model_registry.registry.copy_default_to_user_config"
+        ) as mock_copy:
+            mock_copy.side_effect = OSError("Simulated copy error")
+
+            # Registry should still initialize without raising an exception
+            registry = ModelRegistry()
+
+            # Verify that copy was attempted
+            assert mock_copy.called
+
+            # Registry should have empty capabilities but still be functional
+            assert isinstance(registry._capabilities, dict)
+
+            # Should be able to check if models list is empty without error
+            assert len(registry.models) == 0
+
 
 class TestMiscellaneousFunctions:
     """Tests for miscellaneous functions in registry."""

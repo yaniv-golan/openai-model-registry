@@ -45,6 +45,9 @@ def copy_default_to_user_config(filename: str) -> bool:
 
     Returns:
         True if file was copied, False if no action was taken
+
+    Raises:
+        OSError: If there is an error creating directory or copying file
     """
     package_file = get_package_config_dir() / filename
     user_file = get_user_config_dir() / filename
@@ -54,12 +57,28 @@ def copy_default_to_user_config(filename: str) -> bool:
         return False
 
     # Ensure directory exists
-    ensure_user_config_dir_exists()
+    try:
+        ensure_user_config_dir_exists()
+    except OSError as e:
+        import logging
+
+        logging.getLogger(__name__).error(
+            f"Failed to create user config directory: {e}"
+        )
+        raise  # Re-raise the exception for the caller to handle
 
     # Only copy if package file exists
     if package_file.exists():
-        user_file.write_bytes(package_file.read_bytes())
-        return True
+        try:
+            user_file.write_bytes(package_file.read_bytes())
+            return True
+        except (OSError, PermissionError) as e:
+            import logging
+
+            logging.getLogger(__name__).error(
+                f"Failed to copy config file {filename}: {e}"
+            )
+            raise  # Re-raise the exception for the caller to handle
 
     return False
 

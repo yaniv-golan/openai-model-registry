@@ -8,6 +8,7 @@ from unittest.mock import patch
 
 import pytest
 
+from openai_model_registry import config_paths
 from openai_model_registry.config_paths import (
     APP_NAME,
     MODEL_REGISTRY_FILENAME,
@@ -188,3 +189,35 @@ def test_get_parameter_constraints_path_env_var() -> None:
         os.environ, {"PARAMETER_CONSTRAINTS_PATH": custom_path}
     ), patch("pathlib.Path.is_file", return_value=True):
         assert get_parameter_constraints_path() == custom_path
+
+
+def test_copy_default_to_user_config_error_handling(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """Test error handling in copy_default_to_user_config function."""
+
+    # Mock the write_bytes method to raise an OSError
+    def mock_write_bytes(self: Path, data: bytes) -> None:
+        raise OSError("Simulated write error")
+
+    # Setup paths
+    package_dir = tmp_path / "package"
+    user_dir = tmp_path / "user"
+    package_dir.mkdir()
+    user_dir.mkdir()
+
+    test_file = package_dir / "test.yml"
+    test_file.write_text("test content")
+
+    # Apply monkeypatches
+    monkeypatch.setattr(Path, "write_bytes", mock_write_bytes)
+    monkeypatch.setattr(
+        config_paths, "get_package_config_dir", lambda: package_dir
+    )
+    monkeypatch.setattr(config_paths, "get_user_config_dir", lambda: user_dir)
+
+    # Attempt to copy should raise OSError
+    with pytest.raises(OSError) as excinfo:
+        copy_default_to_user_config("test.yml")
+
+    assert "Simulated write error" in str(excinfo.value)
