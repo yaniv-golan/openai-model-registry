@@ -11,7 +11,7 @@ url: "https://github.com/yaniv-golan/openai-model-registry"
 repository-code: "https://github.com/yaniv-golan/openai-model-registry"
 license: MIT
 abstract: >-
-  A lightweight Python package for validating OpenAI model parameters 
+  A lightweight Python package for validating OpenAI model parameters
   and capabilities. Provides a centralized registry of model information,
   validates parameters against model-specific schemas, and retrieves
   model capabilities.
@@ -20,4 +20,4 @@ keywords:
   - llm
   - machine-learning
   - nlp
-  - validation 
+  - validation

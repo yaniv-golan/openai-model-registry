@@ -7,33 +7,33 @@ on:
       - 'docs/**'
       - 'src/**/*.py'
       - '.github/workflows/docs.yml'
-  
+
   # Allow manual triggering of the workflow
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
-      
+
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
           version: 1.5.1
           virtualenvs-create: true
-      
+
       - name: Install dependencies
         run: |
           poetry install
           poetry add mkdocs mkdocs-material mkdocstrings[python] mkdocs-gen-files
-      
+
       - name: Build docs
         run: |
           mkdir -p docs
@@ -56,10 +56,10 @@ jobs:
             echo "            docstring_style: google" >> mkdocs.yml
           fi
           poetry run mkdocs build
-      
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         if: github.ref == 'refs/heads/main'
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./site 
+          publish_dir: ./site

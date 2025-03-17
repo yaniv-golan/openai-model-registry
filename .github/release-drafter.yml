@@ -49,4 +49,4 @@ version-resolver:
 template: |
   ## Changes
 
-  $CHANGES 
+  $CHANGES
