@@ -503,10 +503,13 @@ class TestRegistryRefresh:
         mock_config_result = MagicMock()
         mock_config_result.success = True
         mock_config_result.data = {"version": "1.0.0"}
+        # Ensure the mock correctly implements dict-like access for the code
         mock_config_result.__getitem__ = (
-            lambda self, key: "1.0.0" if key == "version" else None
+            lambda self, key: mock_config_result.data.get(key)
         )
-        mock_config_result.__contains__ = lambda self, key: key == "version"
+        mock_config_result.__contains__ = (
+            lambda self, key: key in mock_config_result.data
+        )
 
         with patch.object(
             registry, "_load_config", return_value=mock_config_result
