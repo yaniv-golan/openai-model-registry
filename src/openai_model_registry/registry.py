@@ -9,6 +9,7 @@ import functools
 import logging
 import os
 import re
+import threading
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Union
@@ -247,6 +248,7 @@ class ModelRegistry:
     # Pre-compile regex patterns for improved performance
     _DATE_PATTERN = re.compile(r"^(.*)-(\d{4}-\d{2}-\d{2})$")
     _IS_DATED_MODEL_PATTERN = re.compile(r".*-\d{4}-\d{2}-\d{2}$")
+    _instance_lock = threading.RLock()
 
     @classmethod
     def get_instance(cls) -> "ModelRegistry":
@@ -267,9 +269,10 @@ class ModelRegistry:
         Returns:
             The default ModelRegistry instance
         """
-        if cls._default_instance is None:
-            cls._default_instance = cls()
-        return cls._default_instance
+        with cls._instance_lock:
+            if cls._default_instance is None:
+                cls._default_instance = cls()
+            return cls._default_instance
 
     def __init__(self, config: Optional[RegistryConfig] = None):
         """Initialize a new registry instance.
