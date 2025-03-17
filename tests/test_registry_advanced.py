@@ -421,6 +421,7 @@ class TestRegistryRefresh:
         # Create a mock config result with version information
         mock_config_result = MagicMock()
         mock_config_result.success = True
+        mock_config_result.data = {"version": "1.0.0"}
         mock_config_result.__getitem__ = (
             lambda self, key: "1.0.0" if key == "version" else None
         )
