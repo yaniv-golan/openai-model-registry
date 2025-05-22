@@ -6,10 +6,10 @@ This module provides deprecation metadata and validation for models.
 import warnings
 from dataclasses import dataclass
 from datetime import date
-from typing import Literal
+from typing import Dict, Literal, Optional
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class DeprecationInfo:
     """Deprecation metadata for a model.
 
@@ -17,10 +17,10 @@ class DeprecationInfo:
     """
 
     status: Literal["active", "deprecated", "sunset"]
-    deprecates_on: date | None
-    sunsets_on: date | None
-    replacement: str | None
-    migration_guide: str | None
+    deprecates_on: Optional[date]
+    sunsets_on: Optional[date]
+    replacement: Optional[str]
+    migration_guide: Optional[str]
     reason: str
 
     def __post_init__(self) -> None:
@@ -50,7 +50,9 @@ class ModelSunsetError(Exception):
 class InvalidSchemaVersionError(Exception):
     """Raised when the schema version is not supported."""
 
-    def __init__(self, found_version: str | None, expected_version: str = "2"):
+    def __init__(
+        self, found_version: Optional[str], expected_version: str = "2"
+    ):
         self.found_version = found_version
         self.expected_version = expected_version
         super().__init__(
@@ -89,7 +91,7 @@ def assert_model_active(model: str, deprecation_info: DeprecationInfo) -> None:
         )
 
 
-def sunset_headers(deprecation_info: DeprecationInfo) -> dict[str, str]:
+def sunset_headers(deprecation_info: DeprecationInfo) -> Dict[str, str]:
     """Generate RFC-compliant HTTP headers for deprecation status.
 
     Args:
@@ -101,7 +103,7 @@ def sunset_headers(deprecation_info: DeprecationInfo) -> dict[str, str]:
     if deprecation_info.status == "active":
         return {}
 
-    headers: dict[str, str] = {}
+    headers: Dict[str, str] = {}
 
     if deprecation_info.deprecates_on is not None:
         headers[
