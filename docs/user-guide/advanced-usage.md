@@ -58,23 +58,67 @@ The registry data can be updated from an upstream source. This is useful for kee
 
 ```python
 from openai_model_registry import ModelRegistry
-from openai_model_registry.registry import RegistryUpdateStatus
+from openai_model_registry.registry import RefreshStatus
 
 # Get registry instance
 registry = ModelRegistry.get_default()
 
-# Update the registry
-update_result = registry.update_registry()
+# Check for updates first
+check_result = registry.check_for_updates()
+if check_result.status == RefreshStatus.UPDATE_AVAILABLE:
+    print(f"Update available: {check_result.message}")
 
-# Check update status
-if update_result.status == RegistryUpdateStatus.SUCCESS:
-    print("Registry updated successfully")
-    print(f"Added models: {update_result.added_models}")
-    print(f"Updated models: {update_result.updated_models}")
-elif update_result.status == RegistryUpdateStatus.NO_CHANGE:
+    # Refresh from remote source
+    refresh_result = registry.refresh_from_remote()
+
+    if refresh_result.success:
+        print("Registry updated successfully")
+    else:
+        print(f"Update failed: {refresh_result.message}")
+elif check_result.status == RefreshStatus.ALREADY_CURRENT:
     print("Registry is already up to date")
 else:
-    print(f"Update failed: {update_result.error}")
+    print(f"Update check failed: {check_result.message}")
+```
+
+## Schema Versioning and Backward Compatibility
+
+The registry supports multiple schema versions with full backward compatibility:
+
+```python
+# The registry automatically handles different schema versions
+# v1.0.0: Original format with basic model definitions
+# v1.1.0+: Enhanced format with deprecation metadata and improved structure
+
+# Both formats are supported seamlessly
+registry = ModelRegistry.get_default()
+
+# Works with any schema version
+capabilities = registry.get_capabilities("gpt-4o")
+
+# Deprecation information is available for all models
+# (defaults to "active" status for models without explicit deprecation data)
+print(f"Status: {capabilities.deprecation.status}")
+```
+
+## Model Data Accuracy
+
+The registry maintains accurate model information based on official OpenAI documentation:
+
+```python
+# Model release dates are accurate to OpenAI's official announcements
+capabilities = registry.get_capabilities("gpt-4o-2024-05-13")  # Correct release date
+print(f"Model: {capabilities.model_name}")
+
+# Streaming capabilities reflect current API support
+o1_mini = registry.get_capabilities("o1-mini")
+print(f"O1-mini supports streaming: {o1_mini.supports_streaming}")  # True
+
+o1_latest = registry.get_capabilities("o1-2024-12-17")
+print(f"O1-2024-12-17 supports streaming: {o1_latest.supports_streaming}")  # False (not yet in public API)
+
+# Deprecation dates use null values for unknown timelines instead of placeholder dates
+print(f"Deprecates on: {capabilities.deprecation.deprecates_on}")  # None for active models
 ```
 
 ## Command Line Interface

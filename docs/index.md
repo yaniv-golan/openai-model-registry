@@ -4,7 +4,7 @@ Welcome to the documentation for OpenAI Model Registry, a lightweight Python pac
 
 ## Overview
 
-OpenAI Model Registry provides a centralized registry of OpenAI model information, validates parameters against model-specific schemas, and retrieves model capabilities.
+OpenAI Model Registry provides a centralized registry of OpenAI model information, validates parameters against model-specific schemas, and retrieves model capabilities. The registry includes comprehensive deprecation tracking, accurate model metadata, and supports multiple schema versions with full backward compatibility.
 
 ## Installation
 
@@ -26,6 +26,11 @@ capabilities = registry.get_capabilities("gpt-4o")
 print(f"Context window: {capabilities.context_window}")
 print(f"Max output tokens: {capabilities.max_output_tokens}")
 print(f"Supports streaming: {capabilities.supports_streaming}")
+
+# Check deprecation status
+print(f"Deprecation status: {capabilities.deprecation.status}")
+if capabilities.is_deprecated:
+    print("⚠️  This model is deprecated")
 ```
 
 ## API Reference

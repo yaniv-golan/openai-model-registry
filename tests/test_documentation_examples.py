@@ -24,6 +24,19 @@ from openai_model_registry import (
     ParameterNotSupportedError,
     ParameterReference,
 )
+from openai_model_registry.deprecation import DeprecationInfo
+
+
+def _create_test_deprecation() -> DeprecationInfo:
+    """Create a test deprecation info for active models."""
+    return DeprecationInfo(
+        status="active",
+        deprecates_on=None,
+        sunsets_on=None,
+        replacement=None,
+        migration_guide=None,
+        reason="active",
+    )
 
 
 class TestBasicUsageExamples:
@@ -38,6 +51,7 @@ class TestBasicUsageExamples:
             openai_model_name="gpt-4o",
             context_window=128000,
             max_output_tokens=16384,
+            deprecation=_create_test_deprecation(),
             # Optional parameters
             supports_vision=True,
             supports_streaming=True,
@@ -74,6 +88,7 @@ class TestBasicUsageExamples:
             openai_model_name="example-model",
             context_window=4096,
             max_output_tokens=2048,
+            deprecation=_create_test_deprecation(),
         )
 
         # Add constraints manually since the constructor doesn't accept them directly
@@ -227,6 +242,7 @@ class TestAdvancedExamples:
             openai_model_name="example-model",
             context_window=4096,
             max_output_tokens=2048,
+            deprecation=_create_test_deprecation(),
         )
 
         # Add supported parameters manually

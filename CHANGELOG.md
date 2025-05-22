@@ -5,6 +5,42 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2025-05-23
+
+### Added
+
+- Added support for new GPT-4.1 series models (gpt-4.1, gpt-4.1-mini, gpt-4.1-nano) with 1M context window and 32K output tokens
+- Added support for O-series reasoning models (o1-mini, o3, o4-mini) with specialized parameter constraints
+- Added support for GPT-4.5 preview model (deprecated mid-2025)
+- Added new model aliases for easier access to latest model versions
+- Added reasoning_effort parameter constraint for O3 and O4-mini models with enum values (low, medium, high)
+- Added comprehensive deprecation metadata support with null values for unknown deprecation timelines
+- Added proper semantic versioning support for schema backward compatibility
+
+### Changed
+
+- Updated constraint loading to support nested parameter constraint references (e.g., "numeric_constraints.temperature")
+- Enhanced parameter validation system to handle model-specific parameter restrictions
+- Improved model capability detection for new model features and limitations
+- Updated model release dates to match official OpenAI documentation (gpt-4o-2024-05-13 instead of gpt-4o-2024-08-06)
+- Updated streaming capabilities for O-series models (o1-mini now supports streaming, o1-2024-12-17 does not)
+- Enhanced deprecation system to handle null dates gracefully for active models
+- Improved schema versioning to support true backward compatibility between v1.0.0 and v1.1.0+
+- Updated registry loading to properly handle both legacy and current schema formats
+- Enhanced min_version parsing to support both dictionary and string formats
+
+### Fixed
+
+- Fixed constraint loading mechanism to properly handle nested YAML structure in parameter constraints
+- Fixed parameter validation tests to work with updated constraint reference format
+- Fixed registry initialization tests to handle new constraint structure properly
+- Fixed deprecation date validation to skip ordering checks when dates are null
+- Fixed sunset header generation to handle null deprecation dates
+- Fixed alias resolution in registry capabilities lookup
+- Fixed test suite to use corrected model names and schema versions
+- Fixed schema compatibility to properly support semantic versioning principles
+- Fixed all tests to pass with proper backward compatibility implementation
+
 ## [0.4.0] - 2025-03-18
 
 ### Added

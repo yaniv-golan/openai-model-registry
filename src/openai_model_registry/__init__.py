@@ -23,6 +23,13 @@ from .constraints import (
     NumericConstraint,
     ParameterReference,
 )
+from .deprecation import (
+    DeprecationInfo,
+    InvalidSchemaVersionError,
+    ModelSunsetError,
+    assert_model_active,
+    sunset_headers,
+)
 from .errors import (
     ConfigFileNotFoundError,
     ConfigurationError,
@@ -68,6 +75,12 @@ __all__ = [
     "NumericConstraint",
     "EnumConstraint",
     "ParameterReference",
+    # Deprecation
+    "DeprecationInfo",
+    "InvalidSchemaVersionError",
+    "ModelSunsetError",
+    "assert_model_active",
+    "sunset_headers",
     # Errors
     "ModelRegistryError",
     "ConfigurationError",

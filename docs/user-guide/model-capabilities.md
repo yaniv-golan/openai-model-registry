@@ -72,6 +72,51 @@ capabilities = registry.get_capabilities("gpt-4o-2024-05-13")
 print(f"Context window: {capabilities.context_window}")
 ```
 
+## Model Deprecation Status
+
+Models can have deprecation information that helps you understand their lifecycle:
+
+```python
+# Get capabilities for a model
+capabilities = registry.get_capabilities("gpt-4o")
+
+# Check deprecation status
+print(f"Deprecation status: {capabilities.deprecation.status}")
+
+if capabilities.is_deprecated:
+    print("⚠️  This model is deprecated")
+    if capabilities.deprecation.replacement:
+        print(f"Recommended replacement: {capabilities.deprecation.replacement}")
+    if capabilities.deprecation.migration_guide:
+        print(f"Migration guide: {capabilities.deprecation.migration_guide}")
+
+if capabilities.is_sunset:
+    print("🚫 This model is sunset and no longer available")
+
+# Get HTTP headers for deprecation status
+headers = registry.get_sunset_headers("gpt-4o")
+if headers:
+    print(f"Sunset headers: {headers}")
+```
+
+## Checking Model Status
+
+You can also check if a model is active before using it:
+
+```python
+from openai_model_registry.deprecation import ModelSunsetError
+
+try:
+    # This will raise an exception if the model is sunset
+    registry.assert_model_active("gpt-4o")
+    print("Model is active and safe to use")
+except ModelSunsetError as e:
+    print(f"Model is sunset: {e}")
+    # Use the replacement model if available
+    if e.replacement:
+        capabilities = registry.get_capabilities(e.replacement)
+```
+
 ## Next Steps
 
 Now that you understand model capabilities, learn about [Parameter Validation](parameter-validation.md) to ensure your application uses valid parameter values.

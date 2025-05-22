@@ -1,10 +1,10 @@
 # Models supporting structured output
 # This file defines the capabilities and constraints for all supported models
-version: "1.0.0"
+version: "1.1.0"
 
 # Primary section: dated model versions
 dated_models:
-  gpt-4o-2024-08-06:
+  gpt-4o-2024-05-13:
     context_window: 128000
     max_output_tokens: 16384
     supports_structured: true
@@ -23,8 +23,15 @@ dated_models:
     description: "Initial release with 16k output support"
     min_version:
       year: 2024
-      month: 8
-      day: 6
+      month: 5
+      day: 13
+    deprecation:
+      status: "active"
+      deprecates_on: null
+      sunsets_on: null
+      replacement: null
+      migration_guide: null
+      reason: "active"
 
   gpt-4o-mini-2024-07-18:
     context_window: 128000
@@ -47,6 +54,100 @@ dated_models:
       year: 2024
       month: 7
       day: 18
+    deprecation:
+      status: "active"
+      deprecates_on: null
+      sunsets_on: null
+      replacement: null
+      migration_guide: null
+      reason: "active"
+
+  gpt-4.1-2025-04-14:
+    context_window: 1047576
+    max_output_tokens: 32768
+    supports_structured: true
+    supports_streaming: true
+    supported_parameters:
+      - ref: "numeric_constraints.temperature"
+        max_value: null
+      - ref: "numeric_constraints.top_p"
+        max_value: null
+      - ref: "numeric_constraints.frequency_penalty"
+        max_value: null
+      - ref: "numeric_constraints.presence_penalty"
+        max_value: null
+      - ref: "numeric_constraints.max_completion_tokens"
+        max_value: null
+    description: "GPT-4.1 with 1M context window and 32K output"
+    min_version:
+      year: 2025
+      month: 4
+      day: 14
+    deprecation:
+      status: "active"
+      deprecates_on: null
+      sunsets_on: null
+      replacement: null
+      migration_guide: null
+      reason: "active"
+
+  gpt-4.1-mini-2025-04-14:
+    context_window: 1047576
+    max_output_tokens: 32768
+    supports_structured: true
+    supports_streaming: true
+    supported_parameters:
+      - ref: "numeric_constraints.temperature"
+        max_value: null
+      - ref: "numeric_constraints.top_p"
+        max_value: null
+      - ref: "numeric_constraints.frequency_penalty"
+        max_value: null
+      - ref: "numeric_constraints.presence_penalty"
+        max_value: null
+      - ref: "numeric_constraints.max_completion_tokens"
+        max_value: null
+    description: "GPT-4.1 mini variant - faster and more cost-effective"
+    min_version:
+      year: 2025
+      month: 4
+      day: 14
+    deprecation:
+      status: "active"
+      deprecates_on: null
+      sunsets_on: null
+      replacement: null
+      migration_guide: null
+      reason: "active"
+
+  gpt-4.1-nano-2025-04-14:
+    context_window: 1047576
+    max_output_tokens: 32768
+    supports_structured: true
+    supports_streaming: true
+    supported_parameters:
+      - ref: "numeric_constraints.temperature"
+        max_value: null
+      - ref: "numeric_constraints.top_p"
+        max_value: null
+      - ref: "numeric_constraints.frequency_penalty"
+        max_value: null
+      - ref: "numeric_constraints.presence_penalty"
+        max_value: null
+      - ref: "numeric_constraints.max_completion_tokens"
+        max_value: null
+    description: "GPT-4.1 nano variant - optimized for low latency"
+    min_version:
+      year: 2025
+      month: 4
+      day: 14
+    deprecation:
+      status: "active"
+      deprecates_on: null
+      sunsets_on: null
+      replacement: null
+      migration_guide: null
+      reason: "active"
 
   gpt-4.5-preview-2025-02-27:
     context_window: 128000
@@ -64,13 +165,64 @@ dated_models:
         max_value: null
       - ref: "numeric_constraints.max_completion_tokens"
         max_value: null
-    description: "GPT-4.5 preview release"
+    description: "GPT-4.5 preview release (deprecated mid-2025, use GPT-4.1 instead)"
     min_version:
       year: 2025
       month: 2
       day: 27
+    deprecation:
+      status: "deprecated"
+      deprecates_on: "2025-04-14"
+      sunsets_on: "2025-07-14"
+      replacement: "gpt-4.1"
+      migration_guide: "https://openai.com/index/gpt-4-1/"
+      reason: "superseded"
 
   o1-2024-12-17:
+    context_window: 200000
+    max_output_tokens: 100000
+    supports_structured: true
+    supports_streaming: false
+    supported_parameters:
+      - ref: "numeric_constraints.max_completion_tokens"
+        max_value: null
+      - ref: "enum_constraints.reasoning_effort"
+        max_value: null
+    description: "O1 reasoning model with 200K context and reasoning tokens"
+    min_version:
+      year: 2024
+      month: 12
+      day: 17
+    deprecation:
+      status: "active"
+      deprecates_on: null
+      sunsets_on: null
+      replacement: null
+      migration_guide: null
+      reason: "active"
+
+  o1-mini-2024-09-12:
+    context_window: 128000
+    max_output_tokens: 65536
+    supports_structured: false
+    supports_streaming: false
+    supported_parameters:
+      - ref: "numeric_constraints.max_completion_tokens"
+        max_value: null
+    description: "O1-mini preview model optimized for STEM tasks"
+    min_version:
+      year: 2024
+      month: 9
+      day: 12
+    deprecation:
+      status: "active"
+      deprecates_on: null
+      sunsets_on: null
+      replacement: null
+      migration_guide: null
+      reason: "active"
+
+  o3-2025-04-16:
     context_window: 200000
     max_output_tokens: 100000
     supports_structured: true
@@ -80,11 +232,18 @@ dated_models:
         max_value: null
       - ref: "enum_constraints.reasoning_effort"
         max_value: null
-    description: "Initial preview release"
+    description: "O3 reasoning model with advanced tool usage capabilities"
     min_version:
-      year: 2024
-      month: 12
-      day: 17
+      year: 2025
+      month: 4
+      day: 16
+    deprecation:
+      status: "active"
+      deprecates_on: null
+      sunsets_on: null
+      replacement: null
+      migration_guide: null
+      reason: "active"
 
   o3-mini-2025-01-31:
     context_window: 200000
@@ -96,16 +255,52 @@ dated_models:
         max_value: null
       - ref: "enum_constraints.reasoning_effort"
         max_value: null
-    description: "First o3-series model"
+    description: "First O3-series model (mini variant) released Jan 31, 2025"
     min_version:
       year: 2025
       month: 1
       day: 31
+    deprecation:
+      status: "active"
+      deprecates_on: null
+      sunsets_on: null
+      replacement: null
+      migration_guide: null
+      reason: "active"
+
+  o4-mini-2025-04-16:
+    context_window: 200000
+    max_output_tokens: 100000
+    supports_structured: true
+    supports_streaming: true
+    supported_parameters:
+      - ref: "numeric_constraints.max_completion_tokens"
+        max_value: null
+      - ref: "enum_constraints.reasoning_effort"
+        max_value: null
+    description: "First O4-series model with improved reasoning efficiency"
+    min_version:
+      year: 2025
+      month: 4
+      day: 16
+    deprecation:
+      status: "active"
+      deprecates_on: null
+      sunsets_on: null
+      replacement: null
+      migration_guide: null
+      reason: "active"
 
 # Secondary section: aliases pointing to dated versions
 aliases:
-  gpt-4o: "gpt-4o-2024-08-06"
+  gpt-4o: "gpt-4o-2024-05-13"
   gpt-4o-mini: "gpt-4o-mini-2024-07-18"
+  gpt-4.1: "gpt-4.1-2025-04-14"
+  gpt-4.1-mini: "gpt-4.1-mini-2025-04-14"
+  gpt-4.1-nano: "gpt-4.1-nano-2025-04-14"
   gpt-4.5-preview: "gpt-4.5-preview-2025-02-27"
   o1: "o1-2024-12-17"
+  o1-mini: "o1-mini-2024-09-12"
+  o3: "o3-2025-04-16"
   o3-mini: "o3-mini-2025-01-31"
+  o4-mini: "o4-mini-2025-04-16"

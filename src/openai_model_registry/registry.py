@@ -31,6 +31,11 @@ from .constraints import (
     NumericConstraint,
     ParameterReference,
 )
+from .deprecation import (
+    DeprecationInfo,
+    assert_model_active,
+    sunset_headers,
+)
 from .errors import (
     ConstraintNotFoundError,
     InvalidDateError,
@@ -132,6 +137,7 @@ class ModelCapabilities:
         openai_model_name: str,
         context_window: int,
         max_output_tokens: int,
+        deprecation: DeprecationInfo,
         supports_vision: bool = False,
         supports_functions: bool = False,
         supports_streaming: bool = False,
@@ -150,6 +156,7 @@ class ModelCapabilities:
             openai_model_name: The model name to use with OpenAI API
             context_window: Maximum context window size in tokens
             max_output_tokens: Maximum output tokens
+            deprecation: Deprecation metadata (mandatory in schema v2)
             supports_vision: Whether the model supports vision inputs
             supports_functions: Whether the model supports function calling
             supports_streaming: Whether the model supports streaming
@@ -163,6 +170,7 @@ class ModelCapabilities:
         self.openai_model_name = openai_model_name
         self.context_window = context_window
         self.max_output_tokens = max_output_tokens
+        self.deprecation = deprecation
         self.supports_vision = supports_vision
         self.supports_functions = supports_functions
         self.supports_streaming = supports_streaming
@@ -171,6 +179,16 @@ class ModelCapabilities:
         self.aliases = aliases or []
         self.supported_parameters = supported_parameters or []
         self._constraints = constraints or {}
+
+    @property
+    def is_sunset(self) -> bool:
+        """Check if the model is sunset."""
+        return self.deprecation.status == "sunset"
+
+    @property
+    def is_deprecated(self) -> bool:
+        """Check if the model is deprecated or sunset."""
+        return self.deprecation.status in ["deprecated", "sunset"]
 
     def get_constraint(
         self, ref: str
@@ -357,6 +375,12 @@ class ModelRegistry:
                         error=error_msg,
                         path=self.config.registry_path,
                     )
+
+                # Support both schema versions following semantic versioning
+                # v1.0.0: Original format with "models" section and inline aliases
+                # v1.1.0+: Enhanced format with "dated_models", separate "aliases" section,
+                #          and explicit deprecation metadata
+                # All changes are backward compatible (additive only)
                 return ConfigResult(
                     success=True, data=data, path=self.config.registry_path
                 )
@@ -400,118 +424,131 @@ class ModelRegistry:
                     )
                     return
 
-                # Create constraints from config
-                for name, constraint in data.items():
-                    if not isinstance(constraint, dict):
+                # Handle nested structure: numeric_constraints and enum_constraints
+                for category_name, category_data in data.items():
+                    if not isinstance(category_data, dict):
                         log_error(
                             LogEvent.MODEL_REGISTRY,
-                            f"Constraint '{name}' must be a dictionary",
-                            constraint=constraint,
+                            f"Constraint category '{category_name}' must be a dictionary",
+                            category=category_data,
                         )
                         continue
 
-                    constraint_type = constraint.get("type", "")
-                    if not constraint_type:
-                        log_error(
-                            LogEvent.MODEL_REGISTRY,
-                            f"Constraint '{name}' missing required 'type' field",
-                            constraint=constraint,
-                        )
-                        continue
-
-                    if constraint_type == "numeric":
-                        min_value = constraint.get("min")
-                        max_value = constraint.get("max")
-                        allow_float = constraint.get("allow_float", True)
-                        allow_int = constraint.get("allow_int", True)
-                        description = constraint.get("description", "")
-
-                        # Type validation
-                        if min_value is not None and not isinstance(
-                            min_value, (int, float)
-                        ):
+                    # Process each constraint in the category
+                    for constraint_name, constraint in category_data.items():
+                        if not isinstance(constraint, dict):
                             log_error(
                                 LogEvent.MODEL_REGISTRY,
-                                f"Constraint '{name}' has non-numeric 'min' value",
-                                min_value=min_value,
-                            )
-                            continue
-
-                        if max_value is not None and not isinstance(
-                            max_value, (int, float)
-                        ):
-                            log_error(
-                                LogEvent.MODEL_REGISTRY,
-                                f"Constraint '{name}' has non-numeric 'max' value",
-                                max_value=max_value,
-                            )
-                            continue
-
-                        if not isinstance(allow_float, bool) or not isinstance(
-                            allow_int, bool
-                        ):
-                            log_error(
-                                LogEvent.MODEL_REGISTRY,
-                                f"Constraint '{name}' has non-boolean 'allow_float' or 'allow_int'",
-                                allow_float=allow_float,
-                                allow_int=allow_int,
-                            )
-                            continue
-
-                        # Create constraint
-                        self._constraints[name] = NumericConstraint(
-                            min_value=min_value
-                            if min_value is not None
-                            else 0.0,
-                            max_value=max_value,
-                            allow_float=allow_float,
-                            allow_int=allow_int,
-                            description=description,
-                        )
-                    elif constraint_type == "enum":
-                        allowed_values = constraint.get("values")
-                        description = constraint.get("description", "")
-
-                        # Required field validation
-                        if allowed_values is None:
-                            log_error(
-                                LogEvent.MODEL_REGISTRY,
-                                f"Constraint '{name}' missing required 'values' field",
+                                f"Constraint '{constraint_name}' must be a dictionary",
                                 constraint=constraint,
                             )
                             continue
 
-                        # Type validation
-                        if not isinstance(allowed_values, list):
+                        constraint_type = constraint.get("type", "")
+                        if not constraint_type:
                             log_error(
                                 LogEvent.MODEL_REGISTRY,
-                                f"Constraint '{name}' has non-list 'values' field",
-                                allowed_values=allowed_values,
+                                f"Constraint '{constraint_name}' missing required 'type' field",
+                                constraint=constraint,
                             )
                             continue
 
-                        # Validate all values are strings
-                        if not all(
-                            isinstance(val, str) for val in allowed_values
-                        ):
+                        # Create full reference name (e.g., "numeric_constraints.temperature")
+                        full_ref = f"{category_name}.{constraint_name}"
+
+                        if constraint_type == "numeric":
+                            min_value = constraint.get("min_value")
+                            max_value = constraint.get("max_value")
+                            allow_float = constraint.get("allow_float", True)
+                            allow_int = constraint.get("allow_int", True)
+                            description = constraint.get("description", "")
+
+                            # Type validation
+                            if min_value is not None and not isinstance(
+                                min_value, (int, float)
+                            ):
+                                log_error(
+                                    LogEvent.MODEL_REGISTRY,
+                                    f"Constraint '{constraint_name}' has non-numeric 'min_value' value",
+                                    min_value=min_value,
+                                )
+                                continue
+
+                            if max_value is not None and not isinstance(
+                                max_value, (int, float)
+                            ):
+                                log_error(
+                                    LogEvent.MODEL_REGISTRY,
+                                    f"Constraint '{constraint_name}' has non-numeric 'max_value' value",
+                                    max_value=max_value,
+                                )
+                                continue
+
+                            if not isinstance(
+                                allow_float, bool
+                            ) or not isinstance(allow_int, bool):
+                                log_error(
+                                    LogEvent.MODEL_REGISTRY,
+                                    f"Constraint '{constraint_name}' has non-boolean 'allow_float' or 'allow_int'",
+                                    allow_float=allow_float,
+                                    allow_int=allow_int,
+                                )
+                                continue
+
+                            # Create constraint
+                            self._constraints[full_ref] = NumericConstraint(
+                                min_value=min_value
+                                if min_value is not None
+                                else 0.0,
+                                max_value=max_value,
+                                allow_float=allow_float,
+                                allow_int=allow_int,
+                                description=description,
+                            )
+                        elif constraint_type == "enum":
+                            allowed_values = constraint.get("allowed_values")
+                            description = constraint.get("description", "")
+
+                            # Required field validation
+                            if allowed_values is None:
+                                log_error(
+                                    LogEvent.MODEL_REGISTRY,
+                                    f"Constraint '{constraint_name}' missing required 'allowed_values' field",
+                                    constraint=constraint,
+                                )
+                                continue
+
+                            # Type validation
+                            if not isinstance(allowed_values, list):
+                                log_error(
+                                    LogEvent.MODEL_REGISTRY,
+                                    f"Constraint '{constraint_name}' has non-list 'allowed_values' field",
+                                    allowed_values=allowed_values,
+                                )
+                                continue
+
+                            # Validate all values are strings
+                            if not all(
+                                isinstance(val, str) for val in allowed_values
+                            ):
+                                log_error(
+                                    LogEvent.MODEL_REGISTRY,
+                                    f"Constraint '{constraint_name}' has non-string values in 'allowed_values' list",
+                                    allowed_values=allowed_values,
+                                )
+                                continue
+
+                            # Create constraint
+                            self._constraints[full_ref] = EnumConstraint(
+                                allowed_values=allowed_values,
+                                description=description,
+                            )
+                        else:
                             log_error(
                                 LogEvent.MODEL_REGISTRY,
-                                f"Constraint '{name}' has non-string values in 'values' list",
-                                allowed_values=allowed_values,
+                                f"Unknown constraint type '{constraint_type}' for '{constraint_name}'",
+                                constraint=constraint,
                             )
-                            continue
-
-                        # Create constraint
-                        self._constraints[name] = EnumConstraint(
-                            allowed_values=allowed_values,
-                            description=description,
-                        )
-                    else:
-                        log_error(
-                            LogEvent.MODEL_REGISTRY,
-                            f"Unknown constraint type '{constraint_type}' for '{name}'",
-                            constraint=constraint,
-                        )
 
         except FileNotFoundError:
             log_warning(
@@ -546,7 +583,9 @@ class ModelRegistry:
             )
             return
 
-        models_data = config_result.data.get("models", {})
+            # The schema format has been consistent since v1.0.0
+        # Both v1.0.0 and v1.1.0+ use "dated_models" and separate "aliases" sections
+        models_data = config_result.data.get("dated_models", {})
         if not models_data:
             log_warning(
                 LogEvent.MODEL_REGISTRY,
@@ -556,48 +595,102 @@ class ModelRegistry:
 
         for model_name, model_config in models_data.items():
             try:
-                # Extract aliases
-                aliases = model_config.get("aliases", [])
+                # Parse deprecation metadata (added in v1.1.0, optional for backward compatibility)
+                deprecation_data = model_config.get("deprecation")
+                if deprecation_data:
+                    # Full deprecation metadata format
+                    from datetime import datetime
+
+                    deprecates_on_str = deprecation_data["deprecates_on"]
+                    sunsets_on_str = deprecation_data["sunsets_on"]
+
+                    deprecates_on = (
+                        datetime.fromisoformat(deprecates_on_str).date()
+                        if deprecates_on_str is not None
+                        else None
+                    )
+                    sunsets_on = (
+                        datetime.fromisoformat(sunsets_on_str).date()
+                        if sunsets_on_str is not None
+                        else None
+                    )
+
+                    deprecation = DeprecationInfo(
+                        status=deprecation_data["status"],
+                        deprecates_on=deprecates_on,
+                        sunsets_on=sunsets_on,
+                        replacement=deprecation_data.get("replacement"),
+                        migration_guide=deprecation_data.get(
+                            "migration_guide"
+                        ),
+                        reason=deprecation_data["reason"],
+                    )
+                else:
+                    # Backward compatibility - create default deprecation info for models without it
+                    deprecation = DeprecationInfo(
+                        status="active",
+                        deprecates_on=None,
+                        sunsets_on=None,
+                        replacement=None,
+                        migration_guide=None,
+                        reason="active",
+                    )
 
                 # Extract min version if present
-                min_version_str = model_config.get("min_version")
+                min_version_data = model_config.get("min_version")
                 min_version = None
-                if min_version_str:
+                if min_version_data:
                     try:
-                        min_version = ModelVersion.from_string(min_version_str)
-                    except ValueError:
+                        if isinstance(min_version_data, dict):
+                            # Handle dictionary format: {year: 2024, month: 5, day: 13}
+                            year = min_version_data.get("year")
+                            month = min_version_data.get("month")
+                            day = min_version_data.get("day")
+                            if year and month and day:
+                                min_version = ModelVersion(
+                                    year=year, month=month, day=day
+                                )
+                        else:
+                            # Handle string format: "2024-05-13"
+                            min_version = ModelVersion.from_string(
+                                min_version_data
+                            )
+                    except (ValueError, TypeError) as e:
                         log_warning(
                             LogEvent.MODEL_REGISTRY,
                             "Invalid min_version format for model",
                             model=model_name,
-                            min_version=min_version_str,
+                            min_version=min_version_data,
+                            error=str(e),
                         )
 
                 # Create parameters list from references
                 param_refs = []
-                for _, param_config in model_config.get(
-                    "parameters", {}
-                ).items():
-                    constraint_ref = param_config.get("constraint")
-                    if constraint_ref:
-                        # Create a parameter reference with description
-                        description = param_config.get("description", "")
-                        param_refs.append(
-                            ParameterReference(
-                                ref=constraint_ref,
-                                description=description,
+                for param_ref in model_config.get("supported_parameters", []):
+                    if isinstance(param_ref, dict):
+                        ref = param_ref.get("ref")
+                        if ref:
+                            param_refs.append(
+                                ParameterReference(
+                                    ref=ref,
+                                    description=param_ref.get(
+                                        "description", ""
+                                    ),
+                                )
                             )
-                        )
+
+                # Aliases are handled separately in the aliases section
+                # No inline aliases in individual model configs
 
                 # Create capabilities object
                 capabilities = ModelCapabilities(
                     model_name=model_name,
-                    aliases=aliases,
                     openai_model_name=model_config.get(
                         "openai_name", model_name
                     ),
                     context_window=model_config.get("context_window", 0),
                     max_output_tokens=model_config.get("max_output_tokens", 0),
+                    deprecation=deprecation,
                     supports_vision=model_config.get("supports_vision", False),
                     supports_functions=model_config.get(
                         "supports_functions", False
@@ -609,6 +702,7 @@ class ModelRegistry:
                         "supports_structured", False
                     ),
                     min_version=min_version,
+                    aliases=[],  # Aliases are handled separately
                     supported_parameters=param_refs,
                     constraints=copy.deepcopy(
                         self._constraints
@@ -618,26 +712,6 @@ class ModelRegistry:
                 # Add to registry
                 self._capabilities[model_name] = capabilities
 
-                # Also register under aliases - check for duplicates first
-                for alias in aliases:
-                    if (
-                        alias in self._capabilities
-                        and self._capabilities[alias].model_name != model_name
-                    ):
-                        log_warning(
-                            LogEvent.MODEL_REGISTRY,
-                            "Duplicate model alias detected",
-                            alias=alias,
-                            original_model=self._capabilities[
-                                alias
-                            ].model_name,
-                            new_model=model_name,
-                        )
-                        # Skip this alias to prevent overwriting the existing model
-                        continue
-
-                    self._capabilities[alias] = capabilities
-
             except Exception as e:
                 log_error(
                     LogEvent.MODEL_REGISTRY,
@@ -646,6 +720,22 @@ class ModelRegistry:
                     error=str(e),
                 )
                 # Continue with other models
+
+        # Process aliases section - consistent format since v1.0.0
+        aliases_data = config_result.data.get("aliases", {})
+        for alias_name, target_model in aliases_data.items():
+            if target_model in self._capabilities:
+                # Create an alias entry that points to the target model
+                self._capabilities[alias_name] = self._capabilities[
+                    target_model
+                ]
+            else:
+                log_warning(
+                    LogEvent.MODEL_REGISTRY,
+                    f"Alias '{alias_name}' points to unknown model '{target_model}'",
+                    alias=alias_name,
+                    target=target_model,
+                )
 
     def _get_capabilities_impl(self, model: str) -> ModelCapabilities:
         """Implementation of get_capabilities without caching.
@@ -726,14 +816,31 @@ class ModelRegistry:
             for dated_model, caps in model_versions:
                 if caps.min_version and requested_version < caps.min_version:
                     # Find the matching alias if available
-                    matching_alias = [
-                        alias
-                        for alias in caps.aliases
-                        if alias == base_name or alias.startswith(base_name)
-                    ]
-                    alias_suggestion = (
-                        matching_alias[0] if matching_alias else None
-                    )
+                    # In schema v1.1.0+, aliases are stored separately in the registry
+                    alias_suggestion = None
+
+                    # First check if the base name itself is an alias
+                    if (
+                        base_name in self._capabilities
+                        and not self._IS_DATED_MODEL_PATTERN.match(base_name)
+                    ):
+                        alias_suggestion = base_name
+                    else:
+                        # Look for other aliases that point to this model
+                        for (
+                            alias_name,
+                            target_model,
+                        ) in self._capabilities.items():
+                            # Skip dated models, only consider aliases
+                            if (
+                                not self._IS_DATED_MODEL_PATTERN.match(
+                                    alias_name
+                                )
+                                and target_model is caps
+                                and alias_name.startswith(base_name)
+                            ):
+                                alias_suggestion = alias_name
+                                break
 
                     raise VersionTooOldError(
                         f"Model version '{model}' is older than the minimum supported "
@@ -768,6 +875,7 @@ class ModelRegistry:
                     openai_model_name=model,
                     context_window=base_model_caps.context_window,
                     max_output_tokens=base_model_caps.max_output_tokens,
+                    deprecation=base_model_caps.deprecation,
                     supports_vision=base_model_caps.supports_vision,
                     supports_functions=base_model_caps.supports_functions,
                     supports_streaming=base_model_caps.supports_streaming,
@@ -812,6 +920,37 @@ class ModelRegistry:
                 ref=ref,
             )
         return self._constraints[ref]
+
+    def assert_model_active(self, model: str) -> None:
+        """Assert that a model is active and warn if deprecated.
+
+        Args:
+            model: Model name to check
+
+        Raises:
+            ModelSunsetError: If the model is sunset
+            ModelNotSupportedError: If the model is not found
+
+        Warns:
+            DeprecationWarning: If the model is deprecated
+        """
+        capabilities = self.get_capabilities(model)
+        assert_model_active(model, capabilities.deprecation)
+
+    def get_sunset_headers(self, model: str) -> dict[str, str]:
+        """Get RFC-compliant HTTP headers for model deprecation status.
+
+        Args:
+            model: Model name
+
+        Returns:
+            Dictionary of HTTP headers
+
+        Raises:
+            ModelNotSupportedError: If the model is not found
+        """
+        capabilities = self.get_capabilities(model)
+        return sunset_headers(capabilities.deprecation)
 
     def _get_conditional_headers(self, force: bool = False) -> Dict[str, str]:
         """Get conditional headers for HTTP requests.

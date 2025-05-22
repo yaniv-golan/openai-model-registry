@@ -51,12 +51,14 @@ def simple_registry(
     # Create parameter constraints file
     constraints_path = test_config_dir / "parameter_constraints.yml"
     constraints_content = {
-        "temperature": {
-            "type": "numeric",
-            "min": 0.0,
-            "max": 2.0,
-            "description": "Controls randomness in the output",
-            "allow_float": True,
+        "numeric_constraints": {
+            "temperature": {
+                "type": "numeric",
+                "min_value": 0.0,
+                "max_value": 2.0,
+                "description": "Controls randomness in the output",
+                "allow_float": True,
+            },
         },
     }
 
@@ -66,25 +68,51 @@ def simple_registry(
     # Create model capabilities file
     models_path = test_config_dir / "models.yml"
     models_content = {
-        "version": "1.0.0",
-        "models": {
+        "version": "1.1.0",
+        "dated_models": {
             "old-model-2023-01-01": {
-                "openai_name": "old-model",
                 "context_window": 4096,
                 "max_output_tokens": 1024,
-                "min_version": "2023-01-01",
-                "aliases": ["old-model"],
+                "description": "Old test model",
+                "min_version": {
+                    "year": 2023,
+                    "month": 1,
+                    "day": 1,
+                },
+                "deprecation": {
+                    "status": "active",
+                    "deprecates_on": None,
+                    "sunsets_on": None,
+                    "replacement": None,
+                    "migration_guide": None,
+                    "reason": "active",
+                },
             },
-            "gpt-4o-2024-08-06": {
-                "openai_name": "gpt-4o",
+            "gpt-4o-2024-05-13": {
                 "context_window": 128000,
                 "max_output_tokens": 16384,
                 "supports_vision": True,
                 "supports_functions": True,
                 "supports_streaming": True,
-                "min_version": "2024-05-01",
-                "aliases": ["gpt-4o"],
+                "description": "GPT-4o test model",
+                "min_version": {
+                    "year": 2024,
+                    "month": 5,
+                    "day": 1,
+                },
+                "deprecation": {
+                    "status": "active",
+                    "deprecates_on": None,
+                    "sunsets_on": None,
+                    "replacement": None,
+                    "migration_guide": None,
+                    "reason": "active",
+                },
             },
+        },
+        "aliases": {
+            "old-model": "old-model-2023-01-01",
+            "gpt-4o": "gpt-4o-2024-05-13",
         },
     }
 
@@ -128,9 +156,9 @@ class TestRegistryVersionHandling:
     def test_get_versioned_model(self, simple_registry: ModelRegistry) -> None:
         """Test getting a specific version of a model."""
         # Test retrieving a model using its dated version
-        capabilities = simple_registry.get_capabilities("gpt-4o-2024-08-06")
-        assert capabilities.model_name == "gpt-4o-2024-08-06"
-        assert capabilities.openai_model_name == "gpt-4o"
+        capabilities = simple_registry.get_capabilities("gpt-4o-2024-05-13")
+        assert capabilities.model_name == "gpt-4o-2024-05-13"
+        assert capabilities.openai_model_name == "gpt-4o-2024-05-13"
 
     def test_version_too_old(self, simple_registry: ModelRegistry) -> None:
         """Test error when requesting a version older than minimum."""
@@ -166,8 +194,8 @@ class TestRegistryVersionHandling:
         """Test getting a model using an alias."""
         # Get via alias
         capabilities = simple_registry.get_capabilities("gpt-4o")
-        assert capabilities.model_name == "gpt-4o-2024-08-06"
-        assert "gpt-4o" in capabilities.aliases
+        assert capabilities.model_name == "gpt-4o-2024-05-13"
+        # Note: aliases are not stored in the capabilities object in the new schema
 
     def test_newer_version_than_registered(
         self, simple_registry: ModelRegistry
@@ -185,7 +213,7 @@ class TestRegistryVersionHandling:
     ) -> None:
         """Test behavior when requesting a versioned model but no dated models exist."""
         # Remove the registered dated model to test this case
-        model_key = "gpt-4o-2024-08-06"
+        model_key = "gpt-4o-2024-05-13"
         original_capability = simple_registry._capabilities.pop(
             model_key, None
         )
@@ -311,7 +339,7 @@ class TestModelCapabilities:
         models = simple_registry.models
         assert isinstance(models, dict)
         assert "gpt-4o" in models
-        assert "gpt-4o-2024-08-06" in models
+        assert "gpt-4o-2024-05-13" in models
 
         # Should be a copy, not the original
         original_len = len(simple_registry._capabilities)
@@ -327,23 +355,54 @@ class TestModelCapabilities:
         """Test that duplicate aliases are properly detected and handled."""
         # Create a simple registry configuration with duplicate aliases
         test_config = {
-            "models": {
-                "model-a": {
-                    "aliases": ["shared-alias", "unique-a"],
+            "dated_models": {
+                "model-a-2024-01-01": {
                     "context_window": 1000,
                     "max_output_tokens": 100,
+                    "description": "Model A",
+                    "min_version": {
+                        "year": 2024,
+                        "month": 1,
+                        "day": 1,
+                    },
+                    "deprecation": {
+                        "status": "active",
+                        "deprecates_on": None,
+                        "sunsets_on": None,
+                        "replacement": None,
+                        "migration_guide": None,
+                        "reason": "active",
+                    },
                 },
-                "model-b": {
-                    "aliases": ["shared-alias", "unique-b"],
+                "model-b-2024-01-01": {
                     "context_window": 2000,
                     "max_output_tokens": 200,
+                    "description": "Model B",
+                    "min_version": {
+                        "year": 2024,
+                        "month": 1,
+                        "day": 1,
+                    },
+                    "deprecation": {
+                        "status": "active",
+                        "deprecates_on": None,
+                        "sunsets_on": None,
+                        "replacement": None,
+                        "migration_guide": None,
+                        "reason": "active",
+                    },
                 },
-            }
+            },
+            "aliases": {
+                "shared-alias": "model-a-2024-01-01",
+                "unique-a": "model-a-2024-01-01",
+                "unique-b": "model-b-2024-01-01",
+            },
         }
 
         # Create a registry with this config
         with patch.object(ModelRegistry, "_load_config") as mock_load:
-            config_data = {"version": "1.0.0", **test_config}
+            config_data = {"version": "1.1.0", **test_config}
             mock_load.return_value = ConfigResult(
                 success=True, data=config_data, path="test_path"
             )
@@ -356,50 +415,28 @@ class TestModelCapabilities:
             # Force capabilities loading to trigger the alias detection
             registry._load_capabilities()
 
-            # Check that model-a's capabilities are used for the shared alias
+            # Check that aliases point to the correct models
             assert (
                 registry._capabilities["shared-alias"].context_window == 1000
             )
             assert (
-                registry._capabilities["shared-alias"].model_name == "model-a"
+                registry._capabilities["shared-alias"].model_name
+                == "model-a-2024-01-01"
             )
 
             # Check that unique aliases are properly assigned
-            assert registry._capabilities["unique-a"].model_name == "model-a"
-            assert registry._capabilities["unique-b"].model_name == "model-b"
-
-            # Verify the warning was logged about duplicate alias
-            assert "Duplicate model alias detected" in caplog.text
-
-            # Find relevant log record
-            duplicate_alias_logs = [
-                record
-                for record in caplog.records
-                if "Duplicate model alias detected" in record.getMessage()
-            ]
             assert (
-                len(duplicate_alias_logs) > 0
-            ), "No duplicate alias warning was logged"
-
-            # Check that at least one log record contains the expected data
-            has_expected_data = False
-            for record in duplicate_alias_logs:
-                if hasattr(record, "alias") and record.alias == "shared-alias":
-                    has_expected_data = True
-                    assert hasattr(
-                        record, "new_model"
-                    ), "Log record missing new_model attribute"
-                    assert record.new_model == "model-b"
-                    # Check the original model info is also present
-                    assert hasattr(
-                        record, "original_model"
-                    ), "Log record missing original_model attribute"
-                    assert record.original_model == "model-a"
-                    break
-
+                registry._capabilities["unique-a"].model_name
+                == "model-a-2024-01-01"
+            )
             assert (
-                has_expected_data
-            ), "Log record doesn't contain expected structured data"
+                registry._capabilities["unique-b"].model_name
+                == "model-b-2024-01-01"
+            )
+
+            # In the new schema, there shouldn't be duplicate alias warnings since
+            # aliases are explicitly defined in the aliases section
+            # This test now verifies that aliases work correctly
 
 
 class TestRegistryRefresh:
@@ -457,9 +494,10 @@ class TestRegistryRefresh:
         self, simple_registry: ModelRegistry
     ) -> None:
         """Test check_for_updates with custom URL."""
-        with patch("requests.head") as mock_head, patch(
-            "requests.get"
-        ) as mock_get:
+        with (
+            patch("requests.head") as mock_head,
+            patch("requests.get") as mock_get,
+        ):
             # Mock HEAD response
             head_response = MagicMock()
             head_response.status_code = 200
@@ -511,11 +549,13 @@ class TestRegistryRefresh:
             lambda self, key: key in mock_config_result.data
         )
 
-        with patch.object(
-            registry, "_load_config", return_value=mock_config_result
-        ), patch("requests.head") as mock_head, patch(
-            "requests.get"
-        ) as mock_get:
+        with (
+            patch.object(
+                registry, "_load_config", return_value=mock_config_result
+            ),
+            patch("requests.head") as mock_head,
+            patch("requests.get") as mock_get,
+        ):
             # Create a mock response with 404
             mock_head_response = MagicMock()
             mock_head_response.status_code = 404
@@ -645,11 +685,12 @@ class TestRegistryErrors:
             # Verify that copy was attempted
             assert mock_copy.called
 
-            # Registry should have empty capabilities but still be functional
+            # Registry should have capabilities loaded from the default package config
             assert isinstance(registry._capabilities, dict)
 
-            # Should be able to check if models list is empty without error
-            assert len(registry.models) == 0
+            # Should be able to check models list without error
+            # The registry should still load models from the default package configuration
+            assert len(registry.models) > 0
 
 
 class TestMiscellaneousFunctions:

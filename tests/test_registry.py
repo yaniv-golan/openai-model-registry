@@ -47,23 +47,27 @@ def registry(test_config_dir: Path) -> Generator[ModelRegistry, None, None]:
     # Create parameter constraints file
     constraints_path = test_config_dir / "parameter_constraints.yml"
     constraints_content = {
-        "temperature": {
-            "type": "numeric",
-            "min": 0.0,
-            "max": 2.0,
-            "description": "Controls randomness in the output",
-            "allow_float": True,
+        "numeric_constraints": {
+            "temperature": {
+                "type": "numeric",
+                "min_value": 0.0,
+                "max_value": 2.0,
+                "description": "Controls randomness in the output",
+                "allow_float": True,
+            },
+            "max_completion_tokens": {
+                "type": "numeric",
+                "min_value": 1,
+                "description": "Maximum number of tokens to generate",
+                "allow_float": False,
+            },
         },
-        "max_completion_tokens": {
-            "type": "numeric",
-            "min": 1,
-            "description": "Maximum number of tokens to generate",
-            "allow_float": False,
-        },
-        "reasoning_effort": {
-            "type": "enum",
-            "values": ["low", "medium", "high"],
-            "description": "Controls the model's reasoning depth",
+        "enum_constraints": {
+            "reasoning_effort": {
+                "type": "enum",
+                "allowed_values": ["low", "medium", "high"],
+                "description": "Controls the model's reasoning depth",
+            },
         },
     }
 
@@ -73,52 +77,63 @@ def registry(test_config_dir: Path) -> Generator[ModelRegistry, None, None]:
     # Create model capabilities file
     models_path = test_config_dir / "models.yml"
     models_content = {
-        "version": "1.0.0",
-        "models": {
+        "version": "1.1.0",
+        "dated_models": {
             "test-model-2024-01-01": {
-                "openai_name": "test-model",
                 "context_window": 4096,
                 "max_output_tokens": 2048,
                 "supports_structured": True,
                 "supports_streaming": True,
-                "min_version": "2024-01-01",
-                "parameters": {
-                    "temperature": {
-                        "constraint": "temperature",
-                        "description": "Controls randomness in the output",
-                    },
-                    "max_completion_tokens": {
-                        "constraint": "max_completion_tokens",
-                        "description": "Maximum number of tokens to generate",
-                    },
+                "supported_parameters": [
+                    {"ref": "numeric_constraints.temperature"},
+                    {"ref": "numeric_constraints.max_completion_tokens"},
+                ],
+                "description": "Test model for unit tests",
+                "min_version": {
+                    "year": 2024,
+                    "month": 1,
+                    "day": 1,
                 },
-                "aliases": ["test-model"],
+                "deprecation": {
+                    "status": "active",
+                    "deprecates_on": None,
+                    "sunsets_on": None,
+                    "replacement": None,
+                    "migration_guide": None,
+                    "reason": "active",
+                },
             },
-            "gpt-4o-2024-08-06": {
-                "openai_name": "gpt-4o",
+            "gpt-4o-2024-05-13": {
                 "context_window": 128000,
                 "max_output_tokens": 16384,
                 "supports_structured": True,
                 "supports_streaming": True,
                 "supports_vision": True,
                 "supports_functions": True,
-                "min_version": "2024-08-06",
-                "parameters": {
-                    "temperature": {
-                        "constraint": "temperature",
-                        "description": "Controls randomness in the output",
-                    },
-                    "max_completion_tokens": {
-                        "constraint": "max_completion_tokens",
-                        "description": "Maximum number of tokens to generate",
-                    },
-                    "reasoning_effort": {
-                        "constraint": "reasoning_effort",
-                        "description": "Controls the reasoning depth",
-                    },
+                "supported_parameters": [
+                    {"ref": "numeric_constraints.temperature"},
+                    {"ref": "numeric_constraints.max_completion_tokens"},
+                    {"ref": "enum_constraints.reasoning_effort"},
+                ],
+                "description": "GPT-4o test model",
+                "min_version": {
+                    "year": 2024,
+                    "month": 5,
+                    "day": 13,
                 },
-                "aliases": ["gpt-4o"],
+                "deprecation": {
+                    "status": "active",
+                    "deprecates_on": None,
+                    "sunsets_on": None,
+                    "replacement": None,
+                    "migration_guide": None,
+                    "reason": "active",
+                },
             },
+        },
+        "aliases": {
+            "test-model": "test-model-2024-01-01",
+            "gpt-4o": "gpt-4o-2024-05-13",
         },
     }
 
@@ -160,7 +175,7 @@ def test_registry_initialization(registry: ModelRegistry) -> None:
     assert registry is not None
     assert registry.config is not None
     assert "test-model-2024-01-01" in registry.models
-    assert "gpt-4o-2024-08-06" in registry.models
+    assert "gpt-4o-2024-05-13" in registry.models
 
 
 def test_get_capabilities(registry: ModelRegistry) -> None:

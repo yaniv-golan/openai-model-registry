@@ -9,12 +9,25 @@ from openai_model_registry.constraints import (
     NumericConstraint,
     ParameterReference,
 )
+from openai_model_registry.deprecation import DeprecationInfo
 from openai_model_registry.errors import (
     ModelRegistryError,
     ParameterNotSupportedError,
 )
 from openai_model_registry.model_version import ModelVersion
 from openai_model_registry.registry import ModelCapabilities
+
+
+def _create_test_deprecation() -> DeprecationInfo:
+    """Create a test deprecation info for active models."""
+    return DeprecationInfo(
+        status="active",
+        deprecates_on=None,
+        sunsets_on=None,
+        replacement=None,
+        migration_guide=None,
+        reason="active",
+    )
 
 
 def test_model_capabilities_initialization() -> None:
@@ -25,6 +38,7 @@ def test_model_capabilities_initialization() -> None:
         openai_model_name="test-model",
         context_window=4096,
         max_output_tokens=2048,
+        deprecation=_create_test_deprecation(),
         supports_vision=False,
         supports_functions=True,
         supports_streaming=True,
@@ -80,6 +94,7 @@ def test_model_capabilities_get_constraint() -> None:
         openai_model_name="test-model",
         context_window=4096,
         max_output_tokens=2048,
+        deprecation=_create_test_deprecation(),
         constraints={
             "temperature": temperature_constraint,
             "reasoning_effort": effort_constraint,
@@ -100,6 +115,7 @@ def test_model_capabilities_validate_parameter() -> None:
         openai_model_name="test-model",
         context_window=4096,
         max_output_tokens=2048,
+        deprecation=_create_test_deprecation(),
         supported_parameters=[
             ParameterReference(
                 ref="temperature",
@@ -147,6 +163,7 @@ def test_model_capabilities_validate_parameters() -> None:
         openai_model_name="test-model",
         context_window=4096,
         max_output_tokens=2048,
+        deprecation=_create_test_deprecation(),
         supported_parameters=[
             ParameterReference(
                 ref="temperature",
