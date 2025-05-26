@@ -20,10 +20,11 @@ from .config_paths import (
     MODEL_REGISTRY_FILENAME,
     PARAM_CONSTRAINTS_FILENAME,
     copy_default_to_user_config,
-    ensure_user_config_dir_exists,
+    copy_default_to_user_data,
+    ensure_user_data_dir_exists,
     get_model_registry_path,
     get_parameter_constraints_path,
-    get_user_config_dir,
+    get_user_data_dir,
 )
 from .config_result import ConfigResult
 from .constraints import (
@@ -327,14 +328,14 @@ class ModelRegistry:
             maxsize=self.config.cache_size
         )(self._get_capabilities_impl)
 
-        # Auto-copy default configs to user directory if they don't exist
+        # Auto-copy default files to user directory if they don't exist
         if not config or not config.registry_path:
             try:
-                copy_default_to_user_config(MODEL_REGISTRY_FILENAME)
+                copy_default_to_user_data(MODEL_REGISTRY_FILENAME)
             except OSError as e:
                 log_warning(
                     LogEvent.MODEL_REGISTRY,
-                    f"Failed to copy default model registry config: {e}",
+                    f"Failed to copy default model registry data: {e}",
                     error=str(e),
                 )
 
@@ -1163,9 +1164,9 @@ class ModelRegistry:
                     message="Remote registry configuration validated successfully",
                 )
 
-            # Write to user config directory instead of package directory
-            ensure_user_config_dir_exists()
-            target_path = get_user_config_dir() / MODEL_REGISTRY_FILENAME
+            # Write to user data directory instead of package directory
+            ensure_user_data_dir_exists()
+            target_path = get_user_data_dir() / MODEL_REGISTRY_FILENAME
 
             # Write the updated config
             try:

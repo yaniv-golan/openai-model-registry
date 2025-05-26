@@ -1,7 +1,8 @@
 """Configuration path handling for model registry.
 
 This module implements path resolution for config files following the XDG Base Directory
-Specification for user-specific configuration files.
+Specification. User-editable configuration goes in config directories, while programmatically
+updated data (like models.yml) goes in data directories.
 """
 
 import os
@@ -27,8 +28,46 @@ def get_package_config_dir() -> Path:
 
 
 def get_user_config_dir() -> Path:
-    """Get the path to the user's config directory for this application."""
+    """Get the path to the user's config directory for this application.
+
+    Used for user-editable preferences and settings.
+    """
     return Path(platformdirs.user_config_dir(APP_NAME))
+
+
+def get_user_data_dir() -> Path:
+    """Get the path to the user's data directory for this application.
+
+    Used for programmatically updated files like the model registry.
+    """
+    return Path(platformdirs.user_data_dir(APP_NAME))
+
+
+def ensure_user_data_dir_exists() -> None:
+    """Ensure that the user data directory exists.
+
+    Raises:
+        OSError: If the directory cannot be created due to permission errors or other IO issues
+        PermissionError: If the directory exists but is not writable
+    """
+    user_dir = get_user_data_dir()
+
+    # If directory already exists, check if it's writable
+    if user_dir.exists():
+        if not os.access(user_dir, os.W_OK):
+            raise PermissionError(
+                f"Data directory exists but is not writable: {user_dir}"
+            )
+        return
+
+    # Create the directory and its parents if needed
+    os.makedirs(user_dir, exist_ok=True)
+
+    # Verify the directory is writable after creation
+    if not os.access(user_dir, os.W_OK):
+        raise PermissionError(
+            f"Created data directory but it is not writable: {user_dir}"
+        )
 
 
 def ensure_user_config_dir_exists() -> None:
@@ -56,6 +95,52 @@ def ensure_user_config_dir_exists() -> None:
         raise PermissionError(
             f"Created config directory but it is not writable: {user_dir}"
         )
+
+
+def copy_default_to_user_data(filename: str) -> bool:
+    """Copy a default data file to the user data directory if it doesn't exist.
+
+    Args:
+        filename: Name of the data file to copy
+
+    Returns:
+        True if file was copied, False if no action was taken
+
+    Raises:
+        OSError: If there is an error creating directory or copying file
+    """
+    package_file = get_package_config_dir() / filename
+    user_file = get_user_data_dir() / filename
+
+    # Don't copy if user file already exists
+    if user_file.exists():
+        return False
+
+    # Ensure directory exists
+    try:
+        ensure_user_data_dir_exists()
+    except OSError as e:
+        import logging
+
+        logging.getLogger(__name__).error(
+            f"Failed to create user data directory: {e}"
+        )
+        raise  # Re-raise the exception for the caller to handle
+
+    # Only copy if package file exists
+    if package_file.exists():
+        try:
+            user_file.write_bytes(package_file.read_bytes())
+            return True
+        except (OSError, PermissionError) as e:
+            import logging
+
+            logging.getLogger(__name__).error(
+                f"Failed to copy data file {filename}: {e}"
+            )
+            raise  # Re-raise the exception for the caller to handle
+
+    return False
 
 
 def copy_default_to_user_config(filename: str) -> bool:
@@ -107,6 +192,9 @@ def copy_default_to_user_config(filename: str) -> bool:
 def get_model_registry_path() -> str:
     """Get the path to the model registry file, respecting XDG specification.
 
+    The model registry is stored in the user data directory since it's programmatically
+    updated rather than user-edited configuration.
+
     Returns:
         Path to the model registry file
     """
@@ -115,12 +203,17 @@ def get_model_registry_path() -> str:
     if env_path and Path(env_path).is_file():
         return env_path
 
-    # 2. Check user config directory
-    user_path = get_user_config_dir() / MODEL_REGISTRY_FILENAME
-    if user_path.is_file():
-        return str(user_path)
+    # 2. Check user data directory (primary location for programmatically updated files)
+    user_data_path = get_user_data_dir() / MODEL_REGISTRY_FILENAME
+    if user_data_path.is_file():
+        return str(user_data_path)
 
-    # 3. Fall back to package directory
+    # 3. Check legacy user config directory for backward compatibility
+    user_config_path = get_user_config_dir() / MODEL_REGISTRY_FILENAME
+    if user_config_path.is_file():
+        return str(user_config_path)
+
+    # 4. Fall back to package directory
     return str(get_package_config_dir() / MODEL_REGISTRY_FILENAME)
 
 

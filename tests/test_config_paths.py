@@ -57,19 +57,19 @@ def test_user_config_dir_is_created() -> None:
 def test_get_model_registry_path() -> None:
     """Test that the model registry path is correct."""
     with tempfile.TemporaryDirectory() as temp_dir:
-        temp_config_dir = Path(temp_dir) / APP_NAME
-        temp_config_dir.mkdir(parents=True)
+        temp_data_dir = Path(temp_dir) / APP_NAME
+        temp_data_dir.mkdir(parents=True)
 
         # Create a test file
-        test_file = temp_config_dir / MODEL_REGISTRY_FILENAME
+        test_file = temp_data_dir / MODEL_REGISTRY_FILENAME
         test_file.write_text("test content")
 
-        # Mock the user config dir and ensure the file exists
+        # Mock the user data dir and ensure the file exists
         with patch(
-            "openai_model_registry.config_paths.get_user_config_dir",
-            return_value=temp_config_dir,
+            "openai_model_registry.config_paths.get_user_data_dir",
+            return_value=temp_data_dir,
         ), patch("pathlib.Path.is_file", return_value=True):
-            expected_path = str(temp_config_dir / MODEL_REGISTRY_FILENAME)
+            expected_path = str(temp_data_dir / MODEL_REGISTRY_FILENAME)
             assert get_model_registry_path() == expected_path
 
 

@@ -55,6 +55,7 @@ nav:
       - Model Capabilities: user-guide/model-capabilities.md
       - Parameter Validation: user-guide/parameter-validation.md
       - Advanced Usage: user-guide/advanced-usage.md
+      - Testing: user-guide/testing.md
   - API Reference:
       - Overview: api/index.md
       - ModelRegistry: api/model-registry.md

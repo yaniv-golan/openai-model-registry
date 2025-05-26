@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2025-05-26
+
+### Added
+
+- Added proper cross-platform directory handling using `platformdirs`
+- Added `get_user_data_dir()` function for programmatically updated files
+- Added `ensure_user_data_dir_exists()` function for data directory management
+- Added `copy_default_to_user_data()` function for copying defaults to data directory
+- Added comprehensive testing documentation for pytest and pyfakefs usage
+- Added user guide section for testing applications that use the registry
+
+### Changed
+
+- **BREAKING (Internal)**: Model registry files now stored in user data directory instead of config directory
+  - Linux: `~/.local/share/openai-model-registry/` instead of `~/.config/openai-model-registry/`
+  - macOS/Windows: No change (same directory used for both data and config)
+- Enhanced cross-platform path resolution following XDG Base Directory specification
+- Updated registry update functionality to write to data directory
+- Improved backward compatibility with fallback to legacy config directory locations
+
+### Technical Details
+
+- Follows XDG Base Directory specification: data files go in data directories, config files in config directories
+- Maintains full backward compatibility by checking config directory as fallback
+- Enhanced documentation for developers testing code that depends on this library
+- No breaking changes to public API - all existing code continues to work
+
 ## [0.5.0] - 2025-05-23
 
 ### Added
