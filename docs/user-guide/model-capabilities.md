@@ -12,14 +12,13 @@ Model capabilities represent the features, limitations, and parameters supported
 - Support for structured output
 - Supported parameters and their constraints
 
-:::tip Naming conventions
+**Note on Naming Conventions:**
 
 - **`gpt-4`** → resolves to the latest dated GPT-4 release (`gpt-4o-2025-05-13`).
 - **`*-mini`** → a lower-cost, smaller-context sibling model.
 - **Structured output** means the model supports JSON schema / function calling.
 
 For a complete guide on model naming and selection, see [Model Aliases and Naming Conventions](model-aliases.md).
-:::
 
 ## Accessing Model Capabilities
 
