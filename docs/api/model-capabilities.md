@@ -5,9 +5,9 @@ The `ModelCapabilities` class represents the capabilities, constraints, and para
 ## Class Reference
 
 ::: openai_model_registry.registry.ModelCapabilities
-    options:
-      show_root_heading: false
-      show_source: true
+options:
+show_root_heading: false
+show_source: true
 
 ## Usage Examples
 
@@ -16,7 +16,7 @@ The `ModelCapabilities` class represents the capabilities, constraints, and para
 ```python
 from openai_model_registry import ModelRegistry
 
-registry = ModelRegistry.get_instance()
+registry = ModelRegistry.get_default()
 capabilities = registry.get_capabilities("gpt-4o")
 
 # Access basic properties
@@ -29,6 +29,11 @@ print(f"Supports structured output: {capabilities.supports_structured}")
 # Check for aliases
 if capabilities.aliases:
     print(f"Aliases: {', '.join(capabilities.aliases)}")
+# Expected output: Model name: gpt-4o
+#                  Context window: 128000
+#                  Max output tokens: 16384
+#                  Supports streaming: True
+#                  Supports structured output: True
 ```
 
 ### Validating Parameters
@@ -36,7 +41,7 @@ if capabilities.aliases:
 ```python
 from openai_model_registry import ModelRegistry, ModelRegistryError
 
-registry = ModelRegistry.get_instance()
+registry = ModelRegistry.get_default()
 capabilities = registry.get_capabilities("gpt-4o")
 
 # Validate a parameter
@@ -50,13 +55,11 @@ except ModelRegistryError as e:
 used_params = set()
 capabilities.validate_parameter("temperature", 0.7, used_params)
 print(f"Used parameters: {used_params}")  # Contains 'temperature'
+# Expected output: Temperature 0.7 is valid
+#                  Used parameters: {'temperature'}
 
 # Validate multiple parameters
-params_to_validate = {
-    "temperature": 0.7,
-    "top_p": 0.9,
-    "max_completion_tokens": 500
-}
+params_to_validate = {"temperature": 0.7, "top_p": 0.9, "max_completion_tokens": 500}
 
 for param_name, value in params_to_validate.items():
     try:
@@ -71,7 +74,7 @@ for param_name, value in params_to_validate.items():
 ```python
 from openai_model_registry import ModelRegistry
 
-registry = ModelRegistry.get_instance()
+registry = ModelRegistry.get_default()
 capabilities = registry.get_capabilities("gpt-4o")
 
 # Get a specific constraint
@@ -99,7 +102,7 @@ from openai_model_registry.constraints import NumericConstraint, EnumConstraint
 from typing import Dict, Union
 
 # Get existing constraints for reference
-registry = ModelRegistry.get_instance()
+registry = ModelRegistry.get_default()
 base_capabilities = registry.get_capabilities("gpt-4o")
 
 # Create custom capabilities (with basic properties)
@@ -125,15 +128,55 @@ constraints: Dict[str, Union[NumericConstraint, EnumConstraint]] = {
         max_value=1.0,
         allow_float=True,
         allow_int=True,
-        description="Custom temperature description"
+        description="Custom temperature description",
     ),
     "response_format": EnumConstraint(
         allowed_values=["text", "json_schema"],
-        description="Custom response format description"
-    )
+        description="Custom response format description",
+    ),
 }
 custom_capabilities._constraints = constraints
 
 # Use custom capabilities
 custom_capabilities.validate_parameter("temperature", 0.7)
+```
+
+```python
+from openai_model_registry import ModelRegistry
+
+registry = ModelRegistry.get_default()
+capabilities = registry.get_capabilities("gpt-4o")
+
+# Check if model is deprecated
+if capabilities.is_deprecated:
+    print(f"⚠️  Model is deprecated since {capabilities.deprecation.deprecation_date}")
+    if capabilities.deprecation.sunset_date:
+        print(f"🚫 Model will be sunset on {capabilities.deprecation.sunset_date}")
+```
+
+```python
+from openai_model_registry import ModelRegistry
+
+registry = ModelRegistry.get_default()
+capabilities = registry.get_capabilities("gpt-4o")
+
+# Validate parameters
+try:
+    capabilities.validate_parameter("temperature", 0.7)
+    print("✅ Temperature value is valid")
+except ValueError as e:
+    print(f"❌ Invalid temperature: {e}")
+```
+
+```python
+from openai_model_registry import ModelRegistry
+
+registry = ModelRegistry.get_default()
+capabilities = registry.get_capabilities("gpt-4o")
+
+# Check feature support
+if capabilities.supports_structured:
+    print("✅ Model supports structured output")
+if capabilities.supports_streaming:
+    print("✅ Model supports streaming")
 ```

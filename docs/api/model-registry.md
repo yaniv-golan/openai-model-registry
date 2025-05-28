@@ -5,14 +5,14 @@ The `ModelRegistry` class is the primary entry point for accessing model capabil
 ## Class Reference
 
 ::: openai_model_registry.registry.ModelRegistry
-    options:
-      show_root_heading: false
-      show_source: true
+options:
+show_root_heading: false
+show_source: true
 
 ::: openai_model_registry.registry.RegistryConfig
-    options:
-      show_root_heading: true
-      show_source: true
+options:
+show_root_heading: true
+show_source: true
 
 ## Usage Examples
 
@@ -23,14 +23,14 @@ from openai_model_registry import ModelRegistry
 from openai_model_registry.registry import RegistryConfig
 
 # Get the default singleton instance
-registry = ModelRegistry.get_instance()
+registry = ModelRegistry.get_default()
 
 # Or create a custom instance with specific configuration
 config = RegistryConfig(
     registry_path="/custom/path/registry.yml",
     constraints_path="/custom/path/constraints.yml",
     auto_update=False,
-    cache_size=200
+    cache_size=200,
 )
 custom_registry = ModelRegistry(config)
 ```
@@ -40,14 +40,12 @@ custom_registry = ModelRegistry(config)
 ```python
 from openai_model_registry import ModelRegistry
 
-# Use the default registry
-registry = ModelRegistry.get_instance()
+# Get the default registry instance
+registry = ModelRegistry.get_default()
 
 # Get capabilities for a specific model
 capabilities = registry.get_capabilities("gpt-4o")
-
-# Get capabilities for a dated version
-dated_capabilities = registry.get_capabilities("gpt-4o-2024-05-13")
+print(f"Context window: {capabilities.context_window}")
 ```
 
 ### Listing Available Models
@@ -55,37 +53,26 @@ dated_capabilities = registry.get_capabilities("gpt-4o-2024-05-13")
 ```python
 from openai_model_registry import ModelRegistry
 
-registry = ModelRegistry.get_instance()
+registry = ModelRegistry.get_default()
 
-# Get all models as a dictionary
-all_models = registry.models
-
-# Print all available models
-for model_name in sorted(all_models.keys()):
-    print(model_name)
+# List all available models
+models = registry.list_models()
+for model in models:
+    print(f"Model: {model}")
 ```
 
 ### Updating the Registry
 
 ```python
 from openai_model_registry import ModelRegistry
-from openai_model_registry.registry import RefreshStatus
 
-registry = ModelRegistry.get_instance()
+registry = ModelRegistry.get_default()
 
-# Check for updates
-refresh_result = registry.check_for_updates()
-if refresh_result.status == RefreshStatus.UPDATE_AVAILABLE:
-    print("Update is available")
-
-# Update the registry from the default source
-update_result = registry.refresh_from_remote()
-
-# Check the result
-if update_result.success:
-    print("Registry updated successfully")
+# Check if a model exists
+if registry.has_model("gpt-4o"):
+    print("Model exists in registry")
 else:
-    print(f"Update failed: {update_result.message}")
+    print("Model not found")
 ```
 
 ### Working with Model Versions
@@ -93,7 +80,7 @@ else:
 ```python
 from openai_model_registry import ModelRegistry, ModelVersion
 
-registry = ModelRegistry.get_instance()
+registry = ModelRegistry.get_default()
 
 # Parse a version from a model string
 model = "gpt-4o-2024-05-13"
@@ -115,4 +102,33 @@ if hasattr(ModelVersion, "is_dated_model"):
 
     is_dated = ModelVersion.is_dated_model("gpt-4o")
     print(f"Is a dated model: {is_dated}")  # False
+```
+
+```python
+from openai_model_registry import ModelRegistry
+
+registry = ModelRegistry.get_default()
+
+# Update registry from remote source
+try:
+    result = registry.refresh_from_remote()
+    print(f"Update result: {result}")
+except Exception as e:
+    print(f"Update failed: {e}")
+```
+
+```python
+from openai_model_registry import ModelRegistry
+
+registry = ModelRegistry.get_default()
+
+# Check for updates without applying them
+try:
+    result = registry.check_for_updates()
+    if result.needs_update:
+        print("Updates available!")
+        print(f"Current version: {result.current_version}")
+        print(f"Latest version: {result.latest_version}")
+except Exception as e:
+    print(f"Update check failed: {e}")
 ```
