@@ -1133,20 +1133,10 @@ class ModelRegistry:
         Returns:
             Result of the refresh operation
         """
-        # Check for updates
-        result = self.check_for_updates(url=url)
-
-        if not force and result.status == RefreshStatus.ALREADY_CURRENT:
-            return RefreshResult(
-                success=True,
-                status=RefreshStatus.ALREADY_CURRENT,
-                message="Registry is already up to date",
-            )
-
         try:
             # Get remote config
             config_url = url or (
-                "https://raw.githubusercontent.com/openai-model-registry/"
+                "https://raw.githubusercontent.com/yaniv-golan/"
                 "openai-model-registry/main/src/openai_model_registry/config/models.yml"
             )
             remote_config = self._fetch_remote_config(config_url)
@@ -1163,6 +1153,16 @@ class ModelRegistry:
                     status=RefreshStatus.VALIDATED,
                     message="Remote registry configuration validated successfully",
                 )
+
+            # Check for updates only if not forcing and not validating
+            if not force:
+                result = self.check_for_updates(url=url)
+                if result.status == RefreshStatus.ALREADY_CURRENT:
+                    return RefreshResult(
+                        success=True,
+                        status=RefreshStatus.ALREADY_CURRENT,
+                        message="Registry is already up to date",
+                    )
 
             # Write to user data directory instead of package directory
             ensure_user_data_dir_exists()
@@ -1259,7 +1259,7 @@ class ModelRegistry:
 
         # Set up the URL
         config_url = url or (
-            "https://raw.githubusercontent.com/openai-model-registry/"
+            "https://raw.githubusercontent.com/yaniv-golan/"
             "openai-model-registry/main/src/openai_model_registry/config/models.yml"
         )
 

@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.1] - 2025-05-28
+
+### Fixed
+
+- Fixed broken URLs in registry refresh functionality that were pointing to non-existent repository
+- Fixed refresh logic to properly handle validation-only mode and fetch failures
+- Updated remote configuration URLs to point to correct repository: `yaniv-golan/openai-model-registry`
+- Improved error handling in `refresh_from_remote` method to fail gracefully when remote fetch fails
+- Fixed test failures related to refresh validation and fetch error scenarios
+
+### Technical Details
+
+- Updated both `refresh_from_remote` and `check_for_updates` methods to use correct GitHub repository URLs
+- Restructured refresh logic to always fetch and validate remote config before checking version updates
+- Enhanced validation-only mode to properly return `VALIDATED` status after successful remote validation
+- Improved error propagation when remote configuration fetch fails
+
 ## [0.6.0] - 2025-05-26
 
 ### Added
