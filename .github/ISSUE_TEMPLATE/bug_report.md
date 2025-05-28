@@ -1,11 +1,12 @@
----
+______________________________________________________________________
+
 name: Bug report
 about: Create a report to help us improve
-title: '[BUG] '
+title: '\[BUG\] '
 labels: bug
 assignees: ''
 
----
+______________________________________________________________________
 
 **Describe the bug**
 A clear and concise description of what the bug is.
@@ -14,9 +15,9 @@ A clear and concise description of what the bug is.
 Steps to reproduce the behavior:
 
 1. Import module '...'
-2. Create instance '....'
-3. Call method '....'
-4. See error
+1. Create instance '....'
+1. Call method '....'
+1. See error
 
 **Expected behavior**
 A clear and concise description of what you expected to happen.
@@ -29,9 +30,9 @@ A clear and concise description of what you expected to happen.
 
 **Environment:**
 
-- OS: [e.g. macOS, Windows, Linux]
-- Python version: [e.g. 3.9.10]
-- OpenAI Model Registry version: [e.g. 1.0.0]
+- OS: \[e.g. macOS, Windows, Linux\]
+- Python version: \[e.g. 3.9.10\]
+- OpenAI Model Registry version: \[e.g. 1.0.0\]
 
 **Additional context**
 Add any other context about the problem here.
