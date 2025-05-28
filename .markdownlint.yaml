@@ -1,0 +1,36 @@
+# Markdownlint configuration for OpenAI Model Registry documentation
+# See https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md
+
+# MD013: Line length
+MD013:
+  line_length: 120
+  code_blocks: false
+  tables: false
+  headings: false
+
+# MD033: Allow inline HTML (for admonitions and formatting)
+MD033: false
+
+# MD041: First line in file should be a top level header
+MD041: false
+
+# MD046: Code block style (allow both fenced and indented)
+MD046:
+  style: "fenced"
+
+# MD024: Multiple headers with the same content
+MD024:
+  allow_different_nesting: true
+
+# MD007: Unordered list indentation
+MD007:
+  indent: 2
+
+# MD029: Ordered list item prefix - allow inconsistent numbering
+MD029: false
+
+# MD036: Emphasis used instead of a heading - allow for issue templates
+MD036: false
+
+# MD040: Fenced code blocks should have a language specified
+MD040: true

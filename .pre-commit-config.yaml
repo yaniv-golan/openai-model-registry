@@ -35,3 +35,17 @@ repos:
         require_serial: true
         types: [python]
         args: [--strict]
+
+-   repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.37.0
+    hooks:
+    -   id: markdownlint
+        args: [--fix]
+
+-   repo: https://github.com/executablebooks/mdformat
+    rev: 0.7.17
+    hooks:
+    -   id: mdformat
+        additional_dependencies:
+        - mdformat-gfm
+        - mdformat-black
