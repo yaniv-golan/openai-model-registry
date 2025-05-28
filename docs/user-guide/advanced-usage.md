@@ -14,7 +14,7 @@ config = RegistryConfig(
     registry_path="/path/to/custom/registry.yml",
     constraints_path="/path/to/custom/constraints.yml",
     auto_update=True,
-    cache_size=200
+    cache_size=200,
 )
 
 # Initialize registry with the custom configuration
@@ -22,6 +22,7 @@ registry = ModelRegistry(config)
 
 # Use the registry
 capabilities = registry.get_capabilities("gpt-4o")
+# Expected output: Successfully loads capabilities with custom configuration
 ```
 
 The `RegistryConfig` class supports the following options:
@@ -48,9 +49,24 @@ staging_registry = ModelRegistry(staging_config)
 # Use different registries as needed
 prod_capabilities = prod_registry.get_capabilities("gpt-4o")
 staging_capabilities = staging_registry.get_capabilities("gpt-4o")
+# Expected output: Successfully loads capabilities from different registry instances
 ```
 
 This is particularly useful for testing or when you need to support different configurations in the same application.
+
+## API Deprecation Notice
+
+**Note:** `get_instance()` is deprecated; use `get_default()`.
+
+The `get_instance()` method has been deprecated in favor of `get_default()` for better clarity and consistency. While `get_instance()` still works for backward compatibility, new code should use `get_default()`.
+
+```python
+# ❌ Deprecated (but still works)
+registry = ModelRegistry.get_instance()
+
+# ✅ Recommended
+registry = ModelRegistry.get_default()
+```
 
 ## Registry Updates
 
@@ -99,6 +115,7 @@ capabilities = registry.get_capabilities("gpt-4o")
 # Deprecation information is available for all models
 # (defaults to "active" status for models without explicit deprecation data)
 print(f"Status: {capabilities.deprecation.status}")
+# Expected output: Status: active
 ```
 
 ## Model Data Accuracy
@@ -115,10 +132,14 @@ o1_mini = registry.get_capabilities("o1-mini")
 print(f"O1-mini supports streaming: {o1_mini.supports_streaming}")  # True
 
 o1_latest = registry.get_capabilities("o1-2024-12-17")
-print(f"O1-2024-12-17 supports streaming: {o1_latest.supports_streaming}")  # False (not yet in public API)
+print(
+    f"O1-2024-12-17 supports streaming: {o1_latest.supports_streaming}"
+)  # False (not yet in public API)
 
 # Deprecation dates use null values for unknown timelines instead of placeholder dates
-print(f"Deprecates on: {capabilities.deprecation.deprecates_on}")  # None for active models
+print(
+    f"Deprecates on: {capabilities.deprecation.deprecates_on}"
+)  # None for active models
 ```
 
 ## Command Line Interface
@@ -179,6 +200,7 @@ capabilities.validate_parameter("top_p", 0.9, used_params)
 
 # used_params now contains ["temperature", "top_p"]
 print(f"Used parameters: {used_params}")
+# Expected output: Used parameters: {'temperature', 'top_p'}
 ```
 
 ## Error Handling
@@ -191,7 +213,7 @@ from openai_model_registry import (
     ModelRegistryError,
     ModelNotSupportedError,
     ParameterNotSupportedError,
-    ConstraintNotFoundError
+    ConstraintNotFoundError,
 )
 
 try:
@@ -220,7 +242,9 @@ try:
 
     # Get constraint information
     try:
-        constraint = registry.get_parameter_constraint("numeric_constraints.temperature")
+        constraint = registry.get_parameter_constraint(
+            "numeric_constraints.temperature"
+        )
         print(f"Min value: {constraint.min_value}, Max value: {constraint.max_value}")
     except ConstraintNotFoundError as e:
         print(f"Constraint reference '{e.ref}' not found")
@@ -268,7 +292,9 @@ logger = get_logger()
 
 # Add custom handlers if needed
 file_handler = logging.FileHandler("registry.log")
-file_handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
+file_handler.setFormatter(
+    logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+)
 logger.addHandler(file_handler)
 ```
 
@@ -282,11 +308,13 @@ For applications that make frequent validation calls, consider caching capabilit
 from openai_model_registry import ModelRegistry
 import functools
 
+
 # Create a cache of model capabilities
 @functools.lru_cache(maxsize=16)
 def get_cached_capabilities(model_name):
     registry = ModelRegistry.get_default()
     return registry.get_capabilities(model_name)
+
 
 # Use cached capabilities
 capabilities = get_cached_capabilities("gpt-4o")

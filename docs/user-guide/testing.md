@@ -24,6 +24,7 @@ import pytest
 from unittest.mock import Mock, patch
 from openai_model_registry import ModelRegistry, ModelCapabilities
 
+
 def test_my_function_with_mocked_registry():
     """Test your function with a completely mocked registry."""
 
@@ -37,8 +38,9 @@ def test_my_function_with_mocked_registry():
     mock_registry = Mock(spec=ModelRegistry)
     mock_registry.get_capabilities.return_value = mock_capabilities
 
-    with patch('openai_model_registry.ModelRegistry.get_default',
-               return_value=mock_registry):
+    with patch(
+        "openai_model_registry.ModelRegistry.get_default", return_value=mock_registry
+    ):
 
         # Your application code here
         result = my_function_that_uses_registry("gpt-4o")
@@ -58,6 +60,7 @@ from pathlib import Path
 from unittest.mock import patch
 from openai_model_registry import ModelRegistry, RegistryConfig
 
+
 def test_my_function_with_real_registry():
     """Test with real registry using temporary configuration."""
 
@@ -71,7 +74,7 @@ def test_my_function_with_real_registry():
 
         config = RegistryConfig(
             registry_path=str(temp_registry_file),
-            constraints_path=str(temp_constraints_file)
+            constraints_path=str(temp_constraints_file),
         )
 
         registry = ModelRegistry(config)
@@ -95,6 +98,7 @@ from pathlib import Path
 from unittest.mock import patch
 from openai_model_registry import ModelRegistry
 
+
 def test_my_app_with_fake_registry_paths(fs):
     """Test your app with fake filesystem paths."""
 
@@ -107,7 +111,9 @@ def test_my_app_with_fake_registry_paths(fs):
 
     # Create fake registry file
     fake_models_file = fake_data_dir / "models.yml"
-    fs.create_file(fake_models_file, contents='''
+    fs.create_file(
+        fake_models_file,
+        contents="""
 version: "1.1.0"
 dated_models:
   test-model-2024-01-01:
@@ -118,13 +124,17 @@ dated_models:
       reason: "test model"
 aliases:
   test-model: "test-model-2024-01-01"
-''')
+""",
+    )
 
     # Mock the directory functions
-    with patch('openai_model_registry.config_paths.get_user_data_dir',
-               return_value=fake_data_dir), \
-         patch('openai_model_registry.config_paths.get_user_config_dir',
-               return_value=fake_config_dir):
+    with patch(
+        "openai_model_registry.config_paths.get_user_data_dir",
+        return_value=fake_data_dir,
+    ), patch(
+        "openai_model_registry.config_paths.get_user_config_dir",
+        return_value=fake_config_dir,
+    ):
 
         # Clear any cached registry instances
         ModelRegistry.cleanup()
@@ -144,12 +154,15 @@ Use environment variables to redirect the registry to fake locations:
 import pytest
 from unittest.mock import patch
 
+
 def test_my_app_with_custom_registry_path(fs, monkeypatch):
     """Test using environment variable to set custom registry path."""
 
     # Create fake registry file
     custom_registry_path = "/custom/registry/models.yml"
-    fs.create_file(custom_registry_path, contents='''
+    fs.create_file(
+        custom_registry_path,
+        contents="""
 version: "1.1.0"
 dated_models:
   custom-model-2024-01-01:
@@ -160,7 +173,8 @@ dated_models:
       reason: "custom model"
 aliases:
   custom-model: "custom-model-2024-01-01"
-''')
+""",
+    )
 
     # Set environment variable
     monkeypatch.setenv("MODEL_REGISTRY_PATH", custom_registry_path)
@@ -183,20 +197,22 @@ from unittest.mock import Mock, patch
 from openai_model_registry import ModelRegistry
 from openai_model_registry.registry import RefreshStatus
 
+
 def test_my_app_handles_registry_updates():
     """Test your app's behavior when registry updates are available."""
 
-    with patch('requests.get') as mock_get, \
-         patch('openai_model_registry.config_paths.get_user_data_dir') as mock_data_dir:
+    with patch("requests.get") as mock_get, patch(
+        "openai_model_registry.config_paths.get_user_data_dir"
+    ) as mock_data_dir:
 
         # Mock successful update response
         mock_response = Mock()
         mock_response.status_code = 200
-        mock_response.text = '''
+        mock_response.text = """
 version: "1.2.0"
 dated_models: {}
 aliases: {}
-'''
+"""
         mock_get.return_value = mock_response
 
         # Test your application's update handling
@@ -205,10 +221,11 @@ aliases: {}
         assert result.update_available == True
         assert result.handled_correctly == True
 
+
 def test_my_app_handles_network_errors():
     """Test your app's behavior when registry updates fail."""
 
-    with patch('requests.get') as mock_get:
+    with patch("requests.get") as mock_get:
         # Mock network error
         mock_get.side_effect = ConnectionError("Network unavailable")
 
@@ -229,6 +246,7 @@ from unittest.mock import Mock
 from openai_model_registry import ModelCapabilities
 from openai_model_registry.deprecation import DeprecationInfo
 
+
 @pytest.fixture
 def deprecated_model_capabilities():
     """Create capabilities for a deprecated model."""
@@ -238,7 +256,7 @@ def deprecated_model_capabilities():
         sunsets_on=None,
         replacement="gpt-4o",
         migration_guide="Use gpt-4o instead",
-        reason="Model deprecated"
+        reason="Model deprecated",
     )
 
     capabilities = Mock(spec=ModelCapabilities)
@@ -249,17 +267,21 @@ def deprecated_model_capabilities():
 
     return capabilities
 
+
 def test_my_app_handles_deprecated_models(deprecated_model_capabilities):
     """Test your app's handling of deprecated models."""
 
-    with patch('openai_model_registry.ModelRegistry.get_default') as mock_registry:
-        mock_registry.return_value.get_capabilities.return_value = deprecated_model_capabilities
+    with patch("openai_model_registry.ModelRegistry.get_default") as mock_registry:
+        mock_registry.return_value.get_capabilities.return_value = (
+            deprecated_model_capabilities
+        )
 
         result = my_app_select_model("deprecated-model")
 
         # Verify your app handles deprecation appropriately
         assert result.warning_shown == True
         assert result.suggested_alternative == "gpt-4o"
+
 
 @pytest.fixture
 def high_capacity_model():
@@ -272,10 +294,11 @@ def high_capacity_model():
 
     return capabilities
 
+
 def test_my_app_uses_high_capacity_features(high_capacity_model):
     """Test your app leverages high-capacity model features."""
 
-    with patch('openai_model_registry.ModelRegistry.get_default') as mock_registry:
+    with patch("openai_model_registry.ModelRegistry.get_default") as mock_registry:
         mock_registry.return_value.get_capabilities.return_value = high_capacity_model
 
         result = my_app_process_large_document("huge-document.txt")
@@ -294,6 +317,7 @@ The registry uses singleton behavior, so clear the cache between tests:
 import pytest
 from openai_model_registry import ModelRegistry
 
+
 @pytest.fixture(autouse=True)
 def clear_registry_cache():
     """Automatically clear registry cache before each test."""
@@ -308,7 +332,7 @@ When creating fake registry data, use realistic model configurations:
 
 ```python
 # Good - includes all required fields
-REALISTIC_MODEL_CONFIG = '''
+REALISTIC_MODEL_CONFIG = """
 version: "1.1.0"
 dated_models:
   test-model-2024-01-01:
@@ -332,7 +356,7 @@ dated_models:
       day: 1
 aliases:
   test-model: "test-model-2024-01-01"
-'''
+"""
 ```
 
 ### 3. Test Error Conditions
@@ -343,11 +367,12 @@ Test how your app handles registry errors:
 def test_my_app_handles_missing_models():
     """Test app behavior when requested model doesn't exist."""
 
-    with patch('openai_model_registry.ModelRegistry.get_default') as mock_registry:
+    with patch("openai_model_registry.ModelRegistry.get_default") as mock_registry:
         from openai_model_registry import ModelNotSupportedError
 
-        mock_registry.return_value.get_capabilities.side_effect = \
+        mock_registry.return_value.get_capabilities.side_effect = (
             ModelNotSupportedError("Model not found", model="nonexistent-model")
+        )
 
         result = my_app_use_model("nonexistent-model")
 
@@ -367,10 +392,10 @@ def test_my_app_validates_parameters_correctly():
     mock_capabilities = Mock()
     mock_capabilities.validate_parameter.side_effect = [
         None,  # temperature=0.7 is valid
-        ValueError("temperature must be between 0 and 2")  # temperature=3.0 is invalid
+        ValueError("temperature must be between 0 and 2"),  # temperature=3.0 is invalid
     ]
 
-    with patch('openai_model_registry.ModelRegistry.get_default') as mock_registry:
+    with patch("openai_model_registry.ModelRegistry.get_default") as mock_registry:
         mock_registry.return_value.get_capabilities.return_value = mock_capabilities
 
         # Test valid parameters

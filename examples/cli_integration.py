@@ -67,7 +67,7 @@ def get_update_notification(quiet: bool = False) -> Optional[str]:
         LAST_CHECK_FILE.touch()
 
         # Check if updates are available
-        registry = ModelRegistry.get_instance()
+        registry = ModelRegistry.get_default()
         result = registry.check_for_updates()
 
         if result.status.name == "UPDATE_AVAILABLE":
@@ -85,7 +85,7 @@ def get_update_notification(quiet: bool = False) -> Optional[str]:
 def validate_model_parameters(model: str, params: Dict[str, Any]) -> None:
     """Validate that model parameters are supported by the model."""
     try:
-        registry = ModelRegistry.get_instance()
+        registry = ModelRegistry.get_default()
         capabilities = registry.get_capabilities(model)
 
         # Validates parameters against model capabilities
@@ -163,7 +163,7 @@ def update_registry_command(
     quiet = ctx.obj.get("quiet", False)
 
     try:
-        registry = ModelRegistry.get_instance()
+        registry = ModelRegistry.get_default()
 
         # Check if updates are available
         if not force:

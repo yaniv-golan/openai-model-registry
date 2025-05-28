@@ -13,18 +13,16 @@ You can validate parameters through the model capabilities object:
 ```python
 from openai_model_registry import ModelRegistry
 
-# Get the registry
-registry = ModelRegistry.get_instance()
-
-# Get capabilities for a specific model
+registry = ModelRegistry.get_default()
 capabilities = registry.get_capabilities("gpt-4o")
 
-# Validate a parameter
+# Validate a temperature value
 try:
     capabilities.validate_parameter("temperature", 0.7)
-    print("Temperature 0.7 is valid")
-except Exception as e:
-    print(f"Invalid parameter: {e}")
+    print("✅ Valid temperature")
+except ValueError as e:
+    print(f"❌ Invalid temperature: {e}")
+# Expected output: ✅ Valid temperature
 ```
 
 ## Handling Validation Errors
@@ -32,14 +30,19 @@ except Exception as e:
 Validation errors provide detailed information about why a parameter is invalid:
 
 ```python
+from openai_model_registry import ModelRegistry
+
+registry = ModelRegistry.get_default()
+capabilities = registry.get_capabilities("gpt-4o")
+
 try:
     # Invalid temperature (outside of allowed range)
     capabilities.validate_parameter("temperature", 3.0)
 except Exception as e:
     print(f"Validation error: {e}")
-    # Output: "Validation error: Parameter 'temperature' must be between 0 and 2.
+    # Expected output: Validation error: Parameter 'temperature' must be between 0 and 2.
     # Description: Controls randomness: Lowering results in less random completions.
-    # Current value: 3.0"
+    # Current value: 3.0
 ```
 
 ## Common Parameter Types
@@ -72,6 +75,11 @@ Examples of enum parameters:
 Different models may support different parameters. For example, the O1 model has parameters not available in other models:
 
 ```python
+from openai_model_registry import ModelRegistry
+
+# Initialize registry
+registry = ModelRegistry.get_default()
+
 # Get O1 capabilities
 o1_capabilities = registry.get_capabilities("o1")
 
@@ -81,6 +89,7 @@ try:
     print("reasoning_effort 'medium' is valid for O1")
 except Exception as e:
     print(f"Invalid parameter: {e}")
+# Expected output: reasoning_effort 'medium' is valid for O1
 ```
 
 ## Getting Supported Parameters
@@ -88,13 +97,15 @@ except Exception as e:
 You can retrieve the list of parameters supported by a specific model:
 
 ```python
+from openai_model_registry import ModelRegistry
+
+registry = ModelRegistry.get_default()
 capabilities = registry.get_capabilities("gpt-4o")
 
 # Get supported parameters
-supported_params = [
-    ref.ref.split(".")[1] for ref in capabilities.supported_parameters
-]
+supported_params = [ref.ref.split(".")[1] for ref in capabilities.supported_parameters]
 print(f"Supported parameters: {', '.join(sorted(supported_params))}")
+# Expected output: Supported parameters: max_tokens, temperature, top_p, ...
 ```
 
 ## Next Steps

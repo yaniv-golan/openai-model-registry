@@ -29,9 +29,9 @@ More advanced examples will be added here in the future, such as:
 The `cli_integration.py` example demonstrates how to integrate the OpenAI Model Registry into a CLI application. This example showcases:
 
 1. **Automatic Update Notifications**: Non-intrusive checks for registry updates that run periodically
-2. **Registry Update Command**: A dedicated command to update the registry with user confirmation
-3. **Parameter Validation**: Validating model parameters against model capabilities
-4. **Token Limit Enforcement**: Enforcing context window and output token limits
+1. **Registry Update Command**: A dedicated command to update the registry with user confirmation
+1. **Parameter Validation**: Validating model parameters against model capabilities
+1. **Token Limit Enforcement**: Enforcing context window and output token limits
 
 ### Running the Example
 

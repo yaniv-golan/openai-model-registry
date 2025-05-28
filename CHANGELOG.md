@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.6.1] - 2025-05-28
+## \[0.6.1\] - 2025-05-28
 
 ### Fixed
 
@@ -22,7 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhanced validation-only mode to properly return `VALIDATED` status after successful remote validation
 - Improved error propagation when remote configuration fetch fails
 
-## [0.6.0] - 2025-05-26
+## \[0.6.0\] - 2025-05-26
 
 ### Added
 
@@ -49,7 +49,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhanced documentation for developers testing code that depends on this library
 - No breaking changes to public API - all existing code continues to work
 
-## [0.5.0] - 2025-05-23
+## \[0.5.0\] - 2025-05-23
 
 ### Added
 
@@ -85,7 +85,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed schema compatibility to properly support semantic versioning principles
 - Fixed all tests to pass with proper backward compatibility implementation
 
-## [0.4.0] - 2025-03-18
+## \[0.4.0\] - 2025-03-18
 
 ### Added
 
@@ -123,7 +123,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed race condition in configuration refresh by adding proper locking around version check
 - Fixed duplicate alias detection to prevent multiple models using the same alias
 
-## [0.3.0] - 2025-03-17
+## \[0.3.0\] - 2025-03-17
 
 ### Added
 
@@ -148,7 +148,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added thread safety to the singleton instance creation in ModelRegistry
 - Fixed duplicate network requests in check_for_updates method
-- Fixed unchecked None return in _save_cache_metadata
+- Fixed unchecked None return in \_save_cache_metadata
 - Fixed missing write permission check in config directory creation
 - Fixed unsafe callback usage in logging by adding exception handling
 - Fixed inconsistent error parameter type in ModelNotSupportedError
@@ -156,7 +156,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed shared references issue by using deepcopy for constraints dictionary
 - Fixed documentation build process in GitHub Actions
 
-## [0.2.2] - 2024-03-01
+## \[0.2.2\] - 2024-03-01
 
 ### Added
 

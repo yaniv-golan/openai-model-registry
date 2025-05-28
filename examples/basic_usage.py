@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Example of basic registry usage."""
 
-
 from openai_model_registry import ModelRegistry
 
 
@@ -12,7 +11,7 @@ def print_model_info(model_name: str) -> None:
         model_name: Name of the model to look up
     """
     try:
-        registry = ModelRegistry.get_instance()
+        registry = ModelRegistry.get_default()
         capabilities = registry.get_capabilities(model_name)
 
         print(f"Model: {model_name}")
@@ -47,7 +46,7 @@ def main() -> None:
         print_model_info(model)
 
     # Demonstrate parameter validation
-    registry = ModelRegistry.get_instance()
+    registry = ModelRegistry.get_default()
     gpt4o = registry.get_capabilities("gpt-4o")
 
     print("Parameter validation examples:")

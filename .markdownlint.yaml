@@ -1,12 +1,8 @@
 # Markdownlint configuration for OpenAI Model Registry documentation
 # See https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md
 
-# MD013: Line length
-MD013:
-  line_length: 120
-  code_blocks: false
-  tables: false
-  headings: false
+# MD013: Line length - disabled for documentation flexibility
+MD013: false
 
 # MD033: Allow inline HTML (for admonitions and formatting)
 MD033: false

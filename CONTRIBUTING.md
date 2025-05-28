@@ -50,10 +50,10 @@ poetry run pytest tests/test_registry.py
 ## Pull Request Process
 
 1. Fork the repository and create a branch for your feature or bug fix
-2. Write your code and tests
-3. Update documentation if necessary
-4. Ensure all tests pass and pre-commit checks succeed
-5. Submit a pull request to the main repository
+1. Write your code and tests
+1. Update documentation if necessary
+1. Ensure all tests pass and pre-commit checks succeed
+1. Submit a pull request to the main repository
 
 ## Code Style
 
@@ -87,14 +87,14 @@ The model registry maintains information about OpenAI models and their capabilit
 Model information is stored in two main YAML files located in the `src/openai_model_registry/config/` directory:
 
 1. **`models.yml`**: Contains model definitions, capabilities, and references to parameter constraints
-2. **`parameter_constraints.yml`**: Defines reusable parameter constraints that can be referenced by models
+1. **`parameter_constraints.yml`**: Defines reusable parameter constraints that can be referenced by models
 
 ### Structure of `models.yml`
 
 This file has the following key sections:
 
 1. **`version`**: The version of the model data schema
-2. **`dated_models`**: Contains each model variant with a specific date in its name
+1. **`dated_models`**: Contains each model variant with a specific date in its name
    - Each model entry includes:
      - `context_window`: Maximum token limit for input
      - `max_output_tokens`: Maximum tokens the model can output
@@ -103,7 +103,7 @@ This file has the following key sections:
      - `supported_parameters`: List of parameters the model accepts, with references to constraints
      - `description`: Short description of the model
      - `min_version`: Date information for version validation
-3. **`aliases`**: Maps generic model names to their dated versions
+1. **`aliases`**: Maps generic model names to their dated versions
 
 Example model entry:
 
@@ -131,7 +131,7 @@ This file defines reusable constraints for model parameters, organized by type:
 
 1. **`numeric_constraints`**: For numerical parameters like temperature or top_p
    - Each entry includes type, min/max values, description, and allowed data types
-2. **`enum_constraints`**: For parameters with specific allowed values
+1. **`enum_constraints`**: For parameters with specific allowed values
    - Each entry includes type, allowed values list, and description
 
 Example constraint:
@@ -149,18 +149,21 @@ temperature:
 ### How to Add or Update Models
 
 1. **Adding a new model**:
+
    - Add a new entry under `dated_models` in `models.yml`
    - Use the format `model-name-YYYY-MM-DD` for the key
    - Fill in all required fields (context_window, max_output_tokens, etc.)
    - Reference existing parameter constraints using the `ref` field
    - Add an alias in the `aliases` section if needed
 
-2. **Updating an existing model**:
+1. **Updating an existing model**:
+
    - Locate the model entry in `dated_models`
    - Update the relevant fields as needed
    - Consider adding a new dated version rather than modifying existing ones if the changes are significant
 
-3. **Adding new parameter constraints**:
+1. **Adding new parameter constraints**:
+
    - Add new entries to the appropriate section in `parameter_constraints.yml`
    - Follow the existing format for the type of constraint (numeric or enum)
 
@@ -170,11 +173,11 @@ After making changes to the configuration files:
 
 1. Run the test suite to verify the changes don't break existing functionality:
 
-   ```
+   ```bash
    poetry run pytest
    ```
 
-2. Create a test that uses the model you added or modified to ensure it's correctly loaded:
+1. Create a test that uses the model you added or modified to ensure it's correctly loaded:
 
    ```python
    def test_new_model_capabilities():
@@ -186,8 +189,8 @@ After making changes to the configuration files:
 ### Best Practices
 
 1. **Maintain backward compatibility** when possible
-2. **Document changes** in CHANGELOG.md
-3. **Use semantic versioning** for library releases
-4. **Be conservative** with parameter constraints to avoid false positives
-5. **Add tests** for any new models or constraints
-6. **Update documentation** if you add new constraint types or model parameters
+1. **Document changes** in CHANGELOG.md
+1. **Use semantic versioning** for library releases
+1. **Be conservative** with parameter constraints to avoid false positives
+1. **Add tests** for any new models or constraints
+1. **Update documentation** if you add new constraint types or model parameters
