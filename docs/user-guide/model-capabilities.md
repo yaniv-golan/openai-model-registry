@@ -164,6 +164,8 @@ except ModelSunsetError as e:
 
 Some models can search the web for up-to-date information. The OpenAI Model Registry uses a single boolean flag, `supports_web_search`, to indicate this capability. However, how web search is invoked and its behavior differs between OpenAI's Chat Completions API and Responses API.
 
+> **⚠️ Azure OpenAI Users:** If you're using Azure OpenAI endpoints, please note that standard Azure Chat Completions and Responses APIs **do not support** the `web_search_preview` tool, regardless of what `supports_web_search` indicates. This is a platform limitation, not a model limitation. See our [Azure OpenAI Usage Guide](azure-openai.md) for detailed guidance and alternative approaches.
+
 ### Two Approaches to Web Search
 
 1. **Chat Completions API (Always Searches):**

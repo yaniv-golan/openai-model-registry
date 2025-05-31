@@ -66,6 +66,8 @@ if model.supports_structured:
 
 ➡️ **Keeping it fresh:** run `openai-model-registry-update` (CLI) or `registry.refresh_from_remote()` whenever OpenAI ships new models.
 
+> **🔵 Azure OpenAI Users:** If you're using Azure OpenAI endpoints, be aware of platform-specific limitations, especially for web search capabilities. See our [Azure OpenAI documentation](docs/user-guide/azure-openai.md) for guidance.
+
 ## Practical Use Cases
 
 ### Validating Parameters Before API Calls

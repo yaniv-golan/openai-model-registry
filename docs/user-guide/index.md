@@ -19,4 +19,5 @@ See the [Getting Started](getting-started.md) guide to install and begin using t
 
 - [Model Capabilities](model-capabilities.md) - Working with model capabilities and constraints
 - [Parameter Validation](parameter-validation.md) - Validating parameters against model-specific constraints
+- [Azure OpenAI Usage](azure-openai.md) - Important considerations for Azure OpenAI endpoints
 - [Advanced Usage](advanced-usage.md) - Advanced features and configurations

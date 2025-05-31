@@ -50,6 +50,10 @@ if capabilities.is_deprecated:
 
 ➡️ **Keeping it fresh:** run `openai-model-registry-update` (CLI) or `registry.refresh_from_remote()` whenever OpenAI ships new models.
 
+## Important Notes
+
+> **🔵 Azure OpenAI Users:** If you're using Azure OpenAI endpoints, please be aware of platform-specific limitations, especially regarding web search capabilities. See our [Azure OpenAI Usage Guide](user-guide/azure-openai.md) for detailed guidance.
+
 ## API Reference
 
 Please see the [API Reference](api/index.md) for detailed information about the package's classes and methods.
