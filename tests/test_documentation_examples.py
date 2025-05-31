@@ -21,6 +21,7 @@ from openai_model_registry import (
     ModelRegistryError,
     ModelVersion,
     NumericConstraint,
+    ObjectConstraint,
     ParameterNotSupportedError,
     ParameterReference,
 )
@@ -92,7 +93,9 @@ class TestBasicUsageExamples:
         )
 
         # Add constraints manually since the constructor doesn't accept them directly
-        constraints: Dict[str, Union[NumericConstraint, EnumConstraint]] = {
+        constraints: Dict[
+            str, Union[NumericConstraint, EnumConstraint, ObjectConstraint]
+        ] = {
             "temperature": temp_constraint,
             "reasoning_effort": effort_constraint,
         }
@@ -255,7 +258,9 @@ class TestAdvancedExamples:
         capabilities.supported_parameters = [param_temp, param_tokens]
 
         # Add constraints manually
-        constraints: Dict[str, Union[NumericConstraint, EnumConstraint]] = {
+        constraints: Dict[
+            str, Union[NumericConstraint, EnumConstraint, ObjectConstraint]
+        ] = {
             "temperature": NumericConstraint(
                 min_value=0.0,
                 max_value=2.0,

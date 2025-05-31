@@ -21,6 +21,7 @@ except ImportError:
 from .constraints import (
     EnumConstraint,
     NumericConstraint,
+    ObjectConstraint,
     ParameterReference,
 )
 from .deprecation import (
@@ -74,6 +75,7 @@ __all__ = [
     # Constraints
     "NumericConstraint",
     "EnumConstraint",
+    "ObjectConstraint",
     "ParameterReference",
     # Deprecation
     "DeprecationInfo",

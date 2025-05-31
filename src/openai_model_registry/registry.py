@@ -30,6 +30,7 @@ from .config_result import ConfigResult
 from .constraints import (
     EnumConstraint,
     NumericConstraint,
+    ObjectConstraint,
     ParameterReference,
 )
 from .deprecation import (
@@ -143,11 +144,14 @@ class ModelCapabilities:
         supports_functions: bool = False,
         supports_streaming: bool = False,
         supports_structured: bool = False,
+        supports_web_search: bool = False,
         min_version: Optional[ModelVersion] = None,
         aliases: Optional[List[str]] = None,
         supported_parameters: Optional[List[ParameterReference]] = None,
         constraints: Optional[
-            Dict[str, Union[NumericConstraint, EnumConstraint]]
+            Dict[
+                str, Union[NumericConstraint, EnumConstraint, ObjectConstraint]
+            ]
         ] = None,
     ):
         """Initialize model capabilities.
@@ -162,6 +166,7 @@ class ModelCapabilities:
             supports_functions: Whether the model supports function calling
             supports_streaming: Whether the model supports streaming
             supports_structured: Whether the model supports structured output
+            supports_web_search: Whether the model supports web search (Chat API search-preview models or Responses API tool)
             min_version: Minimum version for dated model variants
             aliases: List of aliases for this model
             supported_parameters: List of parameter references supported by this model
@@ -176,6 +181,7 @@ class ModelCapabilities:
         self.supports_functions = supports_functions
         self.supports_streaming = supports_streaming
         self.supports_structured = supports_structured
+        self.supports_web_search = supports_web_search
         self.min_version = min_version
         self.aliases = aliases or []
         self.supported_parameters = supported_parameters or []
@@ -193,7 +199,7 @@ class ModelCapabilities:
 
     def get_constraint(
         self, ref: str
-    ) -> Optional[Union[NumericConstraint, EnumConstraint]]:
+    ) -> Optional[Union[NumericConstraint, EnumConstraint, ObjectConstraint]]:
         """Get a constraint by reference.
 
         Args:
@@ -254,6 +260,8 @@ class ModelCapabilities:
         if isinstance(constraint, NumericConstraint):
             constraint.validate(name=name, value=value)
         elif isinstance(constraint, EnumConstraint):
+            constraint.validate(name=name, value=value)
+        elif isinstance(constraint, ObjectConstraint):
             constraint.validate(name=name, value=value)
         else:
             # This shouldn't happen with proper type checking, but just in case
@@ -320,7 +328,7 @@ class ModelRegistry:
         self.config = config or RegistryConfig()
         self._capabilities: Dict[str, ModelCapabilities] = {}
         self._constraints: Dict[
-            str, Union[NumericConstraint, EnumConstraint]
+            str, Union[NumericConstraint, EnumConstraint, ObjectConstraint]
         ] = {}
 
         # Set up caching for get_capabilities
@@ -544,6 +552,37 @@ class ModelRegistry:
                                 allowed_values=allowed_values,
                                 description=description,
                             )
+                        elif constraint_type == "object":
+                            # Implementation for object constraint type
+                            description = constraint.get("description", "")
+                            required_keys = constraint.get("required_keys", [])
+                            allowed_keys = constraint.get("allowed_keys")
+
+                            # Type validation
+                            if not isinstance(required_keys, list):
+                                log_error(
+                                    LogEvent.MODEL_REGISTRY,
+                                    f"Constraint '{constraint_name}' has non-list 'required_keys' field",
+                                    required_keys=required_keys,
+                                )
+                                continue
+
+                            if allowed_keys is not None and not isinstance(
+                                allowed_keys, list
+                            ):
+                                log_error(
+                                    LogEvent.MODEL_REGISTRY,
+                                    f"Constraint '{constraint_name}' has non-list 'allowed_keys' field",
+                                    allowed_keys=allowed_keys,
+                                )
+                                continue
+
+                            # Create constraint
+                            self._constraints[full_ref] = ObjectConstraint(
+                                description=description,
+                                required_keys=required_keys,
+                                allowed_keys=allowed_keys,
+                            )
                         else:
                             log_error(
                                 LogEvent.MODEL_REGISTRY,
@@ -701,6 +740,9 @@ class ModelRegistry:
                     ),
                     supports_structured=model_config.get(
                         "supports_structured", False
+                    ),
+                    supports_web_search=model_config.get(
+                        "supports_web_search", False
                     ),
                     min_version=min_version,
                     aliases=[],  # Aliases are handled separately
@@ -881,6 +923,7 @@ class ModelRegistry:
                     supports_functions=base_model_caps.supports_functions,
                     supports_streaming=base_model_caps.supports_streaming,
                     supports_structured=base_model_caps.supports_structured,
+                    supports_web_search=base_model_caps.supports_web_search,
                     min_version=base_model_caps.min_version,
                     aliases=base_model_caps.aliases,
                     supported_parameters=base_model_caps.supported_parameters,
@@ -903,14 +946,14 @@ class ModelRegistry:
 
     def get_parameter_constraint(
         self, ref: str
-    ) -> Union[NumericConstraint, EnumConstraint]:
+    ) -> Union[NumericConstraint, EnumConstraint, ObjectConstraint]:
         """Get a parameter constraint by reference.
 
         Args:
             ref: Reference string (e.g., "numeric_constraints.temperature")
 
         Returns:
-            The constraint object (NumericConstraint or EnumConstraint)
+            The constraint object (NumericConstraint or EnumConstraint or ObjectConstraint)
 
         Raises:
             ConstraintNotFoundError: If the constraint is not found

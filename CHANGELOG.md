@@ -5,6 +5,51 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## \[0.7.0\] - 2025-05-31
+
+### Added
+
+- **Web Search Capability Support**: Added comprehensive support for tracking web search capabilities across OpenAI models
+  - Added `supports_web_search` boolean field to `ModelCapabilities` class
+  - Added support for Chat Completions API search-preview models (`gpt-4o-search-preview`, `gpt-4o-mini-search-preview`)
+  - Added support for Responses API tool-based web search (GPT-4o, GPT-4.1, O-series models)
+  - Added aliases for search-preview models for easier access
+- **Object Constraint Type**: Added new `ObjectConstraint` class for validating object/dictionary parameters
+  - Supports required keys validation
+  - Supports allowed keys restriction
+  - Enhanced constraint validation system to handle object parameters
+- **Enhanced Documentation**: Added comprehensive web search documentation
+  - Detailed explanation of Chat API vs Responses API web search approaches
+  - Complete usage examples showing how to detect and use web search capabilities
+  - Clear guidance on API endpoint selection based on model type
+- **New Models**: Added support for 2 new search-preview model variants
+  - `gpt-4o-search-preview-2025-03-11`: GPT-4o with built-in web search (always searches)
+  - `gpt-4o-mini-search-preview-2025-03-11`: GPT-4o Mini with built-in web search (always searches)
+
+### Changed
+
+- **Enhanced Model Capabilities**: Updated 11 existing models with web search capability flags
+  - GPT-4o series: `supports_web_search: true` (Responses API tool-based)
+  - GPT-4.1 series: `supports_web_search: true` for regular and mini variants
+  - O-series models: `supports_web_search: true` for all reasoning models (o1, o3, o4)
+  - GPT-4.1-nano: `supports_web_search: false` (explicitly unsupported per OpenAI docs)
+- **Type System Enhancement**: Updated constraint type hints throughout codebase
+  - Enhanced `ModelCapabilities._constraints` to support `ObjectConstraint`
+  - Updated `ModelRegistry._constraints` type annotations
+  - Updated constraint validation methods to handle object types
+- **Improved API Exports**: Added `ObjectConstraint` to public API exports in `__init__.py`
+
+### Technical Details
+
+- Web search capability tracking follows unified boolean flag approach for simplicity
+- Registry indicates *capability availability*, application layer handles *API usage differences*
+- Maintains backward compatibility - all existing code continues to work unchanged
+- Search-preview models are documented as "always search" behavior in descriptions
+- Tool-based models use conditional search via Responses API `web_search_preview` tool
+- Added comprehensive test coverage for web search capability detection
+- Enhanced documentation with practical usage examples and troubleshooting guidance
+- **Schema Version**: Updated models.yml schema from v1.1.0 to v1.2.0 to reflect web search capability additions
+
 ## \[0.6.1\] - 2025-05-28
 
 ### Fixed

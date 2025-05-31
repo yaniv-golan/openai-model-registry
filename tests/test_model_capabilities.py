@@ -217,3 +217,49 @@ def test_model_capabilities_validate_parameters() -> None:
                 "max_tokens": 3000,  # Too high
             }
         )
+
+
+def test_web_search_capability() -> None:
+    """Test web search capability tracking."""
+    # Test model with web search support
+    web_search_model = ModelCapabilities(
+        model_name="gpt-4o-search-preview",
+        openai_model_name="gpt-4o-search-preview",
+        context_window=128000,
+        max_output_tokens=16384,
+        deprecation=_create_test_deprecation(),
+        supports_web_search=True,
+    )
+
+    # Test model without web search support
+    regular_model = ModelCapabilities(
+        model_name="gpt-3.5-turbo",
+        openai_model_name="gpt-3.5-turbo",
+        context_window=4096,
+        max_output_tokens=2048,
+        deprecation=_create_test_deprecation(),
+        supports_web_search=False,
+    )
+
+    # Test web search capability detection
+    assert web_search_model.supports_web_search is True
+    assert regular_model.supports_web_search is False
+
+    # Test that web search is properly tracked alongside other capabilities
+    assert web_search_model.supports_web_search
+    assert not regular_model.supports_web_search
+
+
+def test_web_search_capability_default() -> None:
+    """Test that web search capability defaults to False."""
+    # Test that web search defaults to False when not specified
+    default_model = ModelCapabilities(
+        model_name="test-model",
+        openai_model_name="test-model",
+        context_window=4096,
+        max_output_tokens=2048,
+        deprecation=_create_test_deprecation(),
+        # supports_web_search not specified, should default to False
+    )
+
+    assert default_model.supports_web_search is False

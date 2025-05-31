@@ -1,6 +1,6 @@
 # Models supporting structured output
 # This file defines the capabilities and constraints for all supported models
-version: "1.1.0"
+version: "1.2.0"
 
 # Primary section: dated model versions
 dated_models:
@@ -9,6 +9,7 @@ dated_models:
     max_output_tokens: 16384
     supports_structured: true
     supports_streaming: true
+    supports_web_search: true
     supported_parameters:
       - ref: "numeric_constraints.temperature"
         max_value: null
@@ -38,6 +39,7 @@ dated_models:
     max_output_tokens: 16384
     supports_structured: true
     supports_streaming: true
+    supports_web_search: true
     supported_parameters:
       - ref: "numeric_constraints.temperature"
         max_value: null
@@ -67,6 +69,7 @@ dated_models:
     max_output_tokens: 32768
     supports_structured: true
     supports_streaming: true
+    supports_web_search: true
     supported_parameters:
       - ref: "numeric_constraints.temperature"
         max_value: null
@@ -96,6 +99,7 @@ dated_models:
     max_output_tokens: 32768
     supports_structured: true
     supports_streaming: true
+    supports_web_search: true
     supported_parameters:
       - ref: "numeric_constraints.temperature"
         max_value: null
@@ -125,6 +129,7 @@ dated_models:
     max_output_tokens: 32768
     supports_structured: true
     supports_streaming: true
+    supports_web_search: false
     supported_parameters:
       - ref: "numeric_constraints.temperature"
         max_value: null
@@ -183,6 +188,7 @@ dated_models:
     max_output_tokens: 100000
     supports_structured: true
     supports_streaming: false
+    supports_web_search: true
     supported_parameters:
       - ref: "numeric_constraints.max_completion_tokens"
         max_value: null
@@ -206,6 +212,7 @@ dated_models:
     max_output_tokens: 65536
     supports_structured: false
     supports_streaming: false
+    supports_web_search: true
     supported_parameters:
       - ref: "numeric_constraints.max_completion_tokens"
         max_value: null
@@ -227,6 +234,7 @@ dated_models:
     max_output_tokens: 100000
     supports_structured: true
     supports_streaming: true
+    supports_web_search: true
     supported_parameters:
       - ref: "numeric_constraints.max_completion_tokens"
         max_value: null
@@ -250,6 +258,7 @@ dated_models:
     max_output_tokens: 100000
     supports_structured: true
     supports_streaming: true
+    supports_web_search: true
     supported_parameters:
       - ref: "numeric_constraints.max_completion_tokens"
         max_value: null
@@ -273,6 +282,7 @@ dated_models:
     max_output_tokens: 100000
     supports_structured: true
     supports_streaming: true
+    supports_web_search: true
     supported_parameters:
       - ref: "numeric_constraints.max_completion_tokens"
         max_value: null
@@ -283,6 +293,67 @@ dated_models:
       year: 2025
       month: 4
       day: 16
+    deprecation:
+      status: "active"
+      deprecates_on: null
+      sunsets_on: null
+      replacement: null
+      migration_guide: null
+      reason: "active"
+
+  # Chat Completions API - Search Preview Models (always search)
+  gpt-4o-search-preview-2025-03-11:
+    context_window: 128000
+    max_output_tokens: 16384
+    supports_structured: true
+    supports_streaming: true
+    supports_web_search: true
+    supported_parameters:
+      - ref: "numeric_constraints.temperature"
+        max_value: null
+      - ref: "numeric_constraints.top_p"
+        max_value: null
+      - ref: "numeric_constraints.frequency_penalty"
+        max_value: null
+      - ref: "numeric_constraints.presence_penalty"
+        max_value: null
+      - ref: "numeric_constraints.max_completion_tokens"
+        max_value: null
+    description: "GPT-4o with built-in web search for Chat Completions API (always searches)"
+    min_version:
+      year: 2025
+      month: 3
+      day: 11
+    deprecation:
+      status: "active"
+      deprecates_on: null
+      sunsets_on: null
+      replacement: null
+      migration_guide: null
+      reason: "active"
+
+  gpt-4o-mini-search-preview-2025-03-11:
+    context_window: 128000
+    max_output_tokens: 16384
+    supports_structured: true
+    supports_streaming: true
+    supports_web_search: true
+    supported_parameters:
+      - ref: "numeric_constraints.temperature"
+        max_value: null
+      - ref: "numeric_constraints.top_p"
+        max_value: null
+      - ref: "numeric_constraints.frequency_penalty"
+        max_value: null
+      - ref: "numeric_constraints.presence_penalty"
+        max_value: null
+      - ref: "numeric_constraints.max_completion_tokens"
+        max_value: null
+    description: "GPT-4o Mini with built-in web search for Chat Completions API (always searches)"
+    min_version:
+      year: 2025
+      month: 3
+      day: 11
     deprecation:
       status: "active"
       deprecates_on: null
@@ -304,3 +375,5 @@ aliases:
   o3: "o3-2025-04-16"
   o3-mini: "o3-mini-2025-01-31"
   o4-mini: "o4-mini-2025-04-16"
+  gpt-4o-search-preview: "gpt-4o-search-preview-2025-03-11"
+  gpt-4o-mini-search-preview: "gpt-4o-mini-search-preview-2025-03-11"

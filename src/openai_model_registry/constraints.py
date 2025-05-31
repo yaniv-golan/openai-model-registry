@@ -150,3 +150,61 @@ class EnumConstraint:
                 f"Description: {self.description}\n"
                 f"Allowed values: {', '.join(map(str, sorted(self.allowed_values)))}"
             )
+
+
+class ObjectConstraint:
+    """Constraint for object/dictionary parameters."""
+
+    def __init__(
+        self,
+        description: str = "",
+        required_keys: Optional[List[str]] = None,
+        allowed_keys: Optional[List[str]] = None,
+    ):
+        """Initialize object constraint.
+
+        Args:
+            description: Description of the parameter
+            required_keys: List of required keys in the object
+            allowed_keys: List of allowed keys (if None, any keys are allowed)
+        """
+        self.description = description
+        self.required_keys = required_keys or []
+        self.allowed_keys = allowed_keys
+
+    def validate(self, name: str, value: Any) -> None:
+        """Validate a value against this constraint.
+
+        Args:
+            name: Parameter name for error messages
+            value: Value to validate
+
+        Raises:
+            ModelRegistryError: If validation fails
+        """
+        # Validate type
+        if not isinstance(value, dict):
+            raise ModelRegistryError(
+                f"Parameter '{name}' must be an object/dictionary, got {type(value).__name__}.\n"
+                f"Description: {self.description}"
+            )
+
+        # Check required keys
+        missing_keys = [key for key in self.required_keys if key not in value]
+        if missing_keys:
+            raise ModelRegistryError(
+                f"Parameter '{name}' is missing required keys: {', '.join(missing_keys)}.\n"
+                f"Description: {self.description}"
+            )
+
+        # Check allowed keys (if specified)
+        if self.allowed_keys is not None:
+            invalid_keys = [
+                key for key in value.keys() if key not in self.allowed_keys
+            ]
+            if invalid_keys:
+                raise ModelRegistryError(
+                    f"Parameter '{name}' contains invalid keys: {', '.join(invalid_keys)}.\n"
+                    f"Description: {self.description}\n"
+                    f"Allowed keys: {', '.join(self.allowed_keys)}"
+                )
