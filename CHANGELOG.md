@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## \[0.7.1\] - 2025-05-31
+
+### Added
+
+- **Azure OpenAI Documentation**: Added comprehensive guidance for Azure OpenAI users
+  - New dedicated [Azure OpenAI Usage Guide](docs/user-guide/azure-openai.md) explaining platform limitations
+  - Detailed explanation of why standard Azure endpoints don't support `web_search_preview` tool
+  - Code examples for detecting Azure endpoints and implementing graceful fallbacks
+  - Alternative approaches: Azure Assistants API (Browse tool) and external search integration
+  - Platform-aware capability detection patterns and best practices
+
+### Changed
+
+- **Enhanced Documentation Discoverability**: Added Azure guidance references across multiple documentation entry points
+  - Added warning callout in Web Search Support section of model capabilities guide
+  - Added Azure user notice in main documentation index and README
+  - Added Azure guide to user guide navigation and features list
+  - Improved user experience for Azure OpenAI users to prevent runtime errors
+
+### Technical Details
+
+- Documentation-only release - no code changes or breaking changes
+- Addresses user confusion about web search capabilities on Azure endpoints
+- Provides immediate guidance while maintaining backward compatibility
+- Empowers developers to implement correct Azure-specific logic in their applications
+
 ## \[0.7.0\] - 2025-05-31
 
 ### Added

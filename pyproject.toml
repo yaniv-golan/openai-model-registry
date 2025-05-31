@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "openai-model-registry"
-version = "0.7.0"
+version = "0.7.1"
 description = "Registry for OpenAI models with capability and parameter validation"
 authors = ["Yaniv Golan <yaniv@golan.name>"]
 readme = "README.md"
