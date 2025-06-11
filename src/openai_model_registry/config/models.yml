@@ -4,6 +4,30 @@ version: "1.2.0"
 
 # Primary section: dated model versions
 dated_models:
+  o3-pro-2025-06-10:
+    context_window: 200000
+    max_output_tokens: 100000
+    supports_structured: true
+    supports_streaming: false
+    supports_web_search: false
+    supported_parameters:
+      - ref: "numeric_constraints.max_completion_tokens"
+        max_value: null
+      - ref: "enum_constraints.reasoning_effort"
+        max_value: null
+    description: "O3 Pro reasoning model"
+    min_version:
+      year: 2025
+      month: 6
+      day: 10
+    deprecation:
+      status: "active"
+      deprecates_on: null
+      sunsets_on: null
+      replacement: null
+      migration_guide: null
+      reason: "active"
+
   gpt-4o-2024-05-13:
     context_window: 128000
     max_output_tokens: 16384
@@ -364,6 +388,7 @@ dated_models:
 
 # Secondary section: aliases pointing to dated versions
 aliases:
+  o3-pro: "o3-pro-2025-06-10"
   gpt-4o: "gpt-4o-2024-05-13"
   gpt-4o-mini: "gpt-4o-mini-2024-07-18"
   gpt-4.1: "gpt-4.1-2025-04-14"

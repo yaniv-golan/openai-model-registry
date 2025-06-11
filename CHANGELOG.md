@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Added `py.typed` file to the package to support PEP 561-style type checking. This allows consumers of the library to type check their code against the library's type hints.
+- Added new `o3-pro` model.
 
 ## \[0.7.1\] - 2025-05-31
 
