@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## \[0.7.2\] - 2025-06-11
+
+### Added
+
+- Added `py.typed` file to the package to support PEP 561-style type checking. This allows consumers of the library to type check their code against the library's type hints.
+
 ## \[0.7.1\] - 2025-05-31
 
 ### Added
