@@ -56,3 +56,4 @@ CLAUDE.md
 repomix-output.txt
 .cursor/rules/
 .claude/settings.local.json
+dev/
