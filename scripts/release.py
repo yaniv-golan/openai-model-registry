@@ -158,7 +158,7 @@ def run_tests(dry_run: bool = False) -> None:
         return
 
     # Install dependencies
-    run_command("poetry install --with dev,test")
+    run_command("poetry install --with dev")
 
     # Run tests
     log_info("Running pytest...")
