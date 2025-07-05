@@ -166,7 +166,8 @@ class ModelCapabilities:
             supports_functions: Whether the model supports function calling
             supports_streaming: Whether the model supports streaming
             supports_structured: Whether the model supports structured output
-            supports_web_search: Whether the model supports web search (Chat API search-preview models or Responses API tool)
+            supports_web_search: Whether the model supports web search
+                (Chat API search-preview models or Responses API tool)
             min_version: Minimum version for dated model variants
             aliases: List of aliases for this model
             supported_parameters: List of parameter references supported by this model
