@@ -8,7 +8,7 @@ version = "1.0.0rc1"
 description = "Registry for OpenAI models with capability and parameter validation"
 readme = "README.md"
 authors = [{ name = "Yaniv Golan", email = "yaniv@golan.name" }]
-requires-python = ">=3.9,<4.0"
+requires-python = ">=3.10,<4.0"
 dynamic = ["dependencies"]
 
 [tool.poetry]
@@ -23,7 +23,7 @@ packages = [
 include = ["src/openai_model_registry/py.typed"]
 
 [tool.poetry.dependencies]
-python = ">=3.9,<4.0"
+python = ">=3.10,<4.0"
 PyYAML = "^6.0.1"
 requests = "^2.31.0"
 typing-extensions = "^4.9.0"
@@ -89,7 +89,7 @@ ignore_missing_imports = true
 [tool.black]
 line-length = 120
 target-version = ["py39"]
-include = '\\.pyi?$'
+include = '\\.[pyi]?$'
 preview = false
 required-version = "23.3.0"
 
