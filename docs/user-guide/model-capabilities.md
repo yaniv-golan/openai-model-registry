@@ -11,6 +11,7 @@ Model capabilities represent the features, limitations, and parameters supported
 - Support for streaming
 - Support for structured output
 - Support for web search
+- Input and output modalities (e.g., `input_modalities: [text, image]`, `output_modalities: [text]`)
 - Supported parameters and their constraints
 
 **Note on Naming Conventions:**
@@ -19,8 +20,6 @@ Model capabilities represent the features, limitations, and parameters supported
 - **`*-mini`** → a lower-cost, smaller-context sibling model.
 - **Structured output** means the model supports JSON schema / function calling.
 - **Web search** means the model can search the web for up-to-date information.
-
-For a complete guide on model naming and selection, see [Model Aliases and Naming Conventions](model-aliases.md).
 
 ## Accessing Model Capabilities
 
@@ -41,29 +40,14 @@ print(f"Max output tokens: {capabilities.max_output_tokens}")
 print(f"Supports structured output: {capabilities.supports_structured}")
 print(f"Supports streaming: {capabilities.supports_streaming}")
 print(f"Supports web search: {capabilities.supports_web_search}")
+# Modalities
+print(f"Input modalities: {getattr(capabilities, 'input_modalities', [])}")
+print(f"Output modalities: {getattr(capabilities, 'output_modalities', [])}")
 # Expected output: Context window: 128000
 #                  Max output tokens: 16384
 #                  Supports structured output: True
 #                  Supports streaming: True
 #                  Supports web search: True
-```
-
-## Model Aliases
-
-Some models have aliases - different names that refer to the same underlying model. For example, a dated model version might have an alias to the base model name.
-
-```python
-from openai_model_registry import ModelRegistry
-
-registry = ModelRegistry.get_default()
-
-# Get capabilities for a model
-capabilities = registry.get_capabilities("gpt-4o")
-
-# Check if the model has aliases
-if capabilities.aliases:
-    print(f"Aliases for this model: {', '.join(capabilities.aliases)}")
-# Expected output: (may vary based on model configuration)
 ```
 
 ## Comparing Model Capabilities
@@ -162,6 +146,20 @@ except ModelSunsetError as e:
 
 ## Web Search Support
 
+## Modalities: Input vs Output
+
+The registry distinguishes between what a model can accept as input and what it can produce as output.
+
+- `input_modalities`: list of accepted input types (e.g., `text`, `image`, `audio`)
+- `output_modalities`: list of produced output types
+
+Examples:
+
+- `gpt-4o`: input `[text, image]`, output `[text]`
+- `whisper-1`: input `[audio]`, output `[text]`
+- `tts-1`: input `[text]`, output `[audio]`
+- `dall-e-3`: input `[text]`, output `[image]`
+
 Some models can search the web for up-to-date information. The OpenAI Model Registry uses a single boolean flag, `supports_web_search`, to indicate this capability. However, how web search is invoked and its behavior differs between OpenAI's Chat Completions API and Responses API.
 
 > **⚠️ Azure OpenAI Users:** If you're using Azure OpenAI endpoints, please note that standard Azure Chat Completions and Responses APIs **do not support** the `web_search_preview` tool, regardless of what `supports_web_search` indicates. This is a platform limitation, not a model limitation. See our [Azure OpenAI Usage Guide](azure-openai.md) for detailed guidance and alternative approaches.
@@ -187,7 +185,14 @@ Some models can search the web for up-to-date information. The OpenAI Model Regi
 The Model Registry simplifies this by:
 
 - **Unified Flag:** Using `capabilities.supports_web_search` (boolean) to indicate if a model *can* perform web search, regardless of the API.
-- **Descriptive Information:** The `description` field for search-preview models in the underlying `models.yml` often clarifies their "always searches" behavior (e.g., "GPT-4o with built-in web search for Chat Completions API (always searches)").
+- **Descriptive Information:** The `description` field for search-preview models in the underlying `models.yaml` often clarifies their "always searches" behavior (e.g., "GPT-4o with built-in web search for Chat Completions API (always searches)").
+
+Note: The O1 family uses `reasoning_effort` (enum) instead of classic sampling knobs like `temperature`/`top_p`. Check supported parameters with:
+
+```bash
+omr --format json models get o1 --parameters-only
+```
+
 - **Model Naming:** Following OpenAI's naming (e.g., `-search-preview` suffix for Chat API models).
 
 The registry's role is to inform your application if web search is *available*. It's the application's responsibility to use the correct API endpoint and parameters based on the chosen model and desired search behavior.

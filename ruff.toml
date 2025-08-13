@@ -1,8 +1,8 @@
 # Target Python version
 target-version = "py39"
 
-# Line length - same as black
-line-length = 79
+# Line length - aligned with Black and flake8
+line-length = 120
 
 [lint]
 # Enable Pyflakes (`F`), Bugbear (`B`), and import sorting (`I`)

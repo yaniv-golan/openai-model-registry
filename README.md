@@ -29,6 +29,8 @@ Typical benefits:
 - Handles model aliases and different model versions
 - Works offline with locally stored model information
 - Keeps model information up-to-date with optional updates
+- Programmatic model cards: structured access to each model's capabilities, parameters, pricing (including per-image tiers), and deprecation metadata (OpenAI and Azure providers)
+- Coverage and freshness: includes all OpenAI models as of 2025-08-12; pricing and data are kept current automatically via CI using [ostruct](https://github.com/yaniv-golan/ostruct)
 
 ## Installation
 
@@ -142,6 +144,30 @@ safe_prompt = prepare_prompt("gpt-4o", long_prompt, max_output=1000)
 
 ## Command Line Usage
 
+### OMR CLI
+
+The `omr` CLI provides comprehensive tools for inspecting and managing your model registry:
+
+```bash
+# List all models
+omr models list
+
+# Show data source paths
+omr data paths
+
+# Check for updates
+omr update check
+
+# Get detailed model info
+omr models get gpt-4o
+```
+
+See the [CLI Reference](docs/user-guide/cli.md) for complete documentation.
+
+> Note on updates: `omr update apply` and `omr update refresh` write updated data files to your user data directory by default (or `OMR_DATA_DIR` if set). The `OMR_MODEL_REGISTRY_PATH` environment variable is a read-only override for loading `models.yaml` and is never modified by update commands.
+
+### Legacy Update Command
+
 Update your local registry data:
 
 ```bash
@@ -165,8 +191,10 @@ You can specify custom locations:
 import os
 
 # Use custom registry files
-os.environ["MODEL_REGISTRY_PATH"] = "/path/to/custom/models.yml"
-os.environ["PARAMETER_CONSTRAINTS_PATH"] = "/path/to/custom/parameter_constraints.yml"
+os.environ["OMR_MODEL_REGISTRY_PATH"] = "/path/to/custom/models.yaml"
+os.environ["OMR_PARAMETER_CONSTRAINTS_PATH"] = (
+    "/path/to/custom/parameter_constraints.yml"
+)
 
 # Then initialize registry
 from openai_model_registry import ModelRegistry
@@ -181,6 +209,7 @@ For more details, see:
 - [Getting Started Guide](https://yaniv-golan.github.io/openai-model-registry/user-guide/getting-started/)
 - [API Reference](https://yaniv-golan.github.io/openai-model-registry/api/)
 - [Examples](./examples/)
+- [ostruct pricing automation](scripts/ostruct/README.md)
 
 ## Development
 

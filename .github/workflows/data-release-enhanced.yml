@@ -1,0 +1,347 @@
+name: Enhanced Data Release
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'data/**'
+    tags:
+      - 'data-v*'
+      - 'data-v*-rc*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Data version to release (e.g., 1.0.0 or 1.0.0-rc1)'
+        required: true
+        type: string
+      prerelease:
+        description: 'Mark as prerelease'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  check-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      data-changed: ${{ steps.changes.outputs.data }}
+      should-release: ${{ steps.should-release.outputs.result }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            data:
+              - 'src/openai_model_registry/config/**'
+
+      - name: Determine if should release
+        id: should-release
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "result=true" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event_name }}" = "push" ] && [[ "${{ github.ref }}" =~ refs/tags/data-v ]]; then
+            echo "result=true" >> $GITHUB_OUTPUT
+          elif [ "${{ steps.changes.outputs.data }}" = "true" ]; then
+            echo "result=true" >> $GITHUB_OUTPUT
+          else
+            echo "result=false" >> $GITHUB_OUTPUT
+          fi
+
+  build-data-package:
+    needs: check-changes
+    if: needs.check-changes.outputs.should-release == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install pyyaml requests packaging
+
+      - name: Validate configuration files
+        run: |
+          python -c "
+          import yaml
+          import sys
+          import os
+
+          def validate_yaml(file_path):
+              if not os.path.exists(file_path):
+                  print(f'⚠️  {file_path} does not exist, skipping')
+                  return True
+              try:
+                  with open(file_path, 'r') as f:
+                      yaml.safe_load(f)
+                  print(f'✓ {file_path} is valid YAML')
+                  return True
+              except Exception as e:
+                  print(f'✗ {file_path} is invalid: {e}')
+                  return False
+
+          files = [
+              'src/openai_model_registry/config/models.yml',
+              'src/openai_model_registry/config/parameter_constraints.yml'
+          ]
+          all_valid = all(validate_yaml(f) for f in files)
+          sys.exit(0 if all_valid else 1)
+          "
+
+      - name: Get version info
+        id: version-info
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+            if [[ "$VERSION" =~ rc ]]; then
+              IS_RC="true"
+            else
+              IS_RC="false"
+            fi
+            TAG="data-v$VERSION"
+                     elif [[ "${{ github.ref }}" =~ refs/tags/data-v ]]; then
+             TAG="${GITHUB_REF#refs/tags/}"
+            VERSION="${TAG#data-v}"
+            if [[ "$VERSION" =~ rc ]]; then
+              IS_RC="true"
+            else
+              IS_RC="false"
+            fi
+          else
+            # Auto-increment for push to main
+            LATEST_TAG=$(git tag -l "data-v*" | grep -v "rc" | sort -V | tail -1)
+            if [ -z "$LATEST_TAG" ]; then
+              VERSION="1.0.0"
+            else
+              CURRENT_VERSION="${LATEST_TAG#data-v}"
+              IFS='.' read -r major minor patch <<< "$CURRENT_VERSION"
+              NEW_PATCH=$((patch + 1))
+              VERSION="$major.$minor.$NEW_PATCH"
+            fi
+            TAG="data-v$VERSION"
+            IS_RC="false"
+          fi
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "is_rc=$IS_RC" >> $GITHUB_OUTPUT
+
+      - name: Create data package
+        run: |
+          mkdir -p dist/data-package
+          cd src/openai_model_registry/config
+
+          # Create checksums
+          if [ -f models.yml ]; then
+            sha256sum models.yml >> checksums.txt
+          fi
+          if [ -f parameter_constraints.yml ]; then
+            sha256sum parameter_constraints.yml >> checksums.txt
+          fi
+
+          # Copy files to package directory
+          cp -r * ../../../dist/data-package/
+
+          # Create version info
+          cat > ../../../dist/data-package/version.json << EOF
+          {
+            "version": "${{ steps.version-info.outputs.version }}",
+            "tag": "${{ steps.version-info.outputs.tag }}",
+            "release_date": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "is_rc": ${{ steps.version-info.outputs.is_rc }},
+            "commit": "${{ github.sha }}"
+          }
+          EOF
+
+      - name: Create tarball
+        run: |
+          cd dist
+          tar -czf "openai-model-registry-data-${{ steps.version-info.outputs.version }}.tar.gz" data-package/
+
+      - name: Upload data package artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: data-package
+          path: |
+            dist/data-package/*
+            dist/*.tar.gz
+
+  create-data-release:
+    needs: [check-changes, build-data-package]
+    if: needs.check-changes.outputs.should-release == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download data package artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: data-package
+          path: dist/
+
+      - name: Get version info from build
+        id: version-info
+        run: |
+          if [ -f dist/data-package/version.json ]; then
+            VERSION=$(python -c "import json; print(json.load(open('dist/data-package/version.json'))['version'])")
+            TAG=$(python -c "import json; print(json.load(open('dist/data-package/version.json'))['tag'])")
+            IS_RC=$(python -c "import json; print(json.load(open('dist/data-package/version.json'))['is_rc'])")
+          else
+            echo "Error: version.json not found"
+            exit 1
+          fi
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "is_rc=$IS_RC" >> $GITHUB_OUTPUT
+
+      - name: Generate release notes
+        run: |
+          if [ "${{ steps.version-info.outputs.is_rc }}" = "true" ]; then
+            RELEASE_TYPE="Data Release Candidate"
+            PRERELEASE="true"
+          else
+            RELEASE_TYPE="Data Release"
+            PRERELEASE="false"
+          fi
+
+          cat > release_notes.md << EOF
+          # OpenAI Model Registry $RELEASE_TYPE ${{ steps.version-info.outputs.version }}
+
+          This release contains updated model registry configuration files.
+
+          ## 📦 Installation
+
+          ### Using the Registry
+          \`\`\`bash
+          pip install openai-model-registry
+          from openai_model_registry import ModelRegistry
+          registry = ModelRegistry()  # Will auto-update to this version
+          \`\`\`
+
+          ### Manual Download
+          \`\`\`bash
+          curl -L https://github.com/yaniv-golan/openai-model-registry/releases/download/${{ steps.version-info.outputs.tag }}/openai-model-registry-data-${{ steps.version-info.outputs.version }}.tar.gz -o data.tar.gz
+          tar -xzf data.tar.gz
+          \`\`\`
+
+          ## 📋 Files Included
+
+          - \`models.yml\` - Model definitions and capabilities
+          - \`parameter_constraints.yml\` - Parameter validation rules
+          - \`checksums.txt\` - SHA256 checksums for verification
+          - \`version.json\` - Version metadata
+
+          ## 🔍 Verification
+
+          Verify file integrity using the provided checksums:
+          \`\`\`bash
+          cd data-package
+          sha256sum -c checksums.txt
+          \`\`\`
+
+          ## 🔗 Links
+
+          - [Model Registry Library](https://pypi.org/project/openai-model-registry/)
+          - [Documentation](https://openai-model-registry.readthedocs.io/)
+          - [GitHub Repository](https://github.com/yaniv-golan/openai-model-registry)
+
+          EOF
+
+          echo "prerelease=$PRERELEASE" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version-info.outputs.tag }}
+          name: "Data Release ${{ steps.version-info.outputs.version }}"
+          body_path: release_notes.md
+          draft: false
+          prerelease: ${{ steps.version-info.outputs.is_rc }}
+          files: |
+            dist/data-package/*
+            dist/*.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  update-changelog:
+    needs: [check-changes, build-data-package]
+    if: needs.check-changes.outputs.should-release == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download data package artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: data-package
+          path: dist/
+
+      - name: Update data changelog
+        run: |
+          VERSION=$(python -c "import json; print(json.load(open('dist/data-package/version.json'))['version'])")
+          DATE=$(date -u +"%Y-%m-%d")
+
+          # Create data directory if it doesn't exist
+          mkdir -p src/openai_model_registry/config
+
+          # Create temporary file with new entry
+          cat > temp_changelog.md << EOF
+          # Data Configuration Changelog
+
+          This file tracks changes to the model registry configuration files.
+
+          ## Format
+
+          Each entry should include:
+          - **Version**: Semantic version (e.g., v1.0.0)
+          - **Date**: Release date in YYYY-MM-DD format
+          - **Changes**: List of changes made
+
+          ## Changelog
+
+          ### v$VERSION - $DATE
+
+          **Automated data release**
+
+          - Configuration files updated via automated release process
+          - See git commit history for detailed changes
+
+          EOF
+
+          # Append existing changelog content (skip header)
+          CHANGELOG_FILE="src/openai_model_registry/config/data-changelog.md"
+          if [ -f "$CHANGELOG_FILE" ]; then
+            tail -n +13 "$CHANGELOG_FILE" >> temp_changelog.md
+          fi
+
+          # Replace original
+          mv temp_changelog.md "$CHANGELOG_FILE"
+
+      - name: Commit changelog update
+        run: |
+          VERSION=$(python -c "import json; print(json.load(open('dist/data-package/version.json'))['version'])")
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add src/openai_model_registry/config/data-changelog.md
+          git commit -m "Update data changelog for v$VERSION" || exit 0
+          git push

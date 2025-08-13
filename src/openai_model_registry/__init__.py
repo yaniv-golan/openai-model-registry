@@ -1,8 +1,9 @@
 """Registry for OpenAI model capabilities and version validation.
 
 This package provides a centralized registry for managing OpenAI model capabilities,
-including context windows, token limits, and supported features. It handles
-both model aliases and dated versions, with version validation and fallback support.
+including context windows, token limits, and supported features. It supports
+base models and their dated snapshots under the **modern schema** (top-level ``models``
+mapping). Legacy alias handling and in-code fallback data have been removed.
 """
 
 # Version of the package
@@ -58,6 +59,7 @@ from .registry import (
     RegistryConfig,
     RegistryUpdateResult,
     RegistryUpdateStatus,
+    WebSearchBilling,
     get_registry,
 )
 
@@ -66,6 +68,7 @@ __all__ = [
     # Core registry
     "ModelRegistry",
     "ModelCapabilities",
+    "WebSearchBilling",
     "RegistryConfig",
     "get_registry",
     # Version handling

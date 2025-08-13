@@ -16,9 +16,7 @@ from openai_model_registry.scripts.update_registry import refresh_registry
 @pytest.fixture
 def mock_registry() -> Generator[MagicMock, None, None]:
     """Mock the ModelRegistry for testing."""
-    with patch(
-        "openai_model_registry.scripts.update_registry.ModelRegistry"
-    ) as mock:
+    with patch("openai_model_registry.scripts.update_registry.ModelRegistry") as mock:
         registry_instance = MagicMock()
         mock.get_instance.return_value = registry_instance
         yield registry_instance
@@ -27,9 +25,7 @@ def mock_registry() -> Generator[MagicMock, None, None]:
 class TestRefreshRegistry:
     """Tests for the refresh_registry function."""
 
-    def test_validate_success(
-        self, mock_registry: MagicMock, capsys: Any
-    ) -> None:
+    def test_validate_success(self, mock_registry: MagicMock, capsys: Any) -> None:
         """Test validation mode when successful."""
         result = refresh_registry(validate=True)
 
@@ -41,9 +37,7 @@ class TestRefreshRegistry:
         assert "✅ Config validation successful" in captured.out
         assert result == 0
 
-    def test_validate_verbose(
-        self, mock_registry: MagicMock, capsys: Any
-    ) -> None:
+    def test_validate_verbose(self, mock_registry: MagicMock, capsys: Any) -> None:
         """Test validation mode with verbose output."""
         mock_registry.config.registry_path = "/path/to/registry"
 
@@ -55,9 +49,7 @@ class TestRefreshRegistry:
         assert "Local registry file: /path/to/registry" in captured.out
         assert result == 0
 
-    def test_check_only_update_available(
-        self, mock_registry: MagicMock, capsys: Any
-    ) -> None:
+    def test_check_only_update_available(self, mock_registry: MagicMock, capsys: Any) -> None:
         """Test check_only mode when update is available."""
         mock_registry.check_for_updates.return_value = RefreshResult(
             success=True,
@@ -75,9 +67,7 @@ class TestRefreshRegistry:
         assert "✅ Registry update is available" in captured.out
         assert result == 0
 
-    def test_check_only_already_current(
-        self, mock_registry: MagicMock, capsys: Any
-    ) -> None:
+    def test_check_only_already_current(self, mock_registry: MagicMock, capsys: Any) -> None:
         """Test check_only mode when already current."""
         mock_registry.check_for_updates.return_value = RefreshResult(
             success=True,
@@ -92,9 +82,7 @@ class TestRefreshRegistry:
         assert "✓ Registry is already up to date" in captured.out
         assert result == 0
 
-    def test_check_only_verbose(
-        self, mock_registry: MagicMock, capsys: Any
-    ) -> None:
+    def test_check_only_verbose(self, mock_registry: MagicMock, capsys: Any) -> None:
         """Test check_only mode with verbose output."""
         mock_registry.check_for_updates.return_value = RefreshResult(
             success=True,
@@ -112,9 +100,7 @@ class TestRefreshRegistry:
         assert "Message: Update available" in captured.out
         assert result == 0
 
-    def test_check_only_error(
-        self, mock_registry: MagicMock, capsys: Any
-    ) -> None:
+    def test_check_only_error(self, mock_registry: MagicMock, capsys: Any) -> None:
         """Test check_only mode when error occurs."""
         mock_registry.check_for_updates.return_value = RefreshResult(
             success=False, status=RefreshStatus.ERROR, message="Error occurred"
@@ -127,9 +113,7 @@ class TestRefreshRegistry:
         assert "❌ Error checking for updates: Error occurred" in captured.out
         assert result == 1
 
-    def test_update_already_current_no_force(
-        self, mock_registry: MagicMock, capsys: Any
-    ) -> None:
+    def test_update_already_current_no_force(self, mock_registry: MagicMock, capsys: Any) -> None:
         """Test update when already current and no force flag."""
         mock_registry.check_for_updates.return_value = RefreshResult(
             success=True,
@@ -147,9 +131,7 @@ class TestRefreshRegistry:
         assert "✓ Registry is already up to date" in captured.out
         assert result == 0
 
-    def test_update_success(
-        self, mock_registry: MagicMock, capsys: Any
-    ) -> None:
+    def test_update_success(self, mock_registry: MagicMock, capsys: Any) -> None:
         """Test successful update."""
         mock_registry.check_for_updates.return_value = RefreshResult(
             success=True,
@@ -165,18 +147,14 @@ class TestRefreshRegistry:
         result = refresh_registry()
 
         # Check that refresh_from_remote was called
-        mock_registry.refresh_from_remote.assert_called_once_with(
-            url=None, force=False, validate_only=False
-        )
+        mock_registry.refresh_from_remote.assert_called_once_with(url=None, force=False, validate_only=False)
 
         # Check output
         captured = capsys.readouterr()
         assert "✅ Registry updated successfully" in captured.out
         assert result == 0
 
-    def test_update_failure(
-        self, mock_registry: MagicMock, capsys: Any
-    ) -> None:
+    def test_update_failure(self, mock_registry: MagicMock, capsys: Any) -> None:
         """Test failed update."""
         mock_registry.check_for_updates.return_value = RefreshResult(
             success=True,
@@ -194,9 +172,7 @@ class TestRefreshRegistry:
         assert "❌ Error updating registry: Update failed" in captured.out
         assert result == 1
 
-    def test_model_not_supported_error(
-        self, mock_registry: MagicMock, capsys: Any
-    ) -> None:
+    def test_model_not_supported_error(self, mock_registry: MagicMock, capsys: Any) -> None:
         """Test handling of ModelNotSupportedError."""
         mock_registry.check_for_updates.side_effect = ModelNotSupportedError(
             "Model not supported", model="invalid-model"
@@ -209,13 +185,9 @@ class TestRefreshRegistry:
         assert "❌ Invalid model:" in captured.out
         assert result == 1
 
-    def test_model_version_error(
-        self, mock_registry: MagicMock, capsys: Any
-    ) -> None:
+    def test_model_version_error(self, mock_registry: MagicMock, capsys: Any) -> None:
         """Test handling of ModelVersionError."""
-        mock_registry.check_for_updates.side_effect = ModelVersionError(
-            "Invalid version"
-        )
+        mock_registry.check_for_updates.side_effect = ModelVersionError("Invalid version")
 
         result = refresh_registry()
 
@@ -224,22 +196,15 @@ class TestRefreshRegistry:
         assert "❌ Config error:" in captured.out
         assert result == 1
 
-    def test_generic_exception(
-        self, mock_registry: MagicMock, capsys: Any
-    ) -> None:
+    def test_generic_exception(self, mock_registry: MagicMock, capsys: Any) -> None:
         """Test handling of generic exception."""
-        mock_registry.check_for_updates.side_effect = Exception(
-            "Unexpected error"
-        )
+        mock_registry.check_for_updates.side_effect = Exception("Unexpected error")
 
         result = refresh_registry()
 
         # Check output
         captured = capsys.readouterr()
-        assert (
-            "❌ Error refreshing model registry: Unexpected error"
-            in captured.out
-        )
+        assert "❌ Error refreshing model registry: Unexpected error" in captured.out
         assert result == 1
 
 
@@ -247,9 +212,7 @@ class TestRefreshRegistry:
 # to test Click commands instead of direct invocation
 def test_main_integration() -> None:
     """Verify that main correctly handles command line arguments."""
-    with patch(
-        "openai_model_registry.scripts.update_registry.refresh_registry"
-    ) as mock_refresh:
+    with patch("openai_model_registry.scripts.update_registry.refresh_registry") as mock_refresh:
         from click.testing import CliRunner
 
         from openai_model_registry.scripts.update_registry import main

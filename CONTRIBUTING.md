@@ -84,26 +84,26 @@ The model registry maintains information about OpenAI models and their capabilit
 
 ### Configuration Files Location
 
-Model information is stored in two main YAML files located in the `src/openai_model_registry/config/` directory:
+Model information is stored in YAML files packaged with the library under `openai_model_registry/data/`:
 
-1. **`models.yml`**: Contains model definitions, capabilities, and references to parameter constraints
-1. **`parameter_constraints.yml`**: Defines reusable parameter constraints that can be referenced by models
+1. **`models.yaml`**: Contains model definitions, capabilities, and inline parameters
+1. **`overrides.yaml`**: Contains provider-specific overrides
 
-### Structure of `models.yml`
+### Structure of `models.yaml`
 
 This file has the following key sections:
 
 1. **`version`**: The version of the model data schema
-1. **`dated_models`**: Contains each model variant with a specific date in its name
+1. **`models`**: Contains each model definition; dated variants include a date in the name
    - Each model entry includes:
      - `context_window`: Maximum token limit for input
      - `max_output_tokens`: Maximum tokens the model can output
      - `supports_structured`: Boolean indicating if structured output is supported
      - `supports_streaming`: Boolean indicating if streaming is supported
-     - `supported_parameters`: List of parameters the model accepts, with references to constraints
+     - `parameters`: Inline parameter definitions for validation (type, min/max, enum)
      - `description`: Short description of the model
      - `min_version`: Date information for version validation
-1. **`aliases`**: Maps generic model names to their dated versions
+1. Aliases are represented as separate named models where needed; global alias blocks are not used
 
 Example model entry:
 
@@ -125,36 +125,29 @@ gpt-4o-2024-08-06:
     day: 6
 ```
 
-### Structure of `parameter_constraints.yml`
+### Inline Parameters
 
-This file defines reusable constraints for model parameters, organized by type:
-
-1. **`numeric_constraints`**: For numerical parameters like temperature or top_p
-   - Each entry includes type, min/max values, description, and allowed data types
-1. **`enum_constraints`**: For parameters with specific allowed values
-   - Each entry includes type, allowed values list, and description
-
-Example constraint:
+Parameters are defined inline per model, for example:
 
 ```yaml
-temperature:
-  type: numeric
-  min_value: 0.0
-  max_value: 2.0
-  description: Controls randomness in the output
-  allow_float: true
-  allow_int: true
+parameters:
+  temperature:
+    type: number
+    min: 0.0
+    max: 2.0
+  response_format:
+    type: enum
+    enum: ["json", "text"]
 ```
 
 ### How to Add or Update Models
 
 1. **Adding a new model**:
 
-   - Add a new entry under `dated_models` in `models.yml`
+   - Add a new entry under `models` in `models.yaml`
    - Use the format `model-name-YYYY-MM-DD` for the key
    - Fill in all required fields (context_window, max_output_tokens, etc.)
-   - Reference existing parameter constraints using the `ref` field
-   - Add an alias in the `aliases` section if needed
+   - Define parameters inline under the `parameters` block
 
 1. **Updating an existing model**:
 
@@ -194,3 +187,10 @@ After making changes to the configuration files:
 1. **Be conservative** with parameter constraints to avoid false positives
 1. **Add tests** for any new models or constraints
 1. **Update documentation** if you add new constraint types or model parameters
+
+## Release Documentation
+
+For maintainers and contributors involved in the release process, see:
+
+- [Release Checklist](docs/contributing/RELEASE_CHECKLIST.md) - Step-by-step release process
+- [Release Workflow](docs/contributing/RELEASE_WORKFLOW.md) - Detailed workflow documentation

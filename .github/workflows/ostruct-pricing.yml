@@ -1,0 +1,112 @@
+name: Ostruct Pricing Update
+
+on:
+  schedule:
+    - cron: '0 1 * * 1-6'   # Daily Mon-Sat
+    - cron: '0 1 * * 0'     # Weekly Sunday
+  workflow_dispatch:
+
+jobs:
+  pricing:
+    runs-on: ubuntu-latest
+    # Strategy/matrix determined dynamically later
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: latest
+          virtualenvs-create: true
+
+      - name: Install project
+        run: |
+          poetry install
+
+      - name: Quick detector for pricing/model changes
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          TODAY=$(date -u +%F)
+          # Build allowed_models and dynamic matrix from data/models.yaml using Python
+          python - <<'PY'
+          import json, yaml
+          from pathlib import Path
+          data = yaml.safe_load(Path('data/models.yaml').read_text())
+          models = [k for k,v in (data.get('models') or {}).items() if isinstance(v, dict) and 'pricing' in v and not (v.get('deprecation',{}).get('status')=='deprecated')]
+          Path('matrix.json').write_text(json.dumps(models))
+          Path('allowed_models.json').write_text(json.dumps(models))
+          PY
+          ALLOWED_MODELS=$(cat allowed_models.json)
+          # Use pipx to run ostruct deterministically
+          pipx run --spec ostruct-cli==1.6.1 ostruct run scripts/ostruct/pricing_change_detector.j2 scripts/ostruct/pricing_change_detector_schema.json --enable-tool web-search --tool-choice web-search --ws-context-size low -V today="$TODAY" -J allowed_models="$ALLOWED_MODELS" --model gpt-4.1 --temperature 0 --progress none > detector.json || true
+          echo "Detector output:" && cat detector.json || true
+          # Gate: on Mon-Sat, skip if no changes detected; on Sunday always proceed
+          DOW=$(date -u +%u)
+          if [ "$DOW" -ne 7 ]; then
+            if jq -e '(.last_update_date? // empty) or ((.new_models // []) | length > 0)' detector.json >/dev/null; then
+              echo "Changes detected; proceeding"
+            else
+              echo "No changes detected; skipping pricing fetch on daily run"
+              echo "::set-output name=skip_fetch::true" || true
+            fi
+          fi
+
+      - name: Set dynamic matrix
+        id: set-matrix
+        run: |
+          echo "matrix=$(cat matrix.json)" >> $GITHUB_OUTPUT
+
+      - name: Fetch pricing via ostruct
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        if: steps.set-matrix.outputs.matrix != '' && (success() && ( ! contains( toJson(needs), 'skip_fetch') ))
+        run: |
+          echo "Dynamic models:" && cat matrix.json
+          for m in $(jq -r '.[]' matrix.json); do
+            echo "Fetching pricing for $m"
+            poetry run python src/openai_model_registry/scripts/fetch_pricing_ostruct.py --model "$m" || true
+          done
+
+      - name: Merge pricing into data and normalize
+        run: |
+          poetry run python scripts/update_pricing.py
+          poetry run python scripts/data_convert_unified_pricing.py
+
+      - name: Validate pricing schema for cached files
+        run: |
+          python - <<'PY'
+          import json, glob, sys
+          from pathlib import Path
+          import yaml
+          try:
+              import jsonschema
+          except Exception:
+              print('Installing jsonschema...')
+              import subprocess
+              subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'jsonschema'])
+              import jsonschema
+          schema = json.loads(Path('scripts/ostruct/pricing_schema.json').read_text())
+          for p in glob.glob('pricing_data/*.yaml'):
+              data = yaml.safe_load(open(p))
+              jsonschema.validate(instance=data, schema=schema)
+          print('schema OK')
+          PY
+
+      - name: Commit and push if changed
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: "chore(pricing): merge ostruct pricing and normalize data"
+          add: |
+            pricing_data/*.yaml
+            data/models.yaml
+            data/overrides.yaml
+            data/checksums.txt
+          default_author: github_actions
+          pull: false

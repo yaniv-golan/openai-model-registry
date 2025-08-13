@@ -2,12 +2,25 @@
 
 The `ModelCapabilities` class represents the capabilities, constraints, and parameters for a specific OpenAI model.
 
+## WebSearchBilling
+
+Web search billing is represented by a dedicated dataclass:
+
+::: openai_model_registry.registry.WebSearchBilling
+options:
+show_root_heading: false
+show_source: true
+
 ## Class Reference
 
 ::: openai_model_registry.registry.ModelCapabilities
 options:
 show_root_heading: false
 show_source: true
+
+### Notes
+
+- `input_modalities` and `output_modalities` are provided in addition to the legacy `modalities` (input) for clarity.
 
 ## Usage Examples
 
@@ -26,9 +39,6 @@ print(f"Max output tokens: {capabilities.max_output_tokens}")
 print(f"Supports streaming: {capabilities.supports_streaming}")
 print(f"Supports structured output: {capabilities.supports_structured}")
 
-# Check for aliases
-if capabilities.aliases:
-    print(f"Aliases: {', '.join(capabilities.aliases)}")
 # Expected output: Model name: gpt-4o
 #                  Context window: 128000
 #                  Max output tokens: 16384
@@ -114,9 +124,6 @@ custom_capabilities = ModelCapabilities(
     supports_streaming=True,
     supports_structured=True,
 )
-
-# Add aliases
-custom_capabilities.aliases = ["custom-alias"]
 
 # Copy supported parameters from base model
 custom_capabilities.supported_parameters = base_capabilities.supported_parameters

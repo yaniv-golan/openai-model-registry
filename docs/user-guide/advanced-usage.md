@@ -4,17 +4,17 @@ This guide covers advanced features and configuration options for the OpenAI Mod
 
 ## Custom Registry Configuration
 
-By default, the registry loads its data from predefined locations. You can customize this with the `RegistryConfig` class:
+The registry uses a modern data management system with automatic updates and fallback mechanisms. You can customize this with the `RegistryConfig` class:
 
 ```python
 from openai_model_registry import ModelRegistry, RegistryConfig
 
 # Create a custom configuration
 config = RegistryConfig(
-    registry_path="/path/to/custom/registry.yml",
-    constraints_path="/path/to/custom/constraints.yml",
-    auto_update=True,
-    cache_size=200,
+    registry_path="/path/to/custom/registry.yml",  # Optional: custom registry path
+    constraints_path="/path/to/custom/constraints.yml",  # Custom constraints path
+    auto_update=True,  # Enable automatic updates
+    cache_size=200,  # Increase cache size
 )
 
 # Initialize registry with the custom configuration
@@ -27,10 +27,69 @@ capabilities = registry.get_capabilities("gpt-4o")
 
 The `RegistryConfig` class supports the following options:
 
-- `registry_path`: Custom path to the registry YAML file
+- `registry_path`: Custom path to the registry YAML file (if None, DataManager handles loading)
 - `constraints_path`: Custom path to the constraints YAML file
 - `auto_update`: Whether to automatically update the registry
 - `cache_size`: Size of the model capabilities cache
+
+## Data Management System
+
+The registry uses a modern DataManager that provides:
+
+- **Automatic Updates**: Fetches latest model data from GitHub releases
+- **Version Tracking**: Maintains version information and update history
+- **Fallback Mechanisms**: Environment variable → User directory → Bundled data
+- **Integrity Verification**: Checksums and validation for downloaded data
+
+### Environment Variables
+
+Control data management behavior with these environment variables:
+
+```bash
+# Disable automatic data updates (useful for CI/tests)
+export OMR_DISABLE_DATA_UPDATES=1
+
+# Pin to a specific data version
+export OMR_DATA_VERSION_PIN=v1.2.3
+
+# Use custom data directory
+export OMR_DATA_DIR=/path/to/custom/data
+
+# Override registry path (for testing)
+export OMR_MODEL_REGISTRY_PATH=/path/to/test/models.yaml
+```
+
+### Data Update API
+
+The registry provides methods for managing data updates:
+
+```python
+from openai_model_registry import ModelRegistry
+
+registry = ModelRegistry.get_default()
+
+# Check if updates are available
+if registry.check_data_updates():
+    print("Updates are available!")
+
+    # Update the data
+    if registry.update_data():
+        print("Data updated successfully")
+    else:
+        print("Update failed")
+
+# Force update regardless of current version
+registry.update_data(force=True)
+
+# Get current data version
+version = registry.get_data_version()
+print(f"Current version: {version}")
+
+# Get detailed data information
+info = registry.get_data_info()
+print(f"Data directory: {info['data_directory']}")
+print(f"Updates enabled: {info['updates_enabled']}")
+```
 
 ## Multiple Registry Instances
 
@@ -54,23 +113,17 @@ staging_capabilities = staging_registry.get_capabilities("gpt-4o")
 
 This is particularly useful for testing or when you need to support different configurations in the same application.
 
-## API Deprecation Notice
+## Accessing the Singleton
 
-**Note:** `get_instance()` is deprecated; use `get_default()`.
-
-The `get_instance()` method has been deprecated in favor of `get_default()` for better clarity and consistency. While `get_instance()` still works for backward compatibility, new code should use `get_default()`.
+Use `get_default()` to access the singleton instance.
 
 ```python
-# ❌ Deprecated (but still works)
-registry = ModelRegistry.get_instance()
-
-# ✅ Recommended
 registry = ModelRegistry.get_default()
 ```
 
 ## Registry Updates
 
-The registry data can be updated from an upstream source. This is useful for keeping the registry in sync with the latest model capabilities:
+The registry supports both automatic and manual updates through the DataManager system:
 
 ```python
 from openai_model_registry import ModelRegistry
@@ -79,10 +132,20 @@ from openai_model_registry.registry import RefreshStatus
 # Get registry instance
 registry = ModelRegistry.get_default()
 
-# Check for updates first
+# Check for updates using DataManager
+if registry.check_data_updates():
+    print("DataManager updates are available")
+
+    # Update using DataManager
+    if registry.update_data():
+        print("Registry updated successfully via DataManager")
+    else:
+        print("DataManager update failed")
+
+# Legacy update method (also available)
 check_result = registry.check_for_updates()
 if check_result.status == RefreshStatus.UPDATE_AVAILABLE:
-    print(f"Update available: {check_result.message}")
+    print(f"Legacy update available: {check_result.message}")
 
     # Refresh from remote source
     refresh_result = registry.refresh_from_remote()
@@ -97,26 +160,73 @@ else:
     print(f"Update check failed: {check_result.message}")
 ```
 
-## Schema Versioning and Backward Compatibility
+## Programmatic updates (recommended pattern)
 
-The registry supports multiple schema versions with full backward compatibility:
+For the minimal snippet, see Getting Started → Keeping Data Up-to-Date. Below is the same pattern using the typed enum and intended for adaptation in advanced scenarios (scheduling, retries/backoff, metrics):
 
 ```python
-# The registry automatically handles different schema versions
-# v1.0.0: Original format with basic model definitions
-# v1.1.0+: Enhanced format with deprecation metadata and improved structure
+from openai_model_registry import ModelRegistry
+from openai_model_registry.registry import RefreshStatus
 
-# Both formats are supported seamlessly
 registry = ModelRegistry.get_default()
 
-# Works with any schema version
+try:
+    result = registry.check_for_updates()
+    if result.status is RefreshStatus.UPDATE_AVAILABLE:
+        # Apply the update (writes to user data dir or OMR_DATA_DIR)
+        registry.update_data()
+except Exception:
+    # Never crash the application due to update issues
+    pass
+```
+
+Notes:
+
+- The library automatically honors `OMR_DISABLE_DATA_UPDATES` and `OMR_DATA_VERSION_PIN`.
+- No network calls occur during normal loads; network is used only on explicit update checks/applies.
+- `OMR_MODEL_REGISTRY_PATH` is a read‑only override and is never modified by updates.
+
+For advanced patterns (scheduling, retries/backoff, version pinning strategies, multi‑registry setups), adapt the above to your app’s lifecycle (e.g., run on startup or on a cron/scheduler, add retry/backoff, emit metrics/logs on update checks).
+
+## Data Loading Priority
+
+The registry loads data with the following priority:
+
+1. **Environment Variable**: `OMR_MODEL_REGISTRY_PATH` (if set and file exists)
+1. **User Data Directory**: `~/Library/Application Support/openai-model-registry/models.yaml` (macOS)
+1. **Bundled Data**: Included with the package as fallback
+
+This ensures reliable operation even without network access while allowing customization for testing and development.
+
+## Schema Versioning
+
+The registry uses semantic versioning for schema compatibility:
+
+```python
+# The registry automatically detects and validates schema versions
+# Current supported range: 1.x (>=1.0.0, <2.0.0)
+# Schema version is read from the 'version' field in data files
+
+registry = ModelRegistry.get_default()
+
+# Works with any compatible schema version
 capabilities = registry.get_capabilities("gpt-4o")
 
-# Deprecation information is available for all models
-# (defaults to "active" status for models without explicit deprecation data)
+# All models include comprehensive metadata
 print(f"Status: {capabilities.deprecation.status}")
+print(f"Context window: {capabilities.context_window:,}")
+print(f"Supports vision: {capabilities.supports_vision}")
 # Expected output: Status: active
 ```
+
+### Schema Version Detection
+
+The registry uses proper semantic versioning:
+
+- **Version field**: Schema version is read from the `version` field in configuration files
+- **Compatibility checking**: Uses semver ranges (e.g., ">=1.0.0,\<2.0.0" for 1.x support)
+- **Validation**: Ensures data structure matches the declared schema version
+- **Error handling**: Clear error messages for unsupported or invalid versions
 
 ## Model Data Accuracy
 
@@ -144,7 +254,28 @@ print(
 
 ## Command Line Interface
 
-The package provides a command-line interface for updating the registry:
+The package provides command-line interfaces for managing registry data:
+
+### Data Management CLI (Legacy Script)
+
+```bash
+# Check current data status
+python -m openai_model_registry.scripts.data_update check
+
+# Update data files
+python -m openai_model_registry.scripts.data_update update
+
+# Force update to latest version
+python -m openai_model_registry.scripts.data_update update --force
+
+# Show data configuration
+python -m openai_model_registry.scripts.data_update info
+
+# Clean local data files
+python -m openai_model_registry.scripts.data_update clean
+```
+
+### Legacy Registry Update CLI (Legacy Script)
 
 ```bash
 # Update the registry from the default source
@@ -169,94 +300,46 @@ capabilities = registry.get_capabilities("gpt-4o")
 
 # Get all parameter references
 for param_ref in capabilities.supported_parameters:
-    print(f"Parameter reference: {param_ref.ref}")
-    print(f"  Description: {param_ref.description}")
-
-    # Access the constraint directly
-    constraint = capabilities.get_constraint(param_ref.ref)
-    if hasattr(constraint, "min_value"):
-        print(f"  Min value: {constraint.min_value}")
-        print(f"  Max value: {constraint.max_value}")
-```
-
-## Validation with Context
-
-Some parameters have interdependencies or contextual validation requirements. You can track which parameters have been used:
-
-```python
-from openai_model_registry import ModelRegistry
-
-registry = ModelRegistry.get_default()
-capabilities = registry.get_capabilities("gpt-4o")
-
-# Create a set to track used parameters
-used_params = set()
-
-# Validate temperature
-capabilities.validate_parameter("temperature", 0.7, used_params)
-
-# Validate top_p (these params might be mutually exclusive or have interdependencies)
-capabilities.validate_parameter("top_p", 0.9, used_params)
-
-# used_params now contains ["temperature", "top_p"]
-print(f"Used parameters: {used_params}")
-# Expected output: Used parameters: {'temperature', 'top_p'}
+    print(f"Parameter: {param_ref.ref}")
+    if param_ref.max_value is not None:
+        print(f"  Max value: {param_ref.max_value}")
+    if param_ref.min_value is not None:
+        print(f"  Min value: {param_ref.min_value}")
 ```
 
 ## Error Handling
 
-The library uses a consistent exception-based approach for error handling. Each error type provides detailed context to help diagnose and handle specific error conditions:
+The registry provides comprehensive error handling for various scenarios:
 
 ```python
-from openai_model_registry import (
-    ModelRegistry,
-    ModelRegistryError,
+from openai_model_registry import ModelRegistry
+from openai_model_registry.errors import (
     ModelNotSupportedError,
-    ParameterNotSupportedError,
-    ConstraintNotFoundError,
+    ParameterValidationError,
+    ConfigurationError,
 )
 
+registry = ModelRegistry.get_default()
+
 try:
-    registry = ModelRegistry.get_default()
+    capabilities = registry.get_capabilities("non-existent-model")
+except ModelNotSupportedError as e:
+    print(f"Model not supported: {e}")
 
-    # Try to get capabilities for a model
-    try:
-        capabilities = registry.get_capabilities("nonexistent-model")
-    except ModelNotSupportedError as e:
-        print(f"Model not found: {e.model}")
-        print(f"Available models: {e.available_models}")
-        # Fallback to a default model
-        capabilities = registry.get_capabilities("gpt-4o")
+try:
+    capabilities = registry.get_capabilities("gpt-4o")
+    capabilities.validate_parameter("temperature", 5.0)  # Invalid value
+except ParameterValidationError as e:
+    print(f"Parameter validation failed: {e}")
 
-    # Validate parameters with specific error handling
-    try:
-        capabilities.validate_parameter("temperature", 3.0)
-    except ParameterNotSupportedError as e:
-        print(f"Parameter '{e.param_name}' is not supported for model '{e.model}'")
-        # Skip this parameter
-    except ModelRegistryError as e:
-        print(f"Parameter validation failed: {e}")
-        # Use a default valid value
-        print("Using default temperature of 0.7")
-        temperature = 0.7
-
-    # Get constraint information
-    try:
-        constraint = registry.get_parameter_constraint(
-            "numeric_constraints.temperature"
-        )
-        print(f"Min value: {constraint.min_value}, Max value: {constraint.max_value}")
-    except ConstraintNotFoundError as e:
-        print(f"Constraint reference '{e.ref}' not found")
-
-except Exception as e:
-    print(f"Unexpected error: {e}")
-    # Implement fallback mechanism
+try:
+    # This might fail if data files are corrupted
+    registry._load_capabilities()
+except ConfigurationError as e:
+    print(f"Configuration error: {e}")
 ```
 
-### Exception Hierarchy
-
-The library provides a hierarchical set of exceptions:
+### Error Hierarchy
 
 - `ModelRegistryError`: Base class for all registry errors
   - `ConfigurationError`: Base class for configuration-related errors
@@ -318,5 +401,83 @@ def get_cached_capabilities(model_name):
 
 # Use cached capabilities
 capabilities = get_cached_capabilities("gpt-4o")
-capabilities.validate_parameter("temperature", 0.7)
 ```
+
+The registry itself uses LRU caching for capabilities, so repeated calls to `get_capabilities()` for the same model are automatically optimized.
+
+## Data files and provider overrides
+
+The registry composes its effective dataset from two YAML files in `data/`:
+
+- `models.yaml`: Canonical base dataset for all models (capabilities, parameters,
+  pricing, deprecation, billing).
+- `overrides.yaml`: Provider-specific diffs applied on top of `models.yaml`.
+
+### Provider selection
+
+- Default provider: `openai`.
+- Override via environment `OMR_PROVIDER` or CLI flag `--provider <openai|azure>`.
+
+### Structure of overrides.yaml
+
+```yaml
+overrides:
+  azure:
+    models:
+      gpt-4o:
+        pricing:
+          input_cost_per_unit: 5.0
+          output_cost_per_unit: 20.0
+        parameters:
+          max_tokens:
+            max: 12000
+        capabilities:
+          tools:
+            - file_search
+```
+
+- Top-level key is `overrides`.
+- Under each provider (e.g., `azure`), a `models` map contains partial model
+  entries. Only the fields you want to change need to be present.
+- Unknown models under a provider are ignored; the base dataset remains intact.
+
+### Merge semantics
+
+When building the effective dataset, the registry loads `models.yaml` and then
+applies provider overrides. Merge behavior mirrors the implementation in
+`ModelRegistry._apply_overrides()` and `_merge_model_override()`:
+
+- pricing (dict): merged with base pricing via shallow update
+- capabilities (dict): merged with base capabilities via shallow update
+- parameters (dict): merged with base parameters via shallow update
+- other top-level fields: replaced entirely
+
+Notes:
+
+- Shallow updates mean nested dictionaries are updated key-by-key, but lists are
+  replaced as whole values. This keeps overrides concise and predictable.
+- If no overrides exist for the selected provider, the base `models.yaml` data is
+  used as-is.
+
+### Inspecting raw vs effective data
+
+Use the CLI to compare the on-disk raw files with the provider-merged effective
+dataset:
+
+```bash
+# Dump effective (merged) dataset
+omr data dump --effective --format json | jq '.'
+
+# Dump raw base dataset (no provider merge)
+omr data dump --raw --format yaml
+
+# Per-model views
+omr models get gpt-4o                # effective (default)
+omr models get gpt-4o --raw --format yaml
+```
+
+### Where updates are written
+
+Data updates write `models.yaml`, `overrides.yaml`, and `checksums.txt` to the
+user data directory by default (or `OMR_DATA_DIR` if set). The
+`OMR_MODEL_REGISTRY_PATH` override is read-only and is never modified by updates.

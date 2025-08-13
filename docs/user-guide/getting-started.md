@@ -47,6 +47,35 @@ except Exception as e:
     print(f"Invalid parameter: {e}")
 ```
 
+## Keeping Data Up-to-Date
+
+You can check and apply data updates programmatically or via the CLI.
+
+Programmatically:
+
+```python
+from openai_model_registry import ModelRegistry
+from openai_model_registry.registry import RefreshStatus
+
+registry = ModelRegistry.get_default()
+
+result = registry.check_for_updates()
+if result.status is RefreshStatus.UPDATE_AVAILABLE:
+    registry.update_data()
+```
+
+Via CLI:
+
+```bash
+# Check for updates (exit code 10 if update is available)
+omr --format json update check
+
+# Apply updates
+omr update apply
+```
+
+The library honors `OMR_DISABLE_DATA_UPDATES` and `OMR_DATA_VERSION_PIN`. Updates write to the user data directory (or `OMR_DATA_DIR`), never to `OMR_MODEL_REGISTRY_PATH`.
+
 ## Next Steps
 
 Now that you have the basics, explore the following topics:

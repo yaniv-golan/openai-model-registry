@@ -1,0 +1,229 @@
+name: Create Release and Publish Package
+
+on:
+  push:
+    tags:
+      - 'v*'
+      - 'v*-rc*'  # Release candidate support
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 1.0.0 or 1.0.0-rc1)'
+        required: true
+        type: string
+      prerelease:
+        description: 'Mark as prerelease'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+  id-token: write  # Required for trusted publishing
+
+jobs:
+  build_package:
+    name: Build Python Package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: latest
+          virtualenvs-create: true
+
+      - name: Install dependencies
+        run: |
+          poetry install --only dev
+
+      - name: Run validation
+        run: |
+          poetry run python -c "import openai_model_registry; print('✅ Package imports successfully')"
+          poetry check
+          poetry run pytest -x  # Run tests and stop on first failure
+
+      - name: Build package
+        run: poetry build
+
+      - name: Verify build
+        run: |
+          poetry run twine check dist/*
+          ls -la dist/
+
+      - name: Upload package artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-package
+          path: dist/*
+
+  create_release:
+    name: Create GitHub Release
+    needs: build_package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get tag or version
+        id: get_version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+            if [[ ! "$VERSION" =~ ^v ]]; then
+              VERSION="v$VERSION"
+            fi
+            echo "TAG=$VERSION" >> $GITHUB_ENV
+            echo "VERSION=${VERSION#v}" >> $GITHUB_ENV
+          else
+            echo "TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+            echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+          fi
+
+      - name: Download package artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: python-package
+          path: dist/
+
+      - name: Generate release notes
+        id: release_notes
+        run: |
+          if [[ "${{ env.VERSION }}" =~ rc ]]; then
+            RELEASE_TYPE="Release Candidate"
+            PRERELEASE="true"
+          else
+            RELEASE_TYPE="Release"
+            PRERELEASE="${{ github.event.inputs.prerelease || 'false' }}"
+          fi
+
+          cat > release_notes.md << EOF
+          # OpenAI Model Registry $RELEASE_TYPE ${{ env.VERSION }}
+
+          ## 📦 Installation
+
+          \`\`\`bash
+          pip install openai-model-registry==${{ env.VERSION }}
+          \`\`\`
+
+          ## 🔄 Upgrade
+
+          \`\`\`bash
+          pip install --upgrade openai-model-registry
+          \`\`\`
+
+          ## 📋 What's New
+
+          - See [CHANGELOG.md](https://github.com/yaniv-golan/openai-model-registry/blob/main/CHANGELOG.md) for detailed changes
+          - Full commit history: [\`${{ env.TAG }}\`](https://github.com/yaniv-golan/openai-model-registry/commits/${{ env.TAG }})
+
+          ## 🔗 Links
+
+          - [PyPI Package](https://pypi.org/project/openai-model-registry/${{ env.VERSION }}/)
+          - [Documentation](https://openai-model-registry.readthedocs.io/)
+          - [GitHub Repository](https://github.com/yaniv-golan/openai-model-registry)
+
+          EOF
+
+          echo "prerelease=$PRERELEASE" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.TAG }}
+          name: "OpenAI Model Registry ${{ env.VERSION }}"
+          body_path: release_notes.md
+          draft: false
+          prerelease: ${{ steps.release_notes.outputs.prerelease }}
+          files: |
+            dist/*.whl
+            dist/*.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  publish_to_testpypi:
+    name: Publish to TestPyPI (RC only)
+    needs: build_package
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags') && contains(github.ref, '-rc')
+    permissions:
+      id-token: write
+    steps:
+      - name: Download package artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: python-package
+          path: dist
+
+      - name: Publish to TestPyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+
+  publish_to_pypi:
+    name: Publish to PyPI (Production only)
+    needs: build_package
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags') && !contains(github.ref, '-rc')
+    environment:
+      name: pypi
+      url: https://pypi.org/p/openai-model-registry
+    permissions:
+      id-token: write
+    steps:
+      - name: Download package artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: python-package
+          path: dist
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+
+  publish_manual_pypi:
+    name: Publish to PyPI (Manual)
+    needs: build_package
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.prerelease == 'false'
+    environment:
+      name: pypi
+      url: https://pypi.org/p/openai-model-registry
+    permissions:
+      id-token: write
+    steps:
+      - name: Download package artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: python-package
+          path: dist
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+
+  publish_manual_testpypi:
+    name: Publish to TestPyPI (Manual RC)
+    needs: build_package
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.prerelease == 'true'
+    permissions:
+      id-token: write
+    steps:
+      - name: Download package artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: python-package
+          path: dist
+
+      - name: Publish to TestPyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/

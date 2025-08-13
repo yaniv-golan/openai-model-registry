@@ -5,23 +5,88 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## \[0.7.3\] - 2025-07-05
+## \[1.0.0\] - 2025-08-13
+
+This release is a major refactor and feature expansion. It introduces a new CLI, unified pricing schema, inline parameter validation, provider overrides, robust data packaging, and end-to-end CI/CD for both code and data.
+
+[Full diff on GitHub](https://github.com/yaniv-golan/openai-model-registry/compare/v0.7.3...main)
 
 ### Added
 
--
+- New `omr` CLI for debugging and inspection
+  - `omr data paths|env|dump`
+  - `omr models list|get [--parameters-only]`
+  - `omr providers list|current`
+  - `omr update check|apply|refresh|show-config`
+  - `omr cache info|clear`
+- `--help-json` at root with structured help output
+- Dynamic columns for `omr models list`, including nested fields
+- Human-readable table units (K/M tokens) and compact headers
+- Unified pricing schema: `scheme`, `unit`, `input_cost_per_unit`, `output_cost_per_unit`
+- Web search billing model
+  - Dataclass `WebSearchBilling`
+  - YAML field `billing.web_search` exposed in CLI/JSON
+- Input/output modalities
+  - `input_modalities` and `output_modalities` added alongside legacy `modalities`
+- Tiered pricing (per-image)
+  - `PricingInfo.tiers` parsed from YAML and surfaced in effective JSON and CLI outputs
+- Inline parameters support across mainstream chat models; O1-family specialized params
+- Public APIs for CLI and debugging: `list_providers`, `dump_effective`, `get_raw_data_paths`, `clear_cache`, `get_bundled_data_content`, `get_raw_model_data`
+- CI/CD
+  - Library release workflow (PyPI/TestPyPI, RCs, releases)
+  - Data release workflow (data RCs, validation, GitHub releases)
+  - `ostruct` pricing workflow with pipx fallback
+  - Cross-platform install test workflow
+
+### Coverage and Platforms
+
+- Model coverage: includes all OpenAI models as of 2025-08-12
+- Azure support: provider overrides and CLI/provider switching fully support Azure OpenAI
+- Completeness: all capabilities and inline parameters are now included for supported models
 
 ### Changed
 
--
+- Data files moved to `data/` and packaged robustly using `importlib.resources`
+- Schema detection and validation via `semver` with explicit compatibility checks
+- Parameter validation now uses inline parameters only (legacy `supported_parameters` removed)
+- Provider overrides are loaded and merged correctly (`data/overrides.yaml`)
+- CLI defaults and format handling clarified; commands validate supported formats
+- Docs overhauled: CLI reference, getting started, advanced usage, contributing/release docs
+- Project version set to `1.0.0`; data versioning aligned (e.g., `data-v1.0.0`)
 
 ### Fixed
 
--
+- Silent model serialization/loading failures in `dump_effective` and loader
+- Fragile bundled data access by switching to `importlib.resources.files().read_text()`
+- `omr models list` empty table issue; all fields now surfaced including JSON/structured output flags
+- MyPy errors across modules; added precise type hints and guards
+- Pre-commit, ruff, and formatting issues
 
 ### Removed
 
--
+- Legacy loaders/validators (`config_validator.py`, `loader.py`) and legacy config under `src/.../config/`
+- Redundant/unused CI workflows: performance bench, security scan, semantic-release
+- Flaky CLI test for TTY-default table output
+
+### Data
+
+- Converted `data/models.yaml` and `data/overrides.yaml` to unified pricing schema
+- Populated inline parameters for mainstream chat models; O1 family updated (e.g., `reasoning_effort`)
+- Added `billing.web_search` to relevant models; exposed via CLI and API
+- Applied audit fixes: pricing, audio capabilities, context windows, modalities, deprecations
+- Regenerated `data/checksums.txt` accordingly
+- Pricing data: up to date and kept current automatically via CI (periodic `ostruct` runs and merges)
+
+### CI/CD
+
+- Library release (RC/final) scripts and workflows
+- Data release workflow with YAML validation and GitHub Releases
+- Automated pricing updates via `ostruct` (pipx fallback) into `data/`
+
+### Notes
+
+- Environment variables standardized with `OMR_` prefix
+- Update process writes to user data dir (or `OMR_DATA_DIR`); `OMR_MODEL_REGISTRY_PATH` is read-only override
 
 ## \[0.7.2\] - 2025-06-11
 

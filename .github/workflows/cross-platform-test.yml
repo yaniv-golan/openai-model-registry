@@ -1,0 +1,348 @@
+name: Cross-Platform Installation Tests
+
+on:
+  push:
+    branches: [main, 'release/*']
+    tags: ['v*', 'v*-rc*', 'data-v*', 'data-v*-rc*']
+  pull_request:
+    branches: [main, 'release/*']
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  build_package:
+    name: Build Package for Testing
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: latest
+          virtualenvs-create: true
+
+      - name: Build package
+        run: poetry build
+
+      - name: Upload package artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-package
+          path: dist/*
+
+  test_installation_matrix:
+    name: Test Installation - ${{ matrix.os }} - Python ${{ matrix.python-version }}
+    needs: build_package
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ['3.10', '3.11', '3.12']
+
+    steps:
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Download package artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: python-package
+          path: dist/
+
+      - name: Install from wheel (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          python -m pip install --upgrade pip
+          pip install dist/*.whl
+
+      - name: Install from wheel (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          python -m pip install --upgrade pip
+          $wheel = Get-ChildItem -Path dist -Filter "*.whl" | Select-Object -First 1
+          pip install $wheel.FullName
+
+      - name: Test basic import
+        run: |
+          python -c "import openai_model_registry; print('✅ Package imports successfully')"
+          python -c "from openai_model_registry import ModelRegistry; print('✅ ModelRegistry imports successfully')"
+
+      - name: Test CLI functionality (if available)
+        run: |
+          python -c "
+          try:
+              from openai_model_registry.cli import main
+              print('✅ CLI module available')
+          except ImportError:
+              print('ℹ️  CLI module not available (expected)')
+          "
+
+      - name: Test registry creation
+        run: |
+          python -c "
+          from openai_model_registry import ModelRegistry, RegistryConfig
+          config = RegistryConfig(auto_update=False)
+          registry = ModelRegistry(config)
+          print('✅ Registry created successfully')
+          print(f'Registry has {len(registry.models)} models')
+          "
+
+      - name: Test model lookup
+        run: |
+          python -c "
+          from openai_model_registry import ModelRegistry, RegistryConfig
+          config = RegistryConfig(auto_update=False)
+          registry = ModelRegistry(config)
+          try:
+              capabilities = registry.get_capabilities('gpt-4o')
+              print('✅ Model lookup successful')
+              print(f'Model: {capabilities.model_name}')
+          except Exception as e:
+              print(f'⚠️  Model lookup failed (may be expected): {e}')
+          "
+
+  test_installation_methods:
+    name: Test Installation Methods - ${{ matrix.method }}
+    needs: build_package
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        method: ['wheel', 'sdist', 'pip-install']
+
+    steps:
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Download package artifacts
+        if: matrix.method != 'pip-install'
+        uses: actions/download-artifact@v4
+        with:
+          name: python-package
+          path: dist/
+
+      - name: Install from wheel
+        if: matrix.method == 'wheel'
+        run: |
+          python -m pip install --upgrade pip
+          pip install dist/*.whl
+
+      - name: Install from sdist
+        if: matrix.method == 'sdist'
+        run: |
+          python -m pip install --upgrade pip
+          pip install dist/*.tar.gz
+
+      - name: Install from PyPI (if available)
+        if: matrix.method == 'pip-install'
+        run: |
+          python -m pip install --upgrade pip
+          pip install openai-model-registry || echo "Package not available on PyPI yet"
+
+      - name: Test installation
+        if: matrix.method != 'pip-install'
+        run: |
+          python -c "import openai_model_registry; print('✅ Installation successful')"
+
+  test_clean_environments:
+    name: Test Clean Environment - Python ${{ matrix.python-version }}
+    needs: build_package
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.10', '3.11', '3.12']
+
+    steps:
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Download package artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: python-package
+          path: dist/
+
+      - name: Create clean virtual environment
+        run: |
+          python -m venv clean_env
+          source clean_env/bin/activate
+          python -m pip install --upgrade pip
+          pip install dist/*.whl
+
+      - name: Test in clean environment
+        run: |
+          source clean_env/bin/activate
+          python -c "
+          import sys
+          print(f'Python version: {sys.version}')
+          import openai_model_registry
+          print(f'Package version: {openai_model_registry.__version__}')
+          from openai_model_registry import ModelRegistry, RegistryConfig
+          config = RegistryConfig(auto_update=False)
+          registry = ModelRegistry(config)
+          print('✅ Clean environment test successful')
+          "
+
+  test_dependency_resolution:
+    name: Test Dependency Resolution
+    needs: build_package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Download package artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: python-package
+          path: dist/
+
+      - name: Test dependency resolution
+        run: |
+          python -m pip install --upgrade pip
+          # Install with --dry-run to check dependency resolution
+          pip install --dry-run dist/*.whl
+          echo "✅ Dependency resolution successful"
+
+      - name: Install and check dependencies
+        run: |
+          pip install dist/*.whl
+          pip list
+          python -c "
+          import pkg_resources
+          pkg = pkg_resources.get_distribution('openai-model-registry')
+          print(f'Package: {pkg.project_name} {pkg.version}')
+          print('Dependencies:')
+          for req in pkg.requires():
+              print(f'  - {req}')
+          "
+
+  test_import_speed:
+    name: Test Import Performance
+    needs: build_package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Download package artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: python-package
+          path: dist/
+
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip
+          pip install dist/*.whl
+
+      - name: Test import speed
+        run: |
+          python -c "
+          import time
+          start = time.time()
+          import openai_model_registry
+          end = time.time()
+          print(f'Import time: {end - start:.3f} seconds')
+          if end - start > 2.0:
+              print('⚠️  Import time is slow (> 2 seconds)')
+          else:
+              print('✅ Import time is acceptable')
+          "
+
+  test_memory_usage:
+    name: Test Memory Usage
+    needs: build_package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Download package artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: python-package
+          path: dist/
+
+      - name: Install package and psutil
+        run: |
+          python -m pip install --upgrade pip
+          pip install dist/*.whl psutil
+
+      - name: Test memory usage
+        run: |
+          python -c "
+          import psutil
+          import os
+
+          # Get initial memory
+          process = psutil.Process(os.getpid())
+          initial_memory = process.memory_info().rss / 1024 / 1024  # MB
+
+          # Import package
+          import openai_model_registry
+          from openai_model_registry import ModelRegistry, RegistryConfig
+
+          # Create registry
+          config = RegistryConfig(auto_update=False)
+          registry = ModelRegistry(config)
+
+          # Get final memory
+          final_memory = process.memory_info().rss / 1024 / 1024  # MB
+          memory_increase = final_memory - initial_memory
+
+          print(f'Initial memory: {initial_memory:.1f} MB')
+          print(f'Final memory: {final_memory:.1f} MB')
+          print(f'Memory increase: {memory_increase:.1f} MB')
+
+          if memory_increase > 100:
+              print('⚠️  High memory usage (> 100 MB)')
+          else:
+              print('✅ Memory usage is acceptable')
+          "
+
+  report_results:
+    name: Report Test Results
+    needs: [test_installation_matrix, test_installation_methods, test_clean_environments, test_dependency_resolution, test_import_speed, test_memory_usage]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Report Results
+        run: |
+          echo "## Cross-Platform Test Results"
+          echo "- Installation Matrix: ${{ needs.test_installation_matrix.result }}"
+          echo "- Installation Methods: ${{ needs.test_installation_methods.result }}"
+          echo "- Clean Environments: ${{ needs.test_clean_environments.result }}"
+          echo "- Dependency Resolution: ${{ needs.test_dependency_resolution.result }}"
+          echo "- Import Speed: ${{ needs.test_import_speed.result }}"
+          echo "- Memory Usage: ${{ needs.test_memory_usage.result }}"
+
+          if [ "${{ needs.test_installation_matrix.result }}" = "success" ] && \
+             [ "${{ needs.test_installation_methods.result }}" = "success" ] && \
+             [ "${{ needs.test_clean_environments.result }}" = "success" ] && \
+             [ "${{ needs.test_dependency_resolution.result }}" = "success" ]; then
+            echo "✅ All critical tests passed"
+          else
+            echo "❌ Some tests failed"
+            exit 1
+          fi

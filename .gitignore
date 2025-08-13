@@ -58,3 +58,12 @@ repomix-output.txt
 .claude/settings.local.json
 dev/
 RELEASE_MIGRATION.md
+
+# Data temp files
+data/*.tmp
+data/*.backup
+data/*.download
+pricing_data/
+
+# Docs build output
+site/

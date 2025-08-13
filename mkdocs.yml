@@ -37,23 +37,26 @@ markdown_extensions:
 
 plugins:
   - search
+  - gen-files:
+      scripts:
+        - docs/gen_reference.py
   - mkdocstrings:
       handlers:
         python:
+          paths: [src]
           options:
             docstring_style: google
             show_source: true
             show_root_heading: true
             show_category_heading: true
-            paths: [src]
 
 nav:
   - Home: index.md
   - User Guide:
       - Overview: user-guide/index.md
       - Getting Started: user-guide/getting-started.md
+      - CLI Reference: user-guide/cli.md
       - Model Capabilities: user-guide/model-capabilities.md
-      - Model Aliases: user-guide/model-aliases.md
       - Parameter Validation: user-guide/parameter-validation.md
       - Advanced Usage: user-guide/advanced-usage.md
       - Testing: user-guide/testing.md
@@ -61,5 +64,11 @@ nav:
       - Overview: api/index.md
       - ModelRegistry: api/model-registry.md
       - ModelCapabilities: api/model-capabilities.md
-  - Contributing: contributing.md
+  - Contributing:
+      - Overview: contributing.md
+      - Release Process:
+          - Overview: contributing/index.md
+          - Release Checklist: contributing/RELEASE_CHECKLIST.md
+          - Release Workflow: contributing/RELEASE_WORKFLOW.md
+      - CLI Maintainers Guide: contributing/cli-maintainers-guide.md
   - Changelog: changelog.md

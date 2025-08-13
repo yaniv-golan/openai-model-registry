@@ -1,0 +1,118 @@
+{
+    "type": "object",
+    "properties": {
+        "last_update_date": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "models_updated": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "new_models": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "model": {
+                        "type": "string"
+                    },
+                    "announced_date": {
+                        "type": "string",
+                        "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                    },
+                    "sources": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "pattern": "^https://"
+                        },
+                        "minItems": 1,
+                        "maxItems": 8
+                    },
+                    "initial_pricing": {
+                        "type": "object",
+                        "properties": {
+                            "scheme": {
+                                "type": "string",
+                                "enum": [
+                                    "per_token",
+                                    "per_minute",
+                                    "per_image",
+                                    "per_request",
+                                    "per 1M tokens"
+                                ]
+                            },
+                            "unit": {
+                                "type": "string",
+                                "enum": [
+                                    "million_tokens",
+                                    "minute",
+                                    "image",
+                                    "request",
+                                    "tokens"
+                                ]
+                            },
+                            "input_cost_per_unit": {
+                                "type": "number"
+                            },
+                            "output_cost_per_unit": {
+                                "type": "number"
+                            },
+                            "currency": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "scheme",
+                            "unit",
+                            "input_cost_per_unit",
+                            "output_cost_per_unit",
+                            "currency"
+                        ],
+                        "additionalProperties": false
+                    }
+                },
+                "required": [
+                    "model",
+                    "announced_date",
+                    "sources"
+                ],
+                "additionalProperties": false
+            }
+        },
+        "sources": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "title": {
+                        "type": "string"
+                    },
+                    "url": {
+                        "type": "string",
+                        "pattern": "^https://"
+                    }
+                },
+                "required": [
+                    "title",
+                    "url"
+                ]
+            },
+            "minItems": 1,
+            "maxItems": 8
+        },
+        "notes": {
+            "type": "string"
+        }
+    },
+    "required": [
+        "last_update_date",
+        "models_updated",
+        "sources",
+        "new_models"
+    ],
+    "additionalProperties": false
+}

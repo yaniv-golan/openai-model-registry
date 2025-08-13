@@ -6,18 +6,21 @@ authors:
     email: "yaniv@golan.name"
 title: "OpenAI Model Registry"
 version: 1.0.0
-date-released: 2024-03-16
+date-released: 2025-08-13
 url: "https://github.com/yaniv-golan/openai-model-registry"
 repository-code: "https://github.com/yaniv-golan/openai-model-registry"
 license: MIT
 abstract: >-
-  A lightweight Python package for validating OpenAI model parameters
-  and capabilities. Provides a centralized registry of model information,
-  validates parameters against model-specific schemas, and retrieves
-  model capabilities.
+  A typed Python library and CLI for programmatic model cards,
+  parameter validation, and capabilities/pricing metadata for OpenAI models
+  (with Azure support). Includes inline parameter constraints, provider
+  overrides, web-search billing (dataclass), unified pricing (with per-image
+  tiers), input/output modalities, and a rich `omr` CLI for listing, querying,
+  filtering, and debugging registry data. Pricing is kept up-to-date
+  automatically via CI using the `ostruct` tool. Suitable for both application
+  code and CI/CD use.
 keywords:
   - openai
+  - azure
   - llm
-  - machine-learning
-  - nlp
-  - validation
+  - GenAI

@@ -66,9 +66,7 @@ class TestErrorClasses:
         assert str(error) == "Model not supported"
 
         # With model name
-        error = ModelNotSupportedError(
-            "Model not supported", model="unsupported-model"
-        )
+        error = ModelNotSupportedError("Model not supported", model="unsupported-model")
         assert error.model == "unsupported-model"
 
         # With available models as list
@@ -91,9 +89,7 @@ class TestErrorClasses:
         error = ModelNotSupportedError(
             "Model not supported",
             model="unsupported-model",
-            available_models=list(
-                models_dict.keys()
-            ),  # Convert dict keys to list
+            available_models=list(models_dict.keys()),  # Convert dict keys to list
         )
         assert isinstance(error.available_models, list)
         if error.available_models:  # Type guard
@@ -102,9 +98,7 @@ class TestErrorClasses:
 
     def test_token_parameter_error(self) -> None:
         """Test TokenParameterError."""
-        error = TokenParameterError(
-            "Invalid token parameter", param_name="max_tokens", value=100000
-        )
+        error = TokenParameterError("Invalid token parameter", param_name="max_tokens", value=100000)
 
         assert error.message == "Invalid token parameter"
         assert error.param_name == "max_tokens"

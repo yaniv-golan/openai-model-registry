@@ -9,7 +9,6 @@ from unittest.mock import patch
 import pytest
 
 from openai_model_registry.config_paths import (
-    MODEL_REGISTRY_FILENAME,
     PARAM_CONSTRAINTS_FILENAME,
 )
 from openai_model_registry.registry import (
@@ -44,13 +43,16 @@ def test_xdg_config_home(temp_dir: Path) -> None:
     # Mock get_user_config_dir to directly return the expected path
     config_dir = temp_dir / "openai-model-registry"
 
-    with patch.dict(
-        os.environ,
-        {"XDG_CONFIG_HOME": str(temp_dir)},
-        clear=True,
-    ), patch(
-        "openai_model_registry.config_paths.get_user_config_dir",
-        return_value=config_dir,
+    with (
+        patch.dict(
+            os.environ,
+            {"XDG_CONFIG_HOME": str(temp_dir)},
+            clear=True,
+        ),
+        patch(
+            "openai_model_registry.config_paths.get_user_config_dir",
+            return_value=config_dir,
+        ),
     ):
         # Ensure directory doesn't exist yet
         assert not config_dir.exists()
@@ -68,7 +70,7 @@ def test_xdg_config_home_with_existing_config(temp_dir: Path) -> None:
     app_config_dir.mkdir(parents=True)
 
     # Create minimal config files
-    registry_path = app_config_dir / MODEL_REGISTRY_FILENAME
+    registry_path = app_config_dir / "models.yaml"
     registry_content = {
         "version": "1.0.0",
         "models": {
@@ -105,24 +107,27 @@ def test_xdg_config_home_with_existing_config(temp_dir: Path) -> None:
         f.write(str(constraints_content))
 
     # Test with XDG environment variables
-    with patch.dict(
-        os.environ,
-        {"XDG_CONFIG_HOME": str(temp_dir)},
-        clear=True,
-    ), patch(
-        "openai_model_registry.registry.get_model_registry_path",
-        return_value=str(registry_path),
-    ), patch(
-        "openai_model_registry.registry.get_parameter_constraints_path",
-        return_value=str(constraints_path),
+    with (
+        patch.dict(
+            os.environ,
+            {
+                "XDG_CONFIG_HOME": str(temp_dir),
+                "OMR_MODEL_REGISTRY_PATH": str(registry_path),
+                "OMR_PARAMETER_CONSTRAINTS_PATH": str(constraints_path),
+                "OMR_DISABLE_DATA_UPDATES": "1",
+            },
+            clear=True,
+        ),
     ):
         # Get default registry to test path resolution
         registry = ModelRegistry.get_default()
         assert registry is not None
 
-        # Verify the paths were properly set
-        assert registry.config.registry_path == str(registry_path)
+        # Verify the registry loaded successfully (DataManager handles model path resolution)
         assert registry.config.constraints_path == str(constraints_path)
+
+        # Verify that models were loaded successfully
+        assert len(registry.models) > 0
 
 
 def test_custom_registry_config() -> None:
@@ -150,22 +155,36 @@ def test_custom_registry_config() -> None:
 
 def test_env_var_override() -> None:
     """Test that environment variables override default paths."""
-    registry_path = "/env/var/path/registry.yml"
-    constraints_path = "/env/var/path/constraints.yml"
+    with tempfile.TemporaryDirectory() as temp_dir:
+        # Create temporary files
+        registry_path = os.path.join(temp_dir, "registry.yml")
+        constraints_path = os.path.join(temp_dir, "constraints.yml")
 
-    with patch(
-        "openai_model_registry.registry.get_model_registry_path",
-        return_value=registry_path,
-    ), patch(
-        "openai_model_registry.registry.get_parameter_constraints_path",
-        return_value=constraints_path,
-    ):
-        # Reset singleton
-        ModelRegistry._default_instance = None
+        # Create minimal valid files
+        with open(registry_path, "w") as f:
+            f.write(
+                "version: 2.0.0\nmodels:\n  test-model:\n    context_window: 1000\n    capabilities: {}\n    deprecation: {status: active}\n"
+            )
 
-        # Get default registry with default config (which should use env vars)
-        registry = ModelRegistry.get_default()
+        with open(constraints_path, "w") as f:
+            f.write("numeric_constraints:\n  temperature:\n    type: numeric\n    min_value: 0.0\n    max_value: 2.0\n")
 
-        # Verify paths from env vars were used
-        assert registry.config.registry_path == registry_path
-        assert registry.config.constraints_path == constraints_path
+        with patch.dict(
+            os.environ,
+            {
+                "OMR_MODEL_REGISTRY_PATH": registry_path,
+                "OMR_PARAMETER_CONSTRAINTS_PATH": constraints_path,
+                "OMR_DISABLE_DATA_UPDATES": "1",
+            },
+        ):
+            # Reset singleton
+            ModelRegistry._default_instance = None
+
+            # Get default registry with default config (which should use env vars)
+            registry = ModelRegistry.get_default()
+
+            # Verify constraints path from env var was used (DataManager handles model path)
+            assert registry.config.constraints_path == constraints_path
+
+            # Verify that registry loaded successfully
+            assert registry is not None

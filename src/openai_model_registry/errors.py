@@ -177,9 +177,7 @@ class ModelNotSupportedError(ModelRegistryError):
         self,
         message: str,
         model: Optional[str] = None,
-        available_models: Optional[
-            Union[List[str], Set[str], Dict[str, Any]]
-        ] = None,
+        available_models: Optional[Union[List[str], Set[str], Dict[str, Any]]] = None,
     ) -> None:
         """Initialize model not supported error.
 
@@ -194,9 +192,7 @@ class ModelNotSupportedError(ModelRegistryError):
         # Convert other collection types to list for consistency
         if available_models is not None:
             if isinstance(available_models, dict):
-                self.available_models: Optional[List[str]] = list(
-                    available_models.keys()
-                )
+                self.available_models: Optional[List[str]] = list(available_models.keys())
             elif isinstance(available_models, set):
                 self.available_models = list(available_models)
             else:
@@ -274,6 +270,42 @@ class ConstraintNotFoundError(ModelRegistryError):
         super().__init__(message)
         self.message = message
         self.ref = ref
+
+
+class ConstraintViolation(ParameterValidationError):
+    """Raised when a parameter value violates a constraint.
+
+    Examples:
+        >>> try:
+        ...     registry.validate_parameter("temperature", 3.0, "gpt-4o")
+        ... except ConstraintViolation as e:
+        ...     print(f"Constraint violated: {e.param} must {e.rule}")
+    """
+
+    def __init__(
+        self,
+        param: str,
+        value: Any,
+        rule: str,
+        provider: Optional[str] = None,
+        model: Optional[str] = None,
+    ) -> None:
+        """Initialize constraint violation error.
+
+        Args:
+            param: Parameter name that violated the constraint
+            value: The invalid value
+            rule: Description of the constraint rule
+            provider: Provider name (optional)
+            model: Model name (optional)
+        """
+        provider_msg = f" on provider '{provider}'" if provider else ""
+        message = f"{param} must {rule} (got {value}){provider_msg}"
+        super().__init__(message, param, value, model)
+        self.param = param
+        self.value = value
+        self.rule = rule
+        self.provider = provider
 
 
 class TokenParameterError(ParameterValidationError):

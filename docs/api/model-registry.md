@@ -14,6 +14,13 @@ options:
 show_root_heading: true
 show_source: true
 
+<!-- WebSearchBilling documented under ModelCapabilities page to avoid duplicate anchors -->
+
+### PricingInfo
+
+`PricingInfo` now supports optional `tiers` to capture per-image tiered pricing (e.g., DALL·E models).
+The tiers structure is emitted under `pricing.tiers` in `dump_effective()` and surfaced by the CLI.
+
 ## Usage Examples
 
 ### Initializing the Registry

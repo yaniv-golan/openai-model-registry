@@ -93,9 +93,7 @@ class TestBasicUsageExamples:
         )
 
         # Add constraints manually since the constructor doesn't accept them directly
-        constraints: Dict[
-            str, Union[NumericConstraint, EnumConstraint, ObjectConstraint]
-        ] = {
+        constraints: Dict[str, Union[NumericConstraint, EnumConstraint, ObjectConstraint]] = {
             "temperature": temp_constraint,
             "reasoning_effort": effort_constraint,
         }
@@ -119,9 +117,7 @@ class TestBasicUsageExamples:
             capabilities.validate_parameter("temperature", 3.0)  # Too high
 
         with pytest.raises(ModelRegistryError):
-            capabilities.validate_parameter(
-                "reasoning_effort", "extreme"
-            )  # Not in allowed values
+            capabilities.validate_parameter("reasoning_effort", "extreme")  # Not in allowed values
 
         # Example of unsupported parameter
         with pytest.raises(ParameterNotSupportedError):
@@ -207,9 +203,7 @@ class TestConstraintExamples:
             temperature_constraint.validate("temperature", 2.5)  # Too high
 
         with pytest.raises(ModelRegistryError):
-            temperature_constraint.validate(
-                "temperature", "warm"
-            )  # Wrong type
+            temperature_constraint.validate("temperature", "warm")  # Wrong type
 
     def test_enum_constraint_example(self) -> None:
         """Test example showing enum constraint usage."""
@@ -226,9 +220,7 @@ class TestConstraintExamples:
 
         # Invalid values raise exceptions
         with pytest.raises(ModelRegistryError):
-            effort_constraint.validate(
-                "reasoning_effort", "extreme"
-            )  # Not in allowed values
+            effort_constraint.validate("reasoning_effort", "extreme")  # Not in allowed values
 
         with pytest.raises(ModelRegistryError):
             effort_constraint.validate("reasoning_effort", 5)  # Wrong type
@@ -258,9 +250,7 @@ class TestAdvancedExamples:
         capabilities.supported_parameters = [param_temp, param_tokens]
 
         # Add constraints manually
-        constraints: Dict[
-            str, Union[NumericConstraint, EnumConstraint, ObjectConstraint]
-        ] = {
+        constraints: Dict[str, Union[NumericConstraint, EnumConstraint, ObjectConstraint]] = {
             "temperature": NumericConstraint(
                 min_value=0.0,
                 max_value=2.0,

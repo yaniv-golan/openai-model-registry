@@ -13,10 +13,11 @@ Typical benefits:
 - Catch invalid `temperature`, `top_p`, and `max_tokens` values locally.
 - Swap models confidently by comparing context windows and features.
 - Work fully offline—perfect for CI or air-gapped environments.
+- Automatic updates from GitHub releases keep your data current.
 
 ## Overview
 
-OpenAI Model Registry provides a centralized registry of OpenAI model information, validates parameters against model-specific schemas, and retrieves model capabilities. The registry includes comprehensive deprecation tracking, accurate model metadata, and supports multiple schema versions with full backward compatibility.
+OpenAI Model Registry provides a centralized registry of OpenAI model information with automatic updates from GitHub releases. It validates parameters against model-specific schemas, retrieves model capabilities, and includes comprehensive deprecation tracking with accurate model metadata. It offers programmatic access to model-card data (capabilities, parameters, pricing, deprecations) for both OpenAI and Azure providers. Pricing is kept up to date automatically via CI using [ostruct](https://github.com/yaniv-golan/ostruct). The registry uses semantic versioning for schema compatibility and provides robust fallback mechanisms for offline usage.
 
 ## Installation
 
@@ -48,7 +49,13 @@ if capabilities.is_deprecated:
     print("⚠️  This model is deprecated")
 # Expected output: Deprecation status: active
 
-➡️ **Keeping it fresh:** run `openai-model-registry-update` (CLI) or `registry.refresh_from_remote()` whenever OpenAI ships new models.
+# Check for data updates
+if registry.check_data_updates():
+    print("Updates are available!")
+    registry.update_data()  # Update to latest model data
+```
+
+➡️ **Keeping it fresh:** The registry automatically checks for updates, or you can manually run `registry.update_data()` or the CLI `python -m openai_model_registry.scripts.data_update update`.
 
 ## Important Notes
 
@@ -65,4 +72,3 @@ For more detailed usage instructions, see the [User Guide](user-guide/index.md).
 ## Contributing
 
 Contributions are welcome! Please see our [Contributing Guide](contributing.md) for more details.
-```

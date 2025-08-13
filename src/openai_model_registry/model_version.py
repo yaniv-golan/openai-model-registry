@@ -45,11 +45,7 @@ class ModelVersion:
         """
         if not isinstance(other, ModelVersion):
             return NotImplemented
-        return (
-            self.year == other.year
-            and self.month == other.month
-            and self.day == other.day
-        )
+        return self.year == other.year and self.month == other.month and self.day == other.day
 
     def __lt__(self, other: "ModelVersion") -> bool:
         """Check if this version is earlier than another.
@@ -120,12 +116,18 @@ class ModelVersion:
         Raises:
             InvalidDateError: If the string is not a valid version
         """
+        # Strip whitespace and validate input
+        version_str = version_str.strip()
+        if not version_str:
+            raise InvalidDateError("Version string cannot be empty")
+
+        # Check for reasonable string length (prevent excessive input)
+        if len(version_str) > 50:
+            raise InvalidDateError(f"Version string too long: {len(version_str)} characters. Maximum allowed: 50")
+
         parts = version_str.split("-")
         if len(parts) != 3:
-            raise InvalidDateError(
-                f"Invalid version format: {version_str}. "
-                f"Expected YYYY-MM-DD."
-            )
+            raise InvalidDateError(f"Invalid version format: {version_str}. " f"Expected YYYY-MM-DD.")
 
         try:
             year = int(parts[0])
@@ -133,8 +135,7 @@ class ModelVersion:
             day = int(parts[2])
         except ValueError:
             raise InvalidDateError(
-                f"Invalid version components in {version_str}. "
-                f"Year, month, and day must be integers."
+                f"Invalid version components in {version_str}. " f"Year, month, and day must be integers."
             )
 
         # Basic validation
@@ -174,8 +175,7 @@ class ModelVersion:
 
         if not match:
             raise ModelFormatError(
-                f"Invalid model format: {model}. Expected format: "
-                f"base-name-YYYY-MM-DD (e.g., gpt-4o-2024-08-06)",
+                f"Invalid model format: {model}. Expected format: " f"base-name-YYYY-MM-DD (e.g., gpt-4o-2024-08-06)",
                 model=model,
             )
 

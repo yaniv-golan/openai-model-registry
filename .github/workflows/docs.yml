@@ -39,6 +39,10 @@ jobs:
           poetry install
           poetry add mkdocs mkdocs-material mkdocstrings[python] mkdocs-gen-files
 
+      - name: Generate API reference markdown files
+        run: |
+          poetry run python docs/gen_reference.py
+
       - name: Build docs
         run: |
           mkdir -p docs

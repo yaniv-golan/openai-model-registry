@@ -50,9 +50,7 @@ def get_update_notification(quiet: bool = False) -> Optional[str]:
         if not LAST_CHECK_FILE.exists():
             should_check = True
         else:
-            last_check_time = datetime.fromtimestamp(
-                LAST_CHECK_FILE.stat().st_mtime
-            )
+            last_check_time = datetime.fromtimestamp(LAST_CHECK_FILE.stat().st_mtime)
             check_interval = timedelta(days=UPDATE_CHECK_INTERVAL_DAYS)
             should_check = datetime.now() - last_check_time > check_interval
     except Exception:
@@ -98,14 +96,10 @@ def validate_model_parameters(model: str, params: Dict[str, Any]) -> None:
 
         if max_tokens and max_tokens > capabilities.context_window:
             raise CLIError(
-                f"max_tokens ({max_tokens}) exceeds model context window "
-                f"({capabilities.context_window})"
+                f"max_tokens ({max_tokens}) exceeds model context window " f"({capabilities.context_window})"
             )
 
-        if (
-            max_output_tokens
-            and max_output_tokens > capabilities.max_output_tokens
-        ):
+        if max_output_tokens and max_output_tokens > capabilities.max_output_tokens:
             raise CLIError(
                 f"max_output_tokens ({max_output_tokens}) exceeds model's maximum "
                 f"({capabilities.max_output_tokens})"
@@ -156,9 +150,7 @@ def cli(ctx: Context, quiet: bool) -> None:
     help="Automatically confirm update without prompting",
 )
 @click.pass_context
-def update_registry_command(
-    ctx: Context, url: Optional[str], force: bool, auto_confirm: bool
-) -> None:
+def update_registry_command(ctx: Context, url: Optional[str], force: bool, auto_confirm: bool) -> None:
     """Update the model registry with the latest model information."""
     quiet = ctx.obj.get("quiet", False)
 
@@ -173,9 +165,7 @@ def update_registry_command(
                 return
 
             if not auto_confirm:
-                if not click.confirm(
-                    "Updates are available. Do you want to update now?"
-                ):
+                if not click.confirm("Updates are available. Do you want to update now?"):
                     click.echo("Update cancelled.")
                     return
 
@@ -194,9 +184,7 @@ def update_registry_command(
 @cli.command("completion")
 @click.option("--model", required=True, help="OpenAI model to use")
 @click.option("--prompt", required=True, help="Text prompt")
-@click.option(
-    "--temperature", type=float, default=0.7, help="Sampling temperature"
-)
+@click.option("--temperature", type=float, default=0.7, help="Sampling temperature")
 @click.option("--max-tokens", type=int, help="Maximum tokens to generate")
 @click.pass_context
 def completion_command(

@@ -1,0 +1,27 @@
+---
+system_prompt: |
+  You are a precise research assistant. Use Web Search to detect the most recent official OpenAI pricing update
+  AND any new model announcements. Prefer official sources (OpenAI pricing page, OpenAI blog/changelog/docs).
+  Avoid forum speculation. Output concise, validated JSON per schema.
+---
+
+Task:
+- Today is: {{ today }} (UTC). Consider recency relative to this date.
+- Find the most recent OpenAI pricing update announcement/change.
+- Also detect any NEW OpenAI model announcements (e.g., "GPT-5", "o4-mini", etc.).
+- For new models, extract the announcement date and any official pricing if present.
+- If provided, use the JSON variable "allowed_models" as the preferred list of canonical model names
+  to map any findings. If a newly announced model is not in that list, still include it in output
+  (under new_models) with its name as announced.
+- Ignore Azure-specific pricing.
+
+Context:
+{% if allowed_models is defined and allowed_models %}
+- Allowed canonical model names (JSON): {{ allowed_models | to_json }}
+{% endif %}
+
+Output requirements:
+- Valid JSON only. No extra keys beyond schema.
+- Dates in YYYY-MM-DD.
+- URLs must be https URLs.
+- Pricing values must be floats when provided.

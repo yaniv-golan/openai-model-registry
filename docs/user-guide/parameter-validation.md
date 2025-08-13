@@ -102,12 +102,23 @@ from openai_model_registry import ModelRegistry
 registry = ModelRegistry.get_default()
 capabilities = registry.get_capabilities("gpt-4o")
 
-# Get supported parameters
-supported_params = [ref.ref.split(".")[1] for ref in capabilities.supported_parameters]
-print(f"Supported parameters: {', '.join(sorted(supported_params))}")
+# Get supported parameters (inline)
+param_names = list((capabilities.inline_parameters or {}).keys())
+print(f"Supported parameters: {', '.join(sorted(param_names))}")
 # Expected output: Supported parameters: max_tokens, temperature, top_p, ...
 ```
 
 ## Next Steps
 
 Now that you understand parameter validation, learn about [Advanced Usage](advanced-usage.md) for more complex scenarios and registry management.
+
+## Recommended defaults (chat models)
+
+These are sensible starting points for common chat models. Adjust for your app:
+
+- Temperature: 0.7
+- Top_p: 1.0
+- Max tokens: choose per model up to its max_output_tokens
+- Response format: "text" (use JSON mode where supported for structured outputs)
+
+Note: Not all models expose all knobs (e.g., O1 family does not support classic sampling controls). Check `omr --format json models get <model> --parameters-only` to see what a given model supports.

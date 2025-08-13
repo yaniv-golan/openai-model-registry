@@ -13,7 +13,7 @@ from typing import Dict, Literal, Optional
 class DeprecationInfo:
     """Deprecation metadata for a model.
 
-    All fields are mandatory in schema v2.
+    All fields are mandatory in the current schema.
     """
 
     status: Literal["active", "deprecated", "sunset"]
@@ -25,14 +25,8 @@ class DeprecationInfo:
 
     def __post_init__(self) -> None:
         """Validate deprecation dates are properly ordered."""
-        if (
-            self.deprecates_on is not None
-            and self.sunsets_on is not None
-            and self.deprecates_on > self.sunsets_on
-        ):
-            raise ValueError(
-                f"deprecates_on ({self.deprecates_on}) must be <= sunsets_on ({self.sunsets_on})"
-            )
+        if self.deprecates_on is not None and self.sunsets_on is not None and self.deprecates_on > self.sunsets_on:
+            raise ValueError(f"deprecates_on ({self.deprecates_on}) must be <= sunsets_on ({self.sunsets_on})")
 
 
 class ModelSunsetError(Exception):
@@ -41,23 +35,16 @@ class ModelSunsetError(Exception):
     def __init__(self, model: str, sunset_date: date):
         self.model = model
         self.sunset_date = sunset_date
-        super().__init__(
-            f"Model '{model}' has been sunset as of {sunset_date}. "
-            f"It is no longer available for use."
-        )
+        super().__init__(f"Model '{model}' has been sunset as of {sunset_date}. It is no longer available for use.")
 
 
 class InvalidSchemaVersionError(Exception):
     """Raised when the schema version is not supported."""
 
-    def __init__(
-        self, found_version: Optional[str], expected_version: str = "2"
-    ):
+    def __init__(self, found_version: Optional[str], expected_version: str = "2"):
         self.found_version = found_version
         self.expected_version = expected_version
-        super().__init__(
-            f"Invalid schema version: found {found_version}, expected {expected_version}"
-        )
+        super().__init__(f"Invalid schema version: found {found_version}, expected {expected_version}")
 
 
 def assert_model_active(model: str, deprecation_info: DeprecationInfo) -> None:
@@ -80,9 +67,7 @@ def assert_model_active(model: str, deprecation_info: DeprecationInfo) -> None:
 
     if deprecation_info.status == "deprecated":
         sunset_date = (
-            deprecation_info.sunsets_on.isoformat()
-            if deprecation_info.sunsets_on is not None
-            else "unknown date"
+            deprecation_info.sunsets_on.isoformat() if deprecation_info.sunsets_on is not None else "unknown date"
         )
         warnings.warn(
             f"{model} is deprecated; will sunset {sunset_date}",
@@ -106,18 +91,12 @@ def sunset_headers(deprecation_info: DeprecationInfo) -> Dict[str, str]:
     headers: Dict[str, str] = {}
 
     if deprecation_info.deprecates_on is not None:
-        headers[
-            "Deprecation"
-        ] = deprecation_info.deprecates_on.isoformat()  # RFC 9745 §3
+        headers["Deprecation"] = deprecation_info.deprecates_on.isoformat()  # RFC 9745 §3
 
     if deprecation_info.sunsets_on is not None:
-        headers[
-            "Sunset"
-        ] = deprecation_info.sunsets_on.isoformat()  # RFC 8594 §2
+        headers["Sunset"] = deprecation_info.sunsets_on.isoformat()  # RFC 8594 §2
 
     if deprecation_info.migration_guide:
-        headers[
-            "Link"
-        ] = f'<{deprecation_info.migration_guide}>; rel="deprecation"'
+        headers["Link"] = f'<{deprecation_info.migration_guide}>; rel="deprecation"'
 
     return headers

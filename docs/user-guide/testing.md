@@ -66,11 +66,11 @@ def test_my_function_with_real_registry():
 
     with tempfile.TemporaryDirectory() as temp_dir:
         # Create a custom registry configuration
-        temp_registry_file = Path(temp_dir) / "models.yml"
+        temp_registry_file = Path(temp_dir) / "models.yaml"
         temp_constraints_file = Path(temp_dir) / "constraints.yml"
 
         # Copy or create test configuration files
-        # (you can copy from the package's config directory)
+        # (you can copy from the package's data directory or create custom ones)
 
         config = RegistryConfig(
             registry_path=str(temp_registry_file),
@@ -110,20 +110,18 @@ def test_my_app_with_fake_registry_paths(fs):
     fs.makedirs(fake_config_dir, exist_ok=True)
 
     # Create fake registry file
-    fake_models_file = fake_data_dir / "models.yml"
+    fake_models_file = fake_data_dir / "models.yaml"
     fs.create_file(
         fake_models_file,
         contents="""
-version: "1.1.0"
-dated_models:
+version: "2.0.0"
+models:
   test-model-2024-01-01:
     context_window: 4096
     max_output_tokens: 1024
     deprecation:
       status: "active"
       reason: "test model"
-aliases:
-  test-model: "test-model-2024-01-01"
 """,
     )
 
@@ -159,25 +157,23 @@ def test_my_app_with_custom_registry_path(fs, monkeypatch):
     """Test using environment variable to set custom registry path."""
 
     # Create fake registry file
-    custom_registry_path = "/custom/registry/models.yml"
+    custom_registry_path = "/custom/registry/models.yaml"
     fs.create_file(
         custom_registry_path,
         contents="""
-version: "1.1.0"
-dated_models:
+version: "2.0.0"
+models:
   custom-model-2024-01-01:
     context_window: 8192
     max_output_tokens: 2048
     deprecation:
       status: "active"
       reason: "custom model"
-aliases:
-  custom-model: "custom-model-2024-01-01"
 """,
     )
 
     # Set environment variable
-    monkeypatch.setenv("MODEL_REGISTRY_PATH", custom_registry_path)
+    monkeypatch.setenv("OMR_MODEL_REGISTRY_PATH", custom_registry_path)
 
     # Clear registry cache to pick up new environment
     ModelRegistry.cleanup()
@@ -209,9 +205,8 @@ def test_my_app_handles_registry_updates():
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.text = """
-version: "1.2.0"
-dated_models: {}
-aliases: {}
+version: "2.0.0"
+models: {}
 """
         mock_get.return_value = mock_response
 
@@ -333,8 +328,8 @@ When creating fake registry data, use realistic model configurations:
 ```python
 # Good - includes all required fields
 REALISTIC_MODEL_CONFIG = """
-version: "1.1.0"
-dated_models:
+version: "2.0.0"
+models:
   test-model-2024-01-01:
     context_window: 128000
     max_output_tokens: 16384
@@ -354,8 +349,6 @@ dated_models:
       year: 2024
       month: 1
       day: 1
-aliases:
-  test-model: "test-model-2024-01-01"
 """
 ```
 
@@ -432,3 +425,33 @@ def test_end_to_end_with_real_registry():
 ```
 
 This testing approach ensures your application properly integrates with the OpenAI Model Registry while maintaining test reliability and isolation.
+
+## CLI-Based Debugging
+
+For interactive debugging and inspection during testing, use the `omr` CLI:
+
+```bash
+# Check data source paths and status
+omr data paths
+
+# Show environment variables affecting tests
+omr data env
+
+# List all models available in tests
+omr models list
+
+# Inspect specific model data
+omr models get gpt-4o --effective
+
+# Check cache status that might affect tests
+omr cache info
+```
+
+The CLI is particularly useful for:
+
+- **Debugging test failures** - Check what data the registry is actually loading
+- **Validating test environments** - Ensure test data is set up correctly
+- **Comparing configurations** - Switch providers and compare model data
+- **Cache management** - Clear cache between test runs if needed
+
+See the [CLI Reference](cli.md) for complete documentation.

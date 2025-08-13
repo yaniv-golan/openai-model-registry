@@ -2,7 +2,7 @@
 
 This module implements path resolution for config files following the XDG Base Directory
 Specification. User-editable configuration goes in config directories, while programmatically
-updated data (like models.yml) goes in data directories.
+updated data (like ``models.yaml``) goes in data directories.
 """
 
 import os
@@ -14,11 +14,9 @@ import platformdirs
 APP_NAME = "openai-model-registry"
 
 # Environment variable names
-ENV_MODEL_REGISTRY = "MODEL_REGISTRY_PATH"
-ENV_PARAM_CONSTRAINTS = "PARAMETER_CONSTRAINTS_PATH"
+ENV_PARAM_CONSTRAINTS = "OMR_PARAMETER_CONSTRAINTS_PATH"
 
 # Default filenames
-MODEL_REGISTRY_FILENAME = "models.yml"
 PARAM_CONSTRAINTS_FILENAME = "parameter_constraints.yml"
 
 
@@ -55,9 +53,7 @@ def ensure_user_data_dir_exists() -> None:
     # If directory already exists, check if it's writable
     if user_dir.exists():
         if not os.access(user_dir, os.W_OK):
-            raise PermissionError(
-                f"Data directory exists but is not writable: {user_dir}"
-            )
+            raise PermissionError(f"Data directory exists but is not writable: {user_dir}")
         return
 
     # Create the directory and its parents if needed
@@ -65,9 +61,7 @@ def ensure_user_data_dir_exists() -> None:
 
     # Verify the directory is writable after creation
     if not os.access(user_dir, os.W_OK):
-        raise PermissionError(
-            f"Created data directory but it is not writable: {user_dir}"
-        )
+        raise PermissionError(f"Created data directory but it is not writable: {user_dir}")
 
 
 def ensure_user_config_dir_exists() -> None:
@@ -82,9 +76,7 @@ def ensure_user_config_dir_exists() -> None:
     # If directory already exists, check if it's writable
     if user_dir.exists():
         if not os.access(user_dir, os.W_OK):
-            raise PermissionError(
-                f"Config directory exists but is not writable: {user_dir}"
-            )
+            raise PermissionError(f"Config directory exists but is not writable: {user_dir}")
         return
 
     # Create the directory and its parents if needed
@@ -92,55 +84,7 @@ def ensure_user_config_dir_exists() -> None:
 
     # Verify the directory is writable after creation
     if not os.access(user_dir, os.W_OK):
-        raise PermissionError(
-            f"Created config directory but it is not writable: {user_dir}"
-        )
-
-
-def copy_default_to_user_data(filename: str) -> bool:
-    """Copy a default data file to the user data directory if it doesn't exist.
-
-    Args:
-        filename: Name of the data file to copy
-
-    Returns:
-        True if file was copied, False if no action was taken
-
-    Raises:
-        OSError: If there is an error creating directory or copying file
-    """
-    package_file = get_package_config_dir() / filename
-    user_file = get_user_data_dir() / filename
-
-    # Don't copy if user file already exists
-    if user_file.exists():
-        return False
-
-    # Ensure directory exists
-    try:
-        ensure_user_data_dir_exists()
-    except OSError as e:
-        import logging
-
-        logging.getLogger(__name__).error(
-            f"Failed to create user data directory: {e}"
-        )
-        raise  # Re-raise the exception for the caller to handle
-
-    # Only copy if package file exists
-    if package_file.exists():
-        try:
-            user_file.write_bytes(package_file.read_bytes())
-            return True
-        except (OSError, PermissionError) as e:
-            import logging
-
-            logging.getLogger(__name__).error(
-                f"Failed to copy data file {filename}: {e}"
-            )
-            raise  # Re-raise the exception for the caller to handle
-
-    return False
+        raise PermissionError(f"Created config directory but it is not writable: {user_dir}")
 
 
 def copy_default_to_user_config(filename: str) -> bool:
@@ -168,9 +112,7 @@ def copy_default_to_user_config(filename: str) -> bool:
     except OSError as e:
         import logging
 
-        logging.getLogger(__name__).error(
-            f"Failed to create user config directory: {e}"
-        )
+        logging.getLogger(__name__).error(f"Failed to create user config directory: {e}")
         raise  # Re-raise the exception for the caller to handle
 
     # Only copy if package file exists
@@ -181,40 +123,10 @@ def copy_default_to_user_config(filename: str) -> bool:
         except (OSError, PermissionError) as e:
             import logging
 
-            logging.getLogger(__name__).error(
-                f"Failed to copy config file {filename}: {e}"
-            )
+            logging.getLogger(__name__).error(f"Failed to copy config file {filename}: {e}")
             raise  # Re-raise the exception for the caller to handle
 
     return False
-
-
-def get_model_registry_path() -> str:
-    """Get the path to the model registry file, respecting XDG specification.
-
-    The model registry is stored in the user data directory since it's programmatically
-    updated rather than user-edited configuration.
-
-    Returns:
-        Path to the model registry file
-    """
-    # 1. Check environment variable
-    env_path = os.environ.get(ENV_MODEL_REGISTRY)
-    if env_path and Path(env_path).is_file():
-        return env_path
-
-    # 2. Check user data directory (primary location for programmatically updated files)
-    user_data_path = get_user_data_dir() / MODEL_REGISTRY_FILENAME
-    if user_data_path.is_file():
-        return str(user_data_path)
-
-    # 3. Check legacy user config directory for backward compatibility
-    user_config_path = get_user_config_dir() / MODEL_REGISTRY_FILENAME
-    if user_config_path.is_file():
-        return str(user_config_path)
-
-    # 4. Fall back to package directory
-    return str(get_package_config_dir() / MODEL_REGISTRY_FILENAME)
 
 
 def get_parameter_constraints_path() -> str:

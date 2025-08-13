@@ -7,9 +7,11 @@ Welcome to the OpenAI Model Registry user guide. This guide will help you get st
 The OpenAI Model Registry provides:
 
 - A centralized registry of OpenAI model information
+- Automatic updates from GitHub releases with version tracking
 - Validation for model parameters
 - Access to model capabilities (context window, token limits, etc.)
 - Version tracking and compatibility checks
+- Robust fallback mechanisms for offline usage
 
 ## Getting Started
 
@@ -17,7 +19,9 @@ See the [Getting Started](getting-started.md) guide to install and begin using t
 
 ## Features
 
+- [CLI Reference](cli.md) - Command-line interface for debugging and inspection
 - [Model Capabilities](model-capabilities.md) - Working with model capabilities and constraints
 - [Parameter Validation](parameter-validation.md) - Validating parameters against model-specific constraints
 - [Azure OpenAI Usage](azure-openai.md) - Important considerations for Azure OpenAI endpoints
-- [Advanced Usage](advanced-usage.md) - Advanced features and configurations
+- [Advanced Usage](advanced-usage.md) - Advanced features, data management, and configurations
+- [Testing](testing.md) - Testing patterns and best practices for applications using the registry

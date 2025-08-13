@@ -105,21 +105,15 @@ class TestModelVersion:
     def test_from_string_invalid_calendar_dates(self) -> None:
         """Test creating a version with invalid calendar dates."""
         # Test February 30 (invalid in any year)
-        with pytest.raises(
-            InvalidDateError, match="day is out of range for month"
-        ):
+        with pytest.raises(InvalidDateError, match="day is out of range for month"):
             ModelVersion.from_string("2023-02-30")
 
         # Test April 31 (April only has 30 days)
-        with pytest.raises(
-            InvalidDateError, match="day is out of range for month"
-        ):
+        with pytest.raises(InvalidDateError, match="day is out of range for month"):
             ModelVersion.from_string("2023-04-31")
 
         # Test February 29 in a non-leap year
-        with pytest.raises(
-            InvalidDateError, match="day is out of range for month"
-        ):
+        with pytest.raises(InvalidDateError, match="day is out of range for month"):
             ModelVersion.from_string("2023-02-29")  # 2023 is not a leap year
 
     def test_parse_from_model_valid(self) -> None:

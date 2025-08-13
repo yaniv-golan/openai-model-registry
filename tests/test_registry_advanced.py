@@ -6,9 +6,9 @@ from typing import Generator
 from unittest.mock import MagicMock, patch
 
 import pytest
+import requests
 import yaml
 
-from openai_model_registry.config_result import ConfigResult
 from openai_model_registry.errors import (
     ConstraintNotFoundError,
     InvalidDateError,
@@ -42,8 +42,8 @@ def simple_registry(
         ModelRegistry instance for testing
     """
     # Store original env vars
-    original_registry_path = os.environ.get("MODEL_REGISTRY_PATH")
-    original_constraints_path = os.environ.get("PARAMETER_CONSTRAINTS_PATH")
+    original_registry_path = os.environ.get("OMR_MODEL_REGISTRY_PATH")
+    original_constraints_path = os.environ.get("OMR_PARAMETER_CONSTRAINTS_PATH")
 
     # Cleanup any existing registry first
     ModelRegistry._default_instance = None
@@ -66,10 +66,10 @@ def simple_registry(
         yaml.dump(constraints_content, f)
 
     # Create model capabilities file
-    models_path = test_config_dir / "models.yml"
+    models_path = test_config_dir / "models.yaml"
     models_content = {
-        "version": "1.1.0",
-        "dated_models": {
+        "version": "1.0.0",
+        "models": {
             "old-model-2023-01-01": {
                 "context_window": 4096,
                 "max_output_tokens": 1024,
@@ -109,10 +109,20 @@ def simple_registry(
                     "reason": "active",
                 },
             },
-        },
-        "aliases": {
-            "old-model": "old-model-2023-01-01",
-            "gpt-4o": "gpt-4o-2024-05-13",
+            # Alias/base names for convenience (no date suffix)
+            "old-model": {
+                "context_window": 4096,
+                "max_output_tokens": 1024,
+                "description": "Old model alias",
+            },
+            "gpt-4o": {
+                "context_window": 128000,
+                "max_output_tokens": 16384,
+                "capabilities": {
+                    "supports_vision": True,
+                },
+                "description": "gpt-4o alias",
+            },
         },
     }
 
@@ -120,8 +130,8 @@ def simple_registry(
         yaml.dump(models_content, f)
 
     # Set environment variables
-    os.environ["MODEL_REGISTRY_PATH"] = str(models_path)
-    os.environ["PARAMETER_CONSTRAINTS_PATH"] = str(constraints_path)
+    os.environ["OMR_MODEL_REGISTRY_PATH"] = str(models_path)
+    os.environ["OMR_PARAMETER_CONSTRAINTS_PATH"] = str(constraints_path)
 
     try:
         # Create registry with test config
@@ -135,16 +145,14 @@ def simple_registry(
     finally:
         # Restore environment variables
         if original_registry_path:
-            os.environ["MODEL_REGISTRY_PATH"] = original_registry_path
+            os.environ["OMR_MODEL_REGISTRY_PATH"] = original_registry_path
         else:
-            os.environ.pop("MODEL_REGISTRY_PATH", None)
+            os.environ.pop("OMR_MODEL_REGISTRY_PATH", None)
 
         if original_constraints_path:
-            os.environ[
-                "PARAMETER_CONSTRAINTS_PATH"
-            ] = original_constraints_path
+            os.environ["OMR_PARAMETER_CONSTRAINTS_PATH"] = original_constraints_path
         else:
-            os.environ.pop("PARAMETER_CONSTRAINTS_PATH", None)
+            os.environ.pop("OMR_PARAMETER_CONSTRAINTS_PATH", None)
 
         # Cleanup
         ModelRegistry._default_instance = None
@@ -171,18 +179,15 @@ class TestRegistryVersionHandling:
         assert "2024-05-01" in str(exc_info.value)  # min version
         assert exc_info.value.model == "gpt-4o-2024-01-01"
         assert exc_info.value.min_version == "2024-05-01"
-        assert exc_info.value.alias == "gpt-4o"
+        # Alias suggestion field removed – ensure core details are still correct
+        assert exc_info.value.alias is None
 
     def test_invalid_date_format(self, simple_registry: ModelRegistry) -> None:
         """Test error when date format is invalid."""
         with pytest.raises(InvalidDateError):
-            simple_registry.get_capabilities(
-                "gpt-4o-2024-13-01"
-            )  # Invalid month
+            simple_registry.get_capabilities("gpt-4o-2024-13-01")  # Invalid month
 
-    def test_nonexistent_model_with_valid_date(
-        self, simple_registry: ModelRegistry
-    ) -> None:
+    def test_nonexistent_model_with_valid_date(self, simple_registry: ModelRegistry) -> None:
         """Test error for non-existent model with valid date format."""
         with pytest.raises(ModelNotSupportedError) as exc_info:
             simple_registry.get_capabilities("nonexistent-2024-01-01")
@@ -194,36 +199,28 @@ class TestRegistryVersionHandling:
         """Test getting a model using an alias."""
         # Get via alias
         capabilities = simple_registry.get_capabilities("gpt-4o")
-        assert capabilities.model_name == "gpt-4o-2024-05-13"
+        assert capabilities.model_name == "gpt-4o"
         # Note: aliases are not stored in the capabilities object in the new schema
 
-    def test_newer_version_than_registered(
-        self, simple_registry: ModelRegistry
-    ) -> None:
+    def test_newer_version_than_registered(self, simple_registry: ModelRegistry) -> None:
         """Test getting a newer version than what's registered."""
         # Test with a future version (should work because it's newer than min version)
         capabilities = simple_registry.get_capabilities("gpt-4o-2024-10-01")
         assert capabilities.openai_model_name == "gpt-4o-2024-10-01"
-        assert (
-            capabilities.context_window == 128000
-        )  # Should inherit from base model
+        assert capabilities.context_window == 128000  # Should inherit from base model
 
-    def test_model_with_version_but_no_dated_models(
-        self, simple_registry: ModelRegistry
-    ) -> None:
+    def test_model_with_version_but_no_dated_models(self, simple_registry: ModelRegistry) -> None:
         """Test behavior when requesting a versioned model but no dated models exist."""
         # Remove the registered dated model to test this case
         model_key = "gpt-4o-2024-05-13"
-        original_capability = simple_registry._capabilities.pop(
-            model_key, None
-        )
+        original_capability = simple_registry._capabilities.pop(model_key, None)
 
         try:
             with pytest.raises(ModelNotSupportedError) as exc_info:
                 simple_registry.get_capabilities("gpt-4o-2024-09-01")
 
-            # Since the alias still exists, it should recommend using it
-            assert "Try using 'gpt-4o' instead" in str(exc_info.value)
+            # Error message should not include alias suggestion
+            assert "Try using" not in str(exc_info.value)
         finally:
             # Restore the capability
             if original_capability:
@@ -241,20 +238,12 @@ class TestModelCapabilities:
         # Add a test constraint to validate
         from openai_model_registry.constraints import NumericConstraint
 
-        capabilities._constraints = {
-            "test_constraint": NumericConstraint(
-                min_value=0, max_value=10, allow_float=False
-            )
-        }
+        capabilities._constraints = {"test_constraint": NumericConstraint(min_value=0, max_value=10, allow_float=False)}
 
         # Add a test parameter reference
         from openai_model_registry.constraints import ParameterReference
 
-        capabilities.supported_parameters = [
-            ParameterReference(
-                ref="test_constraint", description="Test parameter"
-            )
-        ]
+        capabilities.supported_parameters = [ParameterReference(ref="test_constraint", description="Test parameter")]
 
         # Test with valid value
         capabilities.validate_parameter("test_constraint", 5)
@@ -278,21 +267,13 @@ class TestModelCapabilities:
         )
 
         capabilities._constraints = {
-            "temp_constraint": NumericConstraint(
-                min_value=0, max_value=2, allow_float=True
-            ),
-            "max_tokens_constraint": NumericConstraint(
-                min_value=1, max_value=1000, allow_float=False
-            ),
+            "temp_constraint": NumericConstraint(min_value=0, max_value=2, allow_float=True),
+            "max_tokens_constraint": NumericConstraint(min_value=1, max_value=1000, allow_float=False),
         }
 
         capabilities.supported_parameters = [
-            ParameterReference(
-                ref="temp_constraint", description="Temperature"
-            ),
-            ParameterReference(
-                ref="max_tokens_constraint", description="Max tokens"
-            ),
+            ParameterReference(ref="temp_constraint", description="Temperature"),
+            ParameterReference(ref="max_tokens_constraint", description="Max tokens"),
         ]
 
         # Valid parameters
@@ -307,24 +288,18 @@ class TestModelCapabilities:
         with pytest.raises(ModelRegistryError):
             capabilities.validate_parameters(params)
 
-    def test_get_parameter_constraint(
-        self, simple_registry: ModelRegistry
-    ) -> None:
+    def test_get_parameter_constraint(self, simple_registry: ModelRegistry) -> None:
         """Test get_parameter_constraint."""
         # Add a test constraint
         from openai_model_registry.constraints import NumericConstraint
 
         # Set up a numeric constraint for testing
         simple_registry._constraints = {
-            "test_constraint": NumericConstraint(
-                min_value=0, max_value=10, allow_float=True, allow_int=True
-            )
+            "test_constraint": NumericConstraint(min_value=0, max_value=10, allow_float=True, allow_int=True)
         }
 
         # Get the constraint
-        constraint = simple_registry.get_parameter_constraint(
-            "test_constraint"
-        )
+        constraint = simple_registry.get_parameter_constraint("test_constraint")
         # Use isinstance to ensure we're dealing with the right type
         assert isinstance(constraint, NumericConstraint)
         assert constraint.min_value == 0
@@ -345,124 +320,25 @@ class TestModelCapabilities:
         original_len = len(simple_registry._capabilities)
         # Verify that modifying the returned dict doesn't affect the original
         assert id(models) != id(simple_registry._capabilities)
-        assert (
-            len(simple_registry._capabilities) == original_len
-        )  # Original unchanged
-
-    def test_duplicate_alias_detection(
-        self, caplog: pytest.LogCaptureFixture
-    ) -> None:
-        """Test that duplicate aliases are properly detected and handled."""
-        # Create a simple registry configuration with duplicate aliases
-        test_config = {
-            "dated_models": {
-                "model-a-2024-01-01": {
-                    "context_window": 1000,
-                    "max_output_tokens": 100,
-                    "description": "Model A",
-                    "min_version": {
-                        "year": 2024,
-                        "month": 1,
-                        "day": 1,
-                    },
-                    "deprecation": {
-                        "status": "active",
-                        "deprecates_on": None,
-                        "sunsets_on": None,
-                        "replacement": None,
-                        "migration_guide": None,
-                        "reason": "active",
-                    },
-                },
-                "model-b-2024-01-01": {
-                    "context_window": 2000,
-                    "max_output_tokens": 200,
-                    "description": "Model B",
-                    "min_version": {
-                        "year": 2024,
-                        "month": 1,
-                        "day": 1,
-                    },
-                    "deprecation": {
-                        "status": "active",
-                        "deprecates_on": None,
-                        "sunsets_on": None,
-                        "replacement": None,
-                        "migration_guide": None,
-                        "reason": "active",
-                    },
-                },
-            },
-            "aliases": {
-                "shared-alias": "model-a-2024-01-01",
-                "unique-a": "model-a-2024-01-01",
-                "unique-b": "model-b-2024-01-01",
-            },
-        }
-
-        # Create a registry with this config
-        with patch.object(ModelRegistry, "_load_config") as mock_load:
-            config_data = {"version": "1.1.0", **test_config}
-            mock_load.return_value = ConfigResult(
-                success=True, data=config_data, path="test_path"
-            )
-
-            # Clear any existing registry
-            ModelRegistry._default_instance = None
-
-            registry = ModelRegistry()
-
-            # Force capabilities loading to trigger the alias detection
-            registry._load_capabilities()
-
-            # Check that aliases point to the correct models
-            assert (
-                registry._capabilities["shared-alias"].context_window == 1000
-            )
-            assert (
-                registry._capabilities["shared-alias"].model_name
-                == "model-a-2024-01-01"
-            )
-
-            # Check that unique aliases are properly assigned
-            assert (
-                registry._capabilities["unique-a"].model_name
-                == "model-a-2024-01-01"
-            )
-            assert (
-                registry._capabilities["unique-b"].model_name
-                == "model-b-2024-01-01"
-            )
-
-            # In the new schema, there shouldn't be duplicate alias warnings since
-            # aliases are explicitly defined in the aliases section
-            # This test now verifies that aliases work correctly
+        assert len(simple_registry._capabilities) == original_len  # Original unchanged
 
 
 class TestRegistryRefresh:
     """Tests for registry refresh functionality with safer mocking approaches."""
 
-    def test_refresh_validate_only(
-        self, simple_registry: ModelRegistry
-    ) -> None:
+    def test_refresh_validate_only(self, simple_registry: ModelRegistry) -> None:
         """Test refresh with validate_only flag."""
         # Only mock what's necessary
-        with patch.object(
-            simple_registry, "_fetch_remote_config"
-        ) as mock_fetch:
+        with patch.object(simple_registry, "_fetch_remote_config") as mock_fetch:
             # Provide a simple mock config
             mock_fetch.return_value = {"version": "1.1.0"}
 
             # Mock just the validation method to avoid complex logic
-            with patch.object(
-                simple_registry, "_validate_remote_config"
-            ) as mock_validate:
+            with patch.object(simple_registry, "_validate_remote_config") as mock_validate:
                 mock_validate.return_value = None
 
                 # Call with validate_only=True
-                result = simple_registry.refresh_from_remote(
-                    validate_only=True
-                )
+                result = simple_registry.refresh_from_remote(validate_only=True)
 
                 # Verify the correct behavior
                 assert result.success is True
@@ -472,13 +348,9 @@ class TestRegistryRefresh:
                 mock_fetch.assert_called_once()
                 mock_validate.assert_called_once()
 
-    def test_refresh_fetch_failure(
-        self, simple_registry: ModelRegistry
-    ) -> None:
+    def test_refresh_fetch_failure(self, simple_registry: ModelRegistry) -> None:
         """Test behavior when fetch fails."""
-        with patch.object(
-            simple_registry, "_fetch_remote_config"
-        ) as mock_fetch:
+        with patch.object(simple_registry, "_fetch_remote_config") as mock_fetch:
             # Simulate fetch failure
             mock_fetch.return_value = None
 
@@ -490,48 +362,38 @@ class TestRegistryRefresh:
             assert result.status == RefreshStatus.ERROR
             assert "Failed to fetch" in result.message
 
-    def test_check_for_updates_with_explicit_url(
-        self, simple_registry: ModelRegistry
-    ) -> None:
+    def test_check_for_updates_with_explicit_url(self, simple_registry: ModelRegistry) -> None:
         """Test check_for_updates with custom URL."""
+        # Create a mock config result with version information
+        mock_config_result = MagicMock()
+        mock_config_result.success = True
+        mock_config_result.data = {"version": "1.0.0"}
+        # Ensure the mock correctly implements dict-like access for the code
+        mock_config_result.__getitem__ = lambda self, key: mock_config_result.data.get(key)
+        mock_config_result.__contains__ = lambda self, key: key in mock_config_result.data
+
         with (
-            patch("requests.head") as mock_head,
+            patch.object(simple_registry, "_load_config", return_value=mock_config_result),
+            patch.object(simple_registry._data_manager, "should_update_data", return_value=False),
+            patch.object(simple_registry._data_manager, "_fetch_latest_data_release", return_value=None),
             patch("requests.get") as mock_get,
         ):
-            # Mock HEAD response
-            head_response = MagicMock()
-            head_response.status_code = 200
-            mock_head.return_value = head_response
-
             # Mock GET response
             get_response = MagicMock()
             get_response.status_code = 200
             get_response.text = yaml.dump({"version": "2.0.0"})
             mock_get.return_value = get_response
 
-            # Mock _load_config to return a known version
-            with patch.object(
-                simple_registry,
-                "_load_config",
-                return_value={"version": "1.0.0"},
-            ):
-                # Use a custom URL to avoid default URL issues
-                result = simple_registry.check_for_updates(
-                    url="https://example.com/test.yml"
-                )
+            # Use a custom URL to avoid default URL issues
+            result = simple_registry.check_for_updates(url="https://example.com/test.yml")
 
-                # Verify the requests were made to the correct URL
-                mock_head.assert_called_once_with(
-                    "https://example.com/test.yml", timeout=10
-                )
-                mock_get.assert_called_once_with(
-                    "https://example.com/test.yml", timeout=10
-                )
+            # Verify the request was made to the correct URL
+            mock_get.assert_called_once_with("https://example.com/test.yml", timeout=10)
 
-                # Verify result
-                assert result.success is True
-                assert result.status == RefreshStatus.UPDATE_AVAILABLE
-                assert "1.0.0 -> 2.0.0" in result.message
+            # Verify result
+            assert result.success is True
+            assert result.status == RefreshStatus.UPDATE_AVAILABLE
+            assert "1.0.0 -> 2.0.0" in result.message
 
     def test_check_for_updates_http_404(self) -> None:
         """Test check_for_updates with a 404 HTTP error using more direct mocking."""
@@ -542,47 +404,40 @@ class TestRegistryRefresh:
         mock_config_result.success = True
         mock_config_result.data = {"version": "1.0.0"}
         # Ensure the mock correctly implements dict-like access for the code
-        mock_config_result.__getitem__ = (
-            lambda self, key: mock_config_result.data.get(key)
-        )
-        mock_config_result.__contains__ = (
-            lambda self, key: key in mock_config_result.data
-        )
+        mock_config_result.__getitem__ = lambda self, key: mock_config_result.data.get(key)
+        mock_config_result.__contains__ = lambda self, key: key in mock_config_result.data
 
         with (
-            patch.object(
-                registry, "_load_config", return_value=mock_config_result
-            ),
-            patch("requests.head") as mock_head,
+            patch.object(registry, "_load_config", return_value=mock_config_result),
+            patch.object(registry._data_manager, "should_update_data", return_value=False),
+            patch.object(registry._data_manager, "_fetch_latest_data_release", return_value=None),
             patch("requests.get") as mock_get,
         ):
             # Create a mock response with 404
-            mock_head_response = MagicMock()
-            mock_head_response.status_code = 404
-            mock_head.return_value = mock_head_response
+            mock_response = MagicMock()
+            mock_response.status_code = 404
 
-            # We don't expect get to be called with 404 from head
-            mock_get_response = MagicMock()
-            mock_get_response.status_code = 200
-            mock_get.return_value = mock_get_response
+            # Create a proper HTTPError with response attribute
+            http_error = requests.HTTPError("404 Client Error: Not Found")
+            http_error.response = mock_response
+            mock_response.raise_for_status.side_effect = http_error
+            mock_get.return_value = mock_response
 
             # Test with specified URL to avoid using the default URL
-            result = registry.check_for_updates(
-                url="https://test.example.com/config.yml"
-            )
+            result = registry.check_for_updates(url="https://test.example.com/config.yml")
 
-            # Verify the request was made to the correct URL
-            mock_head.assert_called_once_with(
-                "https://test.example.com/config.yml", timeout=10
-            )
-
-            # Verify get was not called
-            mock_get.assert_not_called()
+            # Verify the request was made to the correct URL (first call should be the specified URL)
+            calls = mock_get.call_args_list
+            assert len(calls) >= 1, "Should have made at least one request"
+            # Check that the first call was to the specified URL
+            first_call_args, first_call_kwargs = calls[0]
+            assert first_call_args[0] == "https://test.example.com/config.yml"
+            assert first_call_kwargs.get("timeout") == 10
 
             # Verify error handling
             assert result.success is False
             assert result.status == RefreshStatus.ERROR
-            assert "not found" in result.message.lower()
+            assert "could not fetch remote config" in result.message.lower()
 
     def test_file_permission_error_handling(self) -> None:
         """Test file permission error handling in file writing operations."""
@@ -619,64 +474,96 @@ class TestRegistryErrors:
     """Tests for error handling in the registry."""
 
     def test_load_config_file_not_found(self, test_config_dir: Path) -> None:
-        """Test loading config when file doesn't exist."""
+        """Test loading config when file doesn't exist - DataManager provides fallback."""
         nonexistent_path = test_config_dir / "nonexistent.yml"
 
-        registry = ModelRegistry(
-            config=RegistryConfig(
-                registry_path=str(nonexistent_path),
-                constraints_path=str(nonexistent_path),
+        # Set environment to disable data updates and use a nonexistent path
+        import os
+
+        original_env = os.environ.get("OMR_DISABLE_DATA_UPDATES")
+        original_path = os.environ.get("OMR_MODEL_REGISTRY_PATH")
+
+        try:
+            os.environ["OMR_DISABLE_DATA_UPDATES"] = "1"
+            os.environ["OMR_MODEL_REGISTRY_PATH"] = str(nonexistent_path)
+
+            registry = ModelRegistry(
+                config=RegistryConfig(
+                    registry_path=None,  # DataManager handles this
+                    constraints_path=str(nonexistent_path),
+                )
             )
-        )
 
-        # The registry should be initialized with empty capabilities
-        assert registry._capabilities == {}
+            # With DataManager, the registry should fallback to bundled data
+            # So it should have some capabilities loaded from bundled data
+            assert len(registry._capabilities) > 0
 
-        # Load config should return a ConfigResult with success=False
-        result = registry._load_config()
-        assert result is not None
-        assert result.success is False
-        assert result.data is None
-        assert (
-            result.error is not None
-            and "file not found" in result.error.lower()
-        )
-        assert isinstance(result.exception, FileNotFoundError)
+            # Load config should succeed due to DataManager fallback to bundled data
+            result = registry._load_config()
+            assert result is not None
+            assert result.success is True
+            assert result.data is not None
+            assert result.path == "models.yaml"
+
+        finally:
+            # Restore environment
+            if original_env:
+                os.environ["OMR_DISABLE_DATA_UPDATES"] = original_env
+            else:
+                os.environ.pop("OMR_DISABLE_DATA_UPDATES", None)
+            if original_path:
+                os.environ["OMR_MODEL_REGISTRY_PATH"] = original_path
+            else:
+                os.environ.pop("OMR_MODEL_REGISTRY_PATH", None)
 
     def test_load_config_invalid_format(self, test_config_dir: Path) -> None:
-        """Test loading config with invalid format."""
+        """Test loading config with invalid format - registry validates and rejects."""
         invalid_path = test_config_dir / "invalid.yml"
 
         # Create an invalid YAML file (not a dictionary)
         with open(invalid_path, "w") as f:
             f.write("- this\n- is\n- a\n- list")
 
-        registry = ModelRegistry(
-            config=RegistryConfig(
-                registry_path=str(invalid_path),
-            )
-        )
+        # Set environment to use the invalid file
+        import os
 
-        # Load config should return a ConfigResult with success=False for non-dict data
-        result = registry._load_config()
-        assert result is not None
-        assert result.success is False
-        assert result.data is None
-        assert (
-            result.error is not None
-            and "invalid configuration format" in result.error.lower()
-        )
-        assert (
-            result.error is not None
-            and "expected dictionary" in result.error.lower()
-        )
+        original_env = os.environ.get("OMR_DISABLE_DATA_UPDATES")
+        original_path = os.environ.get("OMR_MODEL_REGISTRY_PATH")
+
+        try:
+            os.environ["OMR_DISABLE_DATA_UPDATES"] = "1"
+            os.environ["OMR_MODEL_REGISTRY_PATH"] = str(invalid_path)
+
+            registry = ModelRegistry(
+                config=RegistryConfig(
+                    registry_path=None,  # DataManager handles this
+                )
+            )
+
+            # Load config should fail because DataManager reads the invalid YAML
+            # from the environment path, but registry validates format and rejects it
+            result = registry._load_config()
+            assert result is not None
+            assert result.success is False
+            assert result.error is not None
+            assert "expected dictionary, got list" in result.error
+            assert result.path == "models.yaml"
+
+        finally:
+            # Restore environment
+            if original_env:
+                os.environ["OMR_DISABLE_DATA_UPDATES"] = original_env
+            else:
+                os.environ.pop("OMR_DISABLE_DATA_UPDATES", None)
+            if original_path:
+                os.environ["OMR_MODEL_REGISTRY_PATH"] = original_path
+            else:
+                os.environ.pop("OMR_MODEL_REGISTRY_PATH", None)
 
     def test_init_with_copy_error(self) -> None:
         """Test ModelRegistry initialization with config file copy error."""
         # Mock the copy_default_to_user_config function to raise an OSError
-        with patch(
-            "openai_model_registry.registry.copy_default_to_user_config"
-        ) as mock_copy:
+        with patch("openai_model_registry.registry.copy_default_to_user_config") as mock_copy:
             mock_copy.side_effect = OSError("Simulated copy error")
 
             # Registry should still initialize without raising an exception

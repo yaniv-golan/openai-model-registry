@@ -1,0 +1,1928 @@
+version: 1.0.0
+models:
+  gpt-4o:
+    name: GPT-4o
+    description: OpenAI's flagship multimodal model with vision, audio, and text capabilities
+    provider: openai
+    type: chat
+    input_modalities:
+    - text
+    - image
+    output_modalities:
+    - text
+    context_window:
+      total: 128000
+      input: 128000
+      output: 16384
+    pricing:
+      scheme: per_token
+      unit: million_tokens
+      input_cost_per_unit: 2.5
+      output_cost_per_unit: 10.0
+      currency: USD
+    capabilities:
+      supports_structured_output: true
+      supports_streaming: true
+      supports_function_calling: true
+      supports_vision: true
+      supports_audio: false
+      supports_json_mode: true
+      supports_web_search: true
+    parameters:
+      temperature:
+        type: number
+        min: 0.0
+        max: 2.0
+        default: 1.0
+      top_p:
+        type: number
+        min: 0.0
+        max: 1.0
+        default: 1.0
+      max_tokens:
+        type: integer
+        min: 1
+        max: 16384
+        default: null
+      frequency_penalty:
+        type: number
+        min: -2.0
+        max: 2.0
+        default: 0.0
+      presence_penalty:
+        type: number
+        min: -2.0
+        max: 2.0
+        default: 0.0
+      response_format:
+        type: enum
+        enum:
+        - text
+        - json
+    deprecation:
+      status: active
+      sunset_date: null
+      replacement: null
+    billing:
+      web_search:
+        call_fee_per_1000: 25.0
+        content_token_policy: included_in_call_fee
+        currency: USD
+  gpt-4o-2024-05-13:
+    name: GPT-4o (2024-05-13)
+    description: Initial GPT-4o release with multimodal capabilities
+    provider: openai
+    type: chat
+    input_modalities:
+    - text
+    - image
+    output_modalities:
+    - text
+    context_window:
+      total: 128000
+      input: 128000
+      output: 16384
+    pricing:
+      scheme: per_token
+      unit: million_tokens
+      input_cost_per_unit: 2.5
+      output_cost_per_unit: 10.0
+      currency: USD
+    capabilities:
+      supports_structured_output: true
+      supports_streaming: true
+      supports_function_calling: true
+      supports_vision: true
+      supports_audio: false
+      supports_json_mode: true
+      supports_web_search: true
+    parameters:
+      temperature:
+        type: number
+        min: 0.0
+        max: 2.0
+        default: 1.0
+      top_p:
+        type: number
+        min: 0.0
+        max: 1.0
+        default: 1.0
+      max_tokens:
+        type: integer
+        min: 1
+        max: 16384
+        default: null
+      frequency_penalty:
+        type: number
+        min: -2.0
+        max: 2.0
+        default: 0.0
+      presence_penalty:
+        type: number
+        min: -2.0
+        max: 2.0
+        default: 0.0
+      response_format:
+        type: enum
+        enum:
+        - text
+        - json
+    deprecation:
+      status: active
+      sunset_date: null
+      replacement: null
+    billing:
+      web_search:
+        call_fee_per_1000: 25.0
+        content_token_policy: included_in_call_fee
+        currency: USD
+  gpt-4o-mini:
+    name: GPT-4o Mini
+    description: Smaller, faster, and more affordable version of GPT-4o
+    provider: openai
+    type: chat
+    input_modalities:
+    - text
+    - image
+    output_modalities:
+    - text
+    context_window:
+      total: 128000
+      input: 128000
+      output: 16384
+    pricing:
+      scheme: per_token
+      unit: million_tokens
+      input_cost_per_unit: 0.15
+      output_cost_per_unit: 0.6
+      currency: USD
+    capabilities:
+      supports_structured_output: true
+      supports_streaming: true
+      supports_function_calling: true
+      supports_vision: true
+      supports_audio: false
+      supports_json_mode: true
+      supports_web_search: true
+    parameters:
+      temperature:
+        type: number
+        min: 0.0
+        max: 2.0
+        default: 1.0
+      top_p:
+        type: number
+        min: 0.0
+        max: 1.0
+        default: 1.0
+      max_tokens:
+        type: integer
+        min: 1
+        max: 16384
+        default: null
+      frequency_penalty:
+        type: number
+        min: -2.0
+        max: 2.0
+        default: 0.0
+      presence_penalty:
+        type: number
+        min: -2.0
+        max: 2.0
+        default: 0.0
+      response_format:
+        type: enum
+        enum:
+        - text
+        - json
+    deprecation:
+      status: active
+      sunset_date: null
+      replacement: null
+    billing:
+      web_search:
+        call_fee_per_1000: 25.0
+        content_token_policy: included_in_call_fee
+        currency: USD
+  gpt-4o-mini-2024-07-18:
+    name: GPT-4o Mini (2024-07-18)
+    description: Specific release of GPT-4o Mini
+    provider: openai
+    type: chat
+    context_window:
+      total: 128000
+      input: 128000
+      output: 16384
+    pricing:
+      scheme: per_token
+      unit: million_tokens
+      input_cost_per_unit: 0.15
+      output_cost_per_unit: 0.6
+      currency: USD
+    capabilities:
+      supports_structured_output: true
+      supports_streaming: true
+      supports_function_calling: true
+      supports_vision: true
+      supports_audio: false
+      supports_json_mode: true
+      supports_web_search: true
+    parameters:
+      temperature:
+        type: number
+        min: 0.0
+        max: 2.0
+        default: 1.0
+      top_p:
+        type: number
+        min: 0.0
+        max: 1.0
+        default: 1.0
+      max_tokens:
+        type: integer
+        min: 1
+        max: 16384
+        default: null
+      frequency_penalty:
+        type: number
+        min: -2.0
+        max: 2.0
+        default: 0.0
+      presence_penalty:
+        type: number
+        min: -2.0
+        max: 2.0
+        default: 0.0
+      response_format:
+        type: enum
+        enum:
+        - text
+        - json
+    deprecation:
+      status: active
+      sunset_date: null
+      replacement: null
+    billing:
+      web_search:
+        call_fee_per_1000: 25.0
+        content_token_policy: included_in_call_fee
+        currency: USD
+    input_modalities:
+    - text
+    - image
+    output_modalities:
+    - text
+  gpt-4o-search-preview-2025-03-11:
+    name: GPT-4o Search Preview (2025-03-11)
+    description: GPT-4o with enhanced web search capabilities
+    provider: openai
+    type: chat
+    context_window:
+      total: 128000
+      input: 128000
+      output: 16384
+    pricing:
+      scheme: per_token
+      unit: million_tokens
+      input_cost_per_unit: 2.5
+      output_cost_per_unit: 10.0
+      currency: USD
+    capabilities:
+      supports_structured_output: true
+      supports_streaming: true
+      supports_function_calling: true
+      supports_vision: true
+      supports_web_search: true
+      supports_json_mode: true
+      supports_audio: false
+    parameters:
+      temperature:
+        min: 0.0
+        max: 2.0
+        default: 1.0
+      top_p:
+        min: 0.0
+        max: 1.0
+        default: 1.0
+      max_tokens:
+        min: 1
+        max: 16384
+        default: null
+      frequency_penalty:
+        min: -2.0
+        max: 2.0
+        default: 0.0
+      presence_penalty:
+        min: -2.0
+        max: 2.0
+        default: 0.0
+    deprecation:
+      status: preview
+      sunset_date: null
+      replacement: null
+    billing:
+      web_search:
+        call_fee_per_1000: 25.0
+        content_token_policy: included_in_call_fee
+        currency: USD
+    input_modalities:
+    - text
+    - image
+    output_modalities:
+    - text
+  gpt-4o-mini-search-preview-2025-03-11:
+    name: GPT-4o Mini Search Preview (2025-03-11)
+    description: GPT-4o Mini with enhanced web search capabilities
+    provider: openai
+    type: chat
+    context_window:
+      total: 128000
+      input: 128000
+      output: 16384
+    pricing:
+      scheme: per_token
+      unit: million_tokens
+      input_cost_per_unit: 0.15
+      output_cost_per_unit: 0.6
+      currency: USD
+    capabilities:
+      supports_structured_output: true
+      supports_streaming: true
+      supports_function_calling: true
+      supports_vision: true
+      supports_web_search: true
+      supports_json_mode: true
+      supports_audio: false
+    parameters:
+      temperature:
+        min: 0.0
+        max: 2.0
+        default: 1.0
+      top_p:
+        min: 0.0
+        max: 1.0
+        default: 1.0
+      max_tokens:
+        min: 1
+        max: 16384
+        default: null
+      frequency_penalty:
+        min: -2.0
+        max: 2.0
+        default: 0.0
+      presence_penalty:
+        min: -2.0
+        max: 2.0
+        default: 0.0
+    deprecation:
+      status: preview
+      sunset_date: null
+      replacement: null
+    input_modalities:
+    - text
+    - image
+    output_modalities:
+    - text
+  gpt-4.1:
+    name: GPT-4.1
+    description: Latest GPT-4 series with 1M token context window and enhanced coding
+      capabilities
+    provider: openai
+    type: chat
+    context_window:
+      total: 1048576
+      input: 1048576
+      output: 32768
+    pricing:
+      scheme: per_token
+      unit: million_tokens
+      input_cost_per_unit: 2.0
+      output_cost_per_unit: 8.0
+      currency: USD
+    capabilities:
+      supports_structured_output: true
+      supports_streaming: true
+      supports_function_calling: true
+      supports_vision: true
+      supports_json_mode: true
+      supports_web_search: true
+      supports_audio: false
+    parameters:
+      temperature:
+        type: number
+        min: 0.0
+        max: 2.0
+        default: 1.0
+      top_p:
+        type: number
+        min: 0.0
+        max: 1.0
+        default: 1.0
+      max_tokens:
+        type: integer
+        min: 1
+        max: 32768
+        default: null
+      frequency_penalty:
+        type: number
+        min: -2.0
+        max: 2.0
+        default: 0.0
+      presence_penalty:
+        type: number
+        min: -2.0
+        max: 2.0
+        default: 0.0
+      response_format:
+        type: enum
+        enum:
+        - text
+        - json
+    deprecation:
+      status: active
+      sunset_date: null
+      replacement: null
+    billing:
+      web_search:
+        call_fee_per_1000: 25.0
+        content_token_policy: included_in_call_fee
+        currency: USD
+    input_modalities:
+    - text
+    - image
+    output_modalities:
+    - text
+  gpt-4.1-mini:
+    name: GPT-4.1 Mini
+    description: Smaller version of GPT-4.1 with 1M token context
+    provider: openai
+    type: chat
+    context_window:
+      total: 1048576
+      input: 1048576
+      output: 32768
+    pricing:
+      scheme: per_token
+      unit: million_tokens
+      input_cost_per_unit: 0.4
+      output_cost_per_unit: 1.6
+      currency: USD
+    capabilities:
+      supports_structured_output: true
+      supports_streaming: true
+      supports_function_calling: true
+      supports_vision: true
+      supports_json_mode: true
+      supports_web_search: true
+      supports_audio: false
+    parameters:
+      temperature:
+        type: number
+        min: 0.0
+        max: 2.0
+        default: 1.0
+      top_p:
+        type: number
+        min: 0.0
+        max: 1.0
+        default: 1.0
+      max_tokens:
+        type: integer
+        min: 1
+        max: 32768
+        default: null
+      frequency_penalty:
+        type: number
+        min: -2.0
+        max: 2.0
+        default: 0.0
+      presence_penalty:
+        type: number
+        min: -2.0
+        max: 2.0
+        default: 0.0
+      response_format:
+        type: enum
+        enum:
+        - text
+        - json
+    deprecation:
+      status: active
+      sunset_date: null
+      replacement: null
+    billing:
+      web_search:
+        call_fee_per_1000: 25.0
+        content_token_policy: included_in_call_fee
+        currency: USD
+    input_modalities:
+    - text
+    - image
+    output_modalities:
+    - text
+  gpt-4.1-nano:
+    name: GPT-4.1 Nano
+    description: Ultra-fast and cost-effective version of GPT-4.1
+    provider: openai
+    type: chat
+    context_window:
+      total: 1048576
+      input: 1048576
+      output: 32768
+    pricing:
+      scheme: per_token
+      unit: million_tokens
+      input_cost_per_unit: 0.1
+      output_cost_per_unit: 0.4
+      currency: USD
+    capabilities:
+      supports_structured_output: true
+      supports_streaming: true
+      supports_function_calling: true
+      supports_vision: true
+      supports_json_mode: true
+      supports_web_search: true
+      supports_audio: false
+    parameters:
+      temperature:
+        min: 0.0
+        max: 2.0
+        default: 1.0
+      top_p:
+        min: 0.0
+        max: 1.0
+        default: 1.0
+      max_tokens:
+        min: 1
+        max: 32768
+        default: null
+      frequency_penalty:
+        min: -2.0
+        max: 2.0
+        default: 0.0
+      presence_penalty:
+        min: -2.0
+        max: 2.0
+        default: 0.0
+    deprecation:
+      status: active
+      sunset_date: null
+      replacement: null
+    billing:
+      web_search:
+        call_fee_per_1000: 25.0
+        content_token_policy: included_in_call_fee
+        currency: USD
+    input_modalities:
+    - text
+    - image
+    output_modalities:
+    - text
+  o1:
+    name: O1
+    description: Advanced reasoning model with enhanced problem-solving capabilities
+    provider: openai
+    type: chat
+    context_window:
+      total: 200000
+      input: 200000
+      output: 100000
+    pricing:
+      scheme: per_token
+      unit: million_tokens
+      input_cost_per_unit: 15.0
+      output_cost_per_unit: 60.0
+      currency: USD
+    capabilities:
+      supports_structured_output: true
+      supports_streaming: false
+      supports_function_calling: true
+      supports_vision: false
+      supports_json_mode: true
+      supports_reasoning: true
+      supports_web_search: true
+      supports_audio: false
+    parameters:
+      reasoning_effort:
+        type: enum
+        enum:
+        - low
+        - medium
+        - high
+      max_tokens:
+        type: integer
+        min: 1
+        max: 100000
+        default: null
+    deprecation:
+      status: active
+      sunset_date: null
+      replacement: null
+    input_modalities:
+    - text
+    output_modalities:
+    - text
+  o1-2024-12-17:
+    name: O1 (2024-12-17)
+    description: Specific release of O1 reasoning model
+    provider: openai
+    type: chat
+    context_window:
+      total: 200000
+      input: 200000
+      output: 100000
+    pricing:
+      scheme: per_token
+      unit: million_tokens
+      input_cost_per_unit: 15.0
+      output_cost_per_unit: 60.0
+      currency: USD
+    capabilities:
+      supports_structured_output: false
+      supports_streaming: false
+      supports_function_calling: false
+      supports_vision: false
+      supports_json_mode: false
+      supports_reasoning: true
+      supports_web_search: true
+      supports_audio: false
+    parameters:
+      reasoning_effort:
+        type: enum
+        enum:
+        - low
+        - medium
+        - high
+      max_tokens:
+        type: integer
+        min: 1
+        max: 100000
+        default: null
+    deprecation:
+      status: active
+      sunset_date: null
+      replacement: null
+    input_modalities:
+    - text
+    output_modalities:
+    - text
+  o1-mini:
+    name: O1 Mini
+    description: Smaller, faster version of O1 reasoning model
+    provider: openai
+    type: chat
+    context_window:
+      total: 128000
+      input: 128000
+      output: 65536
+    pricing:
+      scheme: per_token
+      unit: million_tokens
+      input_cost_per_unit: 3.0
+      output_cost_per_unit: 12.0
+      currency: USD
+    capabilities:
+      supports_structured_output: false
+      supports_streaming: false
+      supports_function_calling: false
+      supports_vision: false
+      supports_json_mode: false
+      supports_reasoning: true
+      supports_web_search: true
+      supports_audio: false
+    parameters:
+      reasoning_effort:
+        type: enum
+        enum:
+        - low
+        - medium
+        - high
+      max_tokens:
+        type: integer
+        min: 1
+        max: 65536
+        default: null
+    deprecation:
+      status: active
+      sunset_date: null
+      replacement: null
+    input_modalities:
+    - text
+    output_modalities:
+    - text
+  o1-mini-2024-09-12:
+    name: O1 Mini (2024-09-12)
+    description: Specific release of O1 Mini reasoning model
+    provider: openai
+    type: chat
+    context_window:
+      total: 128000
+      input: 128000
+      output: 65536
+    pricing:
+      scheme: per_token
+      unit: million_tokens
+      input_cost_per_unit: 3.0
+      output_cost_per_unit: 12.0
+      currency: USD
+    capabilities:
+      supports_structured_output: false
+      supports_streaming: false
+      supports_function_calling: false
+      supports_vision: false
+      supports_json_mode: false
+      supports_reasoning: true
+      supports_web_search: true
+      supports_audio: false
+    parameters:
+      reasoning_effort:
+        type: enum
+        enum:
+        - low
+        - medium
+        - high
+      max_tokens:
+        type: integer
+        min: 1
+        max: 65536
+        default: null
+    deprecation:
+      status: active
+      sunset_date: null
+      replacement: null
+    input_modalities:
+    - text
+    output_modalities:
+    - text
+  o1-preview:
+    name: O1 Preview
+    description: Preview version of O1 reasoning model
+    provider: openai
+    type: chat
+    context_window:
+      total: 128000
+      input: 128000
+      output: 32768
+    pricing:
+      scheme: per_token
+      unit: million_tokens
+      input_cost_per_unit: 15.0
+      output_cost_per_unit: 60.0
+      currency: USD
+    capabilities:
+      supports_structured_output: false
+      supports_streaming: false
+      supports_function_calling: false
+      supports_vision: false
+      supports_json_mode: false
+      supports_reasoning: true
+      supports_web_search: true
+      supports_audio: false
+    parameters:
+      reasoning_effort:
+        type: enum
+        enum:
+        - low
+        - medium
+        - high
+      max_tokens:
+        type: integer
+        min: 1
+        max: 32768
+        default: null
+    deprecation:
+      status: preview
+      sunset_date: null
+      replacement: o1
+    input_modalities:
+    - text
+    output_modalities:
+    - text
+  o3:
+    name: O3
+    description: Next-generation reasoning model with advanced problem-solving
+    provider: openai
+    type: chat
+    context_window:
+      total: 200000
+      input: 200000
+      output: 100000
+    pricing:
+      scheme: per_token
+      unit: million_tokens
+      input_cost_per_unit: 2.0
+      output_cost_per_unit: 8.0
+      currency: USD
+    capabilities:
+      supports_structured_output: true
+      supports_streaming: false
+      supports_function_calling: true
+      supports_vision: false
+      supports_json_mode: false
+      supports_reasoning: true
+      supports_web_search: true
+      supports_audio: false
+    parameters:
+      temperature:
+        min: 1.0
+        max: 1.0
+        default: 1.0
+      max_tokens:
+        min: 1
+        max: 32768
+        default: null
+    deprecation:
+      status: active
+      sunset_date: null
+      replacement: null
+    input_modalities:
+    - text
+    output_modalities:
+    - text
+  o3-2025-04-16:
+    name: O3 (2025-04-16)
+    description: Specific release of O3 reasoning model
+    provider: openai
+    type: chat
+    context_window:
+      total: 200000
+      input: 200000
+      output: 100000
+    pricing:
+      scheme: per_token
+      unit: million_tokens
+      input_cost_per_unit: 2.0
+      output_cost_per_unit: 8.0
+      currency: USD
+    capabilities:
+      supports_structured_output: false
+      supports_streaming: false
+      supports_function_calling: false
+      supports_vision: false
+      supports_json_mode: false
+      supports_reasoning: true
+      supports_web_search: true
+      supports_audio: false
+    parameters:
+      temperature:
+        min: 1.0
+        max: 1.0
+        default: 1.0
+      max_tokens:
+        min: 1
+        max: 32768
+        default: null
+    deprecation:
+      status: active
+      sunset_date: null
+      replacement: null
+    billing:
+      web_search:
+        call_fee_per_1000: 10.0
+        content_token_policy: billed_at_model_rate
+        currency: USD
+    input_modalities:
+    - text
+    output_modalities:
+    - text
+  o3-mini:
+    name: O3 Mini
+    description: Smaller version of O3 reasoning model
+    provider: openai
+    type: chat
+    context_window:
+      total: 200000
+      input: 200000
+      output: 100000
+    pricing:
+      scheme: per_token
+      unit: million_tokens
+      input_cost_per_unit: 1.1
+      output_cost_per_unit: 4.4
+      currency: USD
+    capabilities:
+      supports_structured_output: false
+      supports_streaming: false
+      supports_function_calling: false
+      supports_vision: false
+      supports_json_mode: false
+      supports_reasoning: true
+      supports_web_search: true
+      supports_audio: false
+    parameters:
+      temperature:
+        min: 1.0
+        max: 1.0
+        default: 1.0
+      max_tokens:
+        min: 1
+        max: 65536
+        default: null
+    deprecation:
+      status: active
+      sunset_date: null
+      replacement: null
+    billing:
+      web_search:
+        call_fee_per_1000: 10.0
+        content_token_policy: billed_at_model_rate
+        currency: USD
+    input_modalities:
+    - text
+    output_modalities:
+    - text
+  o3-mini-2025-01-31:
+    name: O3 Mini (2025-01-31)
+    description: Specific release of O3 Mini reasoning model
+    provider: openai
+    type: chat
+    context_window:
+      total: 200000
+      input: 200000
+      output: 65536
+    pricing:
+      scheme: per_token
+      unit: million_tokens
+      input_cost_per_unit: 1.0
+      output_cost_per_unit: 4.0
+      currency: USD
+    capabilities:
+      supports_structured_output: false
+      supports_streaming: false
+      supports_function_calling: false
+      supports_vision: false
+      supports_json_mode: false
+      supports_reasoning: true
+      supports_web_search: true
+      supports_audio: false
+    parameters:
+      temperature:
+        min: 1.0
+        max: 1.0
+        default: 1.0
+      max_tokens:
+        min: 1
+        max: 65536
+        default: null
+    deprecation:
+      status: active
+      sunset_date: null
+      replacement: null
+    input_modalities:
+    - text
+    output_modalities:
+    - text
+  o3-deep-research:
+    name: O3 Deep Research
+    description: O3 variant with built-in web search and code execution tools for
+      deep research tasks
+    provider: openai
+    type: chat
+    context_window:
+      total: 128000
+      input: 128000
+      output: 32768
+    pricing:
+      scheme: per_token
+      unit: million_tokens
+      input_cost_per_unit: 2.0
+      output_cost_per_unit: 8.0
+      currency: USD
+    capabilities:
+      supports_structured_output: true
+      supports_streaming: false
+      supports_function_calling: true
+      supports_vision: false
+      supports_audio: false
+      supports_web_search: true
+      supports_json_mode: true
+      supports_reasoning: true
+    parameters:
+      temperature:
+        min: 0.0
+        max: 2.0
+        default: 1.0
+      top_p:
+        min: 0.0
+        max: 1.0
+        default: 1.0
+      max_tokens:
+        min: 1
+        max: 32768
+        default: null
+      frequency_penalty:
+        min: -2.0
+        max: 2.0
+        default: 0.0
+      presence_penalty:
+        min: -2.0
+        max: 2.0
+        default: 0.0
+    deprecation:
+      status: preview
+      sunset_date: null
+      replacement: null
+    input_modalities:
+    - text
+    output_modalities:
+    - text
+  o4-mini:
+    name: O4 Mini
+    description: Latest generation mini reasoning model with enhanced STEM capabilities
+    provider: openai
+    type: chat
+    context_window:
+      total: 200000
+      input: 200000
+      output: 100000
+    pricing:
+      scheme: per_token
+      unit: million_tokens
+      input_cost_per_unit: 0.5
+      output_cost_per_unit: 2.0
+      currency: USD
+    capabilities:
+      supports_structured_output: true
+      supports_streaming: false
+      supports_function_calling: true
+      supports_vision: false
+      supports_json_mode: false
+      supports_reasoning: true
+      supports_web_search: true
+      supports_audio: false
+    parameters:
+      temperature:
+        min: 1.0
+        max: 1.0
+        default: 1.0
+      max_tokens:
+        min: 1
+        max: 65536
+        default: null
+    deprecation:
+      status: active
+      sunset_date: null
+      replacement: null
+    billing:
+      web_search:
+        call_fee_per_1000: 10.0
+        content_token_policy: billed_at_model_rate
+        currency: USD
+    input_modalities:
+    - text
+    output_modalities:
+    - text
+  o4-mini-2025-04-16:
+    name: O4 Mini (2025-04-16)
+    description: Specific release of O4 Mini reasoning model
+    provider: openai
+    type: chat
+    context_window:
+      total: 200000
+      input: 200000
+      output: 65536
+    pricing:
+      scheme: per_token
+      unit: million_tokens
+      input_cost_per_unit: 0.5
+      output_cost_per_unit: 2.0
+      currency: USD
+    capabilities:
+      supports_structured_output: false
+      supports_streaming: false
+      supports_function_calling: false
+      supports_vision: false
+      supports_json_mode: false
+      supports_reasoning: true
+      supports_web_search: true
+      supports_audio: false
+    parameters:
+      temperature:
+        min: 1.0
+        max: 1.0
+        default: 1.0
+      max_tokens:
+        min: 1
+        max: 65536
+        default: null
+    deprecation:
+      status: active
+      sunset_date: null
+      replacement: null
+    billing:
+      web_search:
+        call_fee_per_1000: 10.0
+        content_token_policy: billed_at_model_rate
+        currency: USD
+    input_modalities:
+    - text
+    output_modalities:
+    - text
+  o4-mini-deep-research:
+    name: O4 Mini Deep Research
+    description: O4 Mini variant with built-in web search and code execution tools
+      for deep research tasks
+    provider: openai
+    type: chat
+    context_window:
+      total: 200000
+      input: 200000
+      output: 65536
+    pricing:
+      scheme: per_token
+      unit: million_tokens
+      input_cost_per_unit: 2.0
+      output_cost_per_unit: 8.0
+      currency: USD
+    capabilities:
+      supports_structured_output: true
+      supports_streaming: false
+      supports_function_calling: true
+      supports_vision: false
+      supports_audio: false
+      supports_web_search: true
+      supports_json_mode: true
+      supports_reasoning: true
+    parameters:
+      temperature:
+        min: 0.0
+        max: 2.0
+        default: 1.0
+      top_p:
+        min: 0.0
+        max: 1.0
+        default: 1.0
+      max_tokens:
+        min: 1
+        max: 65536
+        default: null
+      frequency_penalty:
+        min: -2.0
+        max: 2.0
+        default: 0.0
+      presence_penalty:
+        min: -2.0
+        max: 2.0
+        default: 0.0
+    deprecation:
+      status: preview
+      sunset_date: null
+      replacement: null
+    input_modalities:
+    - text
+    output_modalities:
+    - text
+  gpt-4:
+    name: GPT-4
+    description: Original GPT-4 model with strong reasoning capabilities
+    provider: openai
+    type: chat
+    context_window:
+      total: 8192
+      input: 8192
+      output: 4096
+    pricing:
+      scheme: per_token
+      unit: million_tokens
+      input_cost_per_unit: 30.0
+      output_cost_per_unit: 60.0
+      currency: USD
+    capabilities:
+      supports_structured_output: true
+      supports_streaming: true
+      supports_function_calling: true
+      supports_vision: false
+      supports_json_mode: true
+      supports_web_search: false
+      supports_audio: false
+    parameters:
+      temperature:
+        min: 0.0
+        max: 2.0
+        default: 1.0
+      top_p:
+        min: 0.0
+        max: 1.0
+        default: 1.0
+      max_tokens:
+        min: 1
+        max: 4096
+        default: null
+      frequency_penalty:
+        min: -2.0
+        max: 2.0
+        default: 0.0
+      presence_penalty:
+        min: -2.0
+        max: 2.0
+        default: 0.0
+    deprecation:
+      status: active
+      sunset_date: null
+      replacement: gpt-4o
+    input_modalities:
+    - text
+    output_modalities:
+    - text
+  gpt-4-turbo:
+    name: GPT-4 Turbo
+    description: Enhanced GPT-4 with larger context window and multimodal capabilities
+    provider: openai
+    type: chat
+    context_window:
+      total: 128000
+      input: 128000
+      output: 4096
+    pricing:
+      scheme: per_token
+      unit: million_tokens
+      input_cost_per_unit: 10.0
+      output_cost_per_unit: 30.0
+      currency: USD
+    capabilities:
+      supports_structured_output: true
+      supports_streaming: true
+      supports_function_calling: true
+      supports_vision: true
+      supports_json_mode: true
+      supports_web_search: false
+      supports_audio: false
+    parameters:
+      temperature:
+        min: 0.0
+        max: 2.0
+        default: 1.0
+      top_p:
+        min: 0.0
+        max: 1.0
+        default: 1.0
+      max_tokens:
+        min: 1
+        max: 4096
+        default: null
+      frequency_penalty:
+        min: -2.0
+        max: 2.0
+        default: 0.0
+      presence_penalty:
+        min: -2.0
+        max: 2.0
+        default: 0.0
+    deprecation:
+      status: active
+      sunset_date: null
+      replacement: gpt-4o
+    input_modalities:
+    - text
+    - image
+    output_modalities:
+    - text
+  gpt-4-turbo-preview:
+    name: GPT-4 Turbo Preview
+    description: Preview version of GPT-4 Turbo
+    provider: openai
+    type: chat
+    context_window:
+      total: 128000
+      input: 128000
+      output: 4096
+    pricing:
+      scheme: per_token
+      unit: million_tokens
+      input_cost_per_unit: 10.0
+      output_cost_per_unit: 30.0
+      currency: USD
+    capabilities:
+      supports_structured_output: true
+      supports_streaming: true
+      supports_function_calling: true
+      supports_vision: true
+      supports_json_mode: true
+      supports_web_search: false
+      supports_audio: false
+    parameters:
+      temperature:
+        min: 0.0
+        max: 2.0
+        default: 1.0
+      top_p:
+        min: 0.0
+        max: 1.0
+        default: 1.0
+      max_tokens:
+        min: 1
+        max: 4096
+        default: null
+      frequency_penalty:
+        min: -2.0
+        max: 2.0
+        default: 0.0
+      presence_penalty:
+        min: -2.0
+        max: 2.0
+        default: 0.0
+    deprecation:
+      status: active
+      sunset_date: null
+      replacement: gpt-4o
+    input_modalities:
+    - text
+    - image
+    output_modalities:
+    - text
+  text-embedding-3-large:
+    name: Text Embedding 3 Large
+    description: Most capable embedding model for text similarity and search
+    provider: openai
+    type: embedding
+    context_window:
+      total: 8191
+      input: 8191
+      output: null
+    pricing:
+      scheme: per_token
+      unit: million_tokens
+      input_cost_per_unit: 0.065
+      output_cost_per_unit: 0.0
+      currency: USD
+    capabilities:
+      supports_structured_output: false
+      supports_streaming: false
+      supports_function_calling: false
+      supports_vision: false
+      supports_json_mode: false
+      supports_web_search: false
+      supports_audio: false
+    parameters: {}
+    deprecation:
+      status: active
+      sunset_date: null
+      replacement: null
+    input_modalities:
+    - text
+  text-embedding-3-small:
+    name: Text Embedding 3 Small
+    description: Efficient embedding model for text similarity and search
+    provider: openai
+    type: embedding
+    context_window:
+      total: 8191
+      input: 8191
+      output: null
+    pricing:
+      scheme: per_token
+      unit: million_tokens
+      input_cost_per_unit: 0.01
+      output_cost_per_unit: 0.0
+      currency: USD
+    capabilities:
+      supports_structured_output: false
+      supports_streaming: false
+      supports_function_calling: false
+      supports_vision: false
+      supports_json_mode: false
+      supports_web_search: false
+      supports_audio: false
+    parameters: {}
+    deprecation:
+      status: active
+      sunset_date: null
+      replacement: null
+    input_modalities:
+    - text
+  text-embedding-ada-002:
+    name: Text Embedding Ada 002
+    description: Legacy embedding model
+    provider: openai
+    type: embedding
+    context_window:
+      total: 8191
+      input: 8191
+      output: null
+    pricing:
+      scheme: per_token
+      unit: million_tokens
+      input_cost_per_unit: 0.1
+      output_cost_per_unit: 0.0
+      currency: USD
+    capabilities:
+      supports_structured_output: false
+      supports_streaming: false
+      supports_function_calling: false
+      supports_vision: false
+      supports_json_mode: false
+      supports_web_search: false
+      supports_audio: false
+    parameters: {}
+    deprecation:
+      status: deprecated
+      sunset_date: null
+      replacement: text-embedding-3-small
+    input_modalities:
+    - text
+  whisper-1:
+    name: Whisper
+    description: Speech recognition model that converts audio to text
+    provider: openai
+    type: audio
+    context_window:
+      total: null
+      input: null
+      output: null
+    pricing:
+      scheme: per_minute
+      unit: minute
+      input_cost_per_unit: 0.006
+      output_cost_per_unit: 0.0
+      currency: USD
+    capabilities:
+      supports_structured_output: false
+      supports_streaming: false
+      supports_function_calling: false
+      supports_vision: false
+      supports_json_mode: false
+      supports_web_search: false
+      supports_audio: true
+    parameters:
+      language:
+        type: string
+        default: null
+      prompt:
+        type: string
+        default: null
+      response_format:
+        type: string
+        default: json
+      temperature:
+        min: 0.0
+        max: 1.0
+        default: 0.0
+    deprecation:
+      status: active
+      sunset_date: null
+      replacement: null
+    input_modalities:
+    - audio
+    output_modalities:
+    - text
+  tts-1:
+    name: Text-to-Speech 1
+    description: Standard quality text-to-speech model
+    provider: openai
+    type: audio
+    context_window:
+      total: 4096
+      input: 4096
+      output: null
+    pricing:
+      scheme: per_character
+      unit: million_characters
+      input_cost_per_unit: 15.0
+      output_cost_per_unit: 0.0
+      currency: USD
+    capabilities:
+      supports_structured_output: false
+      supports_streaming: true
+      supports_function_calling: false
+      supports_vision: false
+      supports_json_mode: false
+      supports_web_search: false
+      supports_audio: true
+    parameters:
+      voice:
+        type: string
+        default: alloy
+      response_format:
+        type: string
+        default: mp3
+      speed:
+        min: 0.25
+        max: 4.0
+        default: 1.0
+    deprecation:
+      status: active
+      sunset_date: null
+      replacement: null
+    input_modalities:
+    - text
+    output_modalities:
+    - audio
+  tts-1-hd:
+    name: Text-to-Speech 1 HD
+    description: High quality text-to-speech model
+    provider: openai
+    type: audio
+    context_window:
+      total: 4096
+      input: 4096
+      output: null
+    pricing:
+      scheme: per_character
+      unit: million_characters
+      input_cost_per_unit: 30.0
+      output_cost_per_unit: 0.0
+      currency: USD
+    capabilities:
+      supports_structured_output: false
+      supports_streaming: true
+      supports_function_calling: false
+      supports_vision: false
+      supports_json_mode: false
+      supports_web_search: false
+      supports_audio: true
+    parameters:
+      voice:
+        type: string
+        default: alloy
+      response_format:
+        type: string
+        default: mp3
+      speed:
+        min: 0.25
+        max: 4.0
+        default: 1.0
+    deprecation:
+      status: active
+      sunset_date: null
+      replacement: null
+    input_modalities:
+    - text
+    output_modalities:
+    - audio
+  dall-e-2:
+    name: DALL-E 2
+    description: Image generation model
+    provider: openai
+    type: image
+    context_window:
+      total: null
+      input: null
+      output: null
+    pricing:
+      scheme: per_image
+      unit: image
+      currency: USD
+      tiers:
+      - quality: standard
+        sizes:
+        - size: 256x256
+          cost_per_image: 0.016
+        - size: 512x512
+          cost_per_image: 0.018
+        - size: 1024x1024
+          cost_per_image: 0.02
+    capabilities:
+      supports_structured_output: false
+      supports_streaming: false
+      supports_function_calling: false
+      supports_vision: false
+      supports_json_mode: false
+      supports_web_search: false
+      supports_audio: false
+    parameters:
+      n:
+        min: 1
+        max: 10
+        default: 1
+      size:
+        type: string
+        default: 1024x1024
+      response_format:
+        type: string
+        default: url
+    deprecation:
+      status: active
+      sunset_date: null
+      replacement: null
+    input_modalities:
+    - text
+    output_modalities:
+    - image
+  dall-e-3:
+    name: DALL-E 3
+    description: Advanced image generation model with improved quality and prompt
+      adherence
+    provider: openai
+    type: image
+    context_window:
+      total: null
+      input: null
+      output: null
+    pricing:
+      scheme: per_image
+      unit: image
+      currency: USD
+      tiers:
+      - quality: standard
+        sizes:
+        - size: 256x256
+          cost_per_image: 0.04
+        - size: 512x512
+          cost_per_image: 0.08
+        - size: 1024x1024
+          cost_per_image: 0.08
+      - quality: hd
+        sizes:
+        - size: 256x256
+          cost_per_image: 0.08
+        - size: 512x512
+          cost_per_image: 0.12
+        - size: 1024x1024
+          cost_per_image: 0.12
+    capabilities:
+      supports_structured_output: false
+      supports_streaming: false
+      supports_function_calling: false
+      supports_vision: false
+      supports_json_mode: false
+      supports_web_search: false
+      supports_audio: false
+    parameters:
+      n:
+        min: 1
+        max: 1
+        default: 1
+      size:
+        type: string
+        default: 1024x1024
+      quality:
+        type: string
+        default: standard
+      style:
+        type: string
+        default: vivid
+      response_format:
+        type: string
+        default: url
+    deprecation:
+      status: active
+      sunset_date: null
+      replacement: null
+    input_modalities:
+    - text
+    output_modalities:
+    - image
+  gpt-5:
+    name: GPT-5
+    description: OpenAI's next-generation flagship multimodal model for advanced reasoning
+      and complex tasks
+    provider: openai
+    type: chat
+    context_window:
+      total: 400000
+      input: 400000
+      output: 128000
+    pricing:
+      scheme: per_token
+      unit: million_tokens
+      input_cost_per_unit: 0.625
+      output_cost_per_unit: 5.0
+      currency: USD
+    capabilities:
+      supports_structured_output: true
+      supports_streaming: true
+      supports_function_calling: true
+      supports_vision: true
+      supports_audio: false
+      supports_json_mode: true
+      supports_web_search: true
+    parameters:
+      temperature:
+        min: 0.0
+        max: 2.0
+        default: 1.0
+      top_p:
+        min: 0.0
+        max: 1.0
+        default: 1.0
+      max_tokens:
+        min: 1
+        max: 128000
+        default: null
+      frequency_penalty:
+        min: -2.0
+        max: 2.0
+        default: 0.0
+      presence_penalty:
+        min: -2.0
+        max: 2.0
+        default: 0.0
+    deprecation:
+      status: active
+      sunset_date: null
+      replacement: null
+    input_modalities:
+    - text
+    - image
+    - audio
+    output_modalities:
+    - text
+  gpt-5-chat-latest:
+    name: GPT-5 Chat Latest
+    description: Chat-optimized GPT-5 variant for conversational applications
+    provider: openai
+    type: chat
+    context_window:
+      total: 400000
+      input: 400000
+      output: 128000
+    pricing:
+      scheme: per_token
+      unit: million_tokens
+      input_cost_per_unit: 0.625
+      output_cost_per_unit: 5.0
+      currency: USD
+    capabilities:
+      supports_structured_output: true
+      supports_streaming: true
+      supports_function_calling: true
+      supports_vision: true
+      supports_audio: false
+      supports_json_mode: true
+      supports_web_search: true
+    parameters:
+      temperature:
+        min: 0.0
+        max: 2.0
+        default: 1.0
+      top_p:
+        min: 0.0
+        max: 1.0
+        default: 1.0
+      max_tokens:
+        min: 1
+        max: 128000
+        default: null
+      frequency_penalty:
+        min: -2.0
+        max: 2.0
+        default: 0.0
+      presence_penalty:
+        min: -2.0
+        max: 2.0
+        default: 0.0
+    deprecation:
+      status: active
+      sunset_date: null
+      replacement: null
+    input_modalities:
+    - text
+    - image
+    - audio
+    output_modalities:
+    - text
+  gpt-5-mini:
+    name: GPT-5 Mini
+    description: Lightweight GPT-5 variant optimized for efficiency and cost
+    provider: openai
+    type: chat
+    context_window:
+      total: 400000
+      input: 400000
+      output: 128000
+    pricing:
+      scheme: per_token
+      unit: million_tokens
+      input_cost_per_unit: 0.125
+      output_cost_per_unit: 1.0
+      currency: USD
+    capabilities:
+      supports_structured_output: true
+      supports_streaming: true
+      supports_function_calling: true
+      supports_vision: true
+      supports_audio: false
+      supports_json_mode: true
+      supports_web_search: true
+    parameters:
+      temperature:
+        min: 0.0
+        max: 2.0
+        default: 1.0
+      top_p:
+        min: 0.0
+        max: 1.0
+        default: 1.0
+      max_tokens:
+        min: 1
+        max: 128000
+        default: null
+      frequency_penalty:
+        min: -2.0
+        max: 2.0
+        default: 0.0
+      presence_penalty:
+        min: -2.0
+        max: 2.0
+        default: 0.0
+    deprecation:
+      status: active
+      sunset_date: null
+      replacement: null
+    input_modalities:
+    - text
+    - image
+    - audio
+    output_modalities:
+    - text
+  gpt-5-nano:
+    name: GPT-5 Nano
+    description: Ultra-efficient GPT-5 variant optimized for latency and cost
+    provider: openai
+    type: chat
+    context_window:
+      total: 400000
+      input: 400000
+      output: 128000
+    pricing:
+      scheme: per_token
+      unit: million_tokens
+      input_cost_per_unit: 0.05
+      output_cost_per_unit: 0.4
+      currency: USD
+    capabilities:
+      supports_structured_output: true
+      supports_streaming: true
+      supports_function_calling: true
+      supports_vision: false
+      supports_audio: false
+      supports_json_mode: true
+      supports_web_search: true
+    parameters:
+      temperature:
+        min: 0.0
+        max: 2.0
+        default: 1.0
+      top_p:
+        min: 0.0
+        max: 1.0
+        default: 1.0
+      max_tokens:
+        min: 1
+        max: 128000
+        default: null
+      frequency_penalty:
+        min: -2.0
+        max: 2.0
+        default: 0.0
+      presence_penalty:
+        min: -2.0
+        max: 2.0
+        default: 0.0
+    deprecation:
+      status: active
+      sunset_date: null
+      replacement: null
+    input_modalities:
+    - text
+    output_modalities:
+    - text
+  gpt-image-1:
+    name: GPT-Image-1
+    description: Image generation & editing (multimodal)
+    provider: openai
+    type: image
+    pricing:
+      scheme: per_image
+      unit: image
+      currency: USD
+      tiers:
+      - quality: low
+        sizes:
+        - size: 1024x1024
+          cost_per_image: 0.011
+        - size: 1024x1792
+          cost_per_image: 0.016
+        - size: 1792x1024
+          cost_per_image: 0.016
+      - quality: medium
+        sizes:
+        - size: 1024x1024
+          cost_per_image: 0.042
+        - size: 1024x1792
+          cost_per_image: 0.063
+        - size: 1792x1024
+          cost_per_image: 0.063
+      - quality: high
+        sizes:
+        - size: 1024x1024
+          cost_per_image: 0.167
+        - size: 1024x1792
+          cost_per_image: 0.25
+        - size: 1792x1024
+          cost_per_image: 0.25
+    capabilities:
+      supports_vision: true
+      supports_json_mode: false
+      supports_streaming: false
+      supports_function_calling: false
+      supports_structured_output: false
+      supports_web_search: false
+      supports_audio: false
+    deprecation:
+      status: active
+    input_modalities:
+    - text
+    - image
+    output_modalities:
+    - image

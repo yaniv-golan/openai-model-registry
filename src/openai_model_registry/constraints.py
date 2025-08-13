@@ -74,27 +74,21 @@ class NumericConstraint:
         # Validate integer/float requirements
         if isinstance(value, float) and not self.allow_float:
             raise ModelRegistryError(
-                f"Parameter '{name}' must be an integer, got float {value}.\n"
-                f"Description: {self.description}"
+                f"Parameter '{name}' must be an integer, got float {value}.\n" f"Description: {self.description}"
             )
         if isinstance(value, int) and not self.allow_int:
             raise ModelRegistryError(
-                f"Parameter '{name}' must be a float, got integer {value}.\n"
-                f"Description: {self.description}"
+                f"Parameter '{name}' must be a float, got integer {value}.\n" f"Description: {self.description}"
             )
 
         # Handle special float values (NaN and infinity)
         if isinstance(value, float):
             if math.isnan(value):
                 raise ModelRegistryError(
-                    f"Parameter '{name}' cannot be NaN (not a number).\n"
-                    f"Description: {self.description}"
+                    f"Parameter '{name}' cannot be NaN (not a number).\n" f"Description: {self.description}"
                 )
             if math.isinf(value):
-                raise ModelRegistryError(
-                    f"Parameter '{name}' cannot be infinity.\n"
-                    f"Description: {self.description}"
-                )
+                raise ModelRegistryError(f"Parameter '{name}' cannot be infinity.\n" f"Description: {self.description}")
 
         # Validate range
         min_val = self.min_value
@@ -139,8 +133,7 @@ class EnumConstraint:
         # Validate type
         if not isinstance(value, str):
             raise ModelRegistryError(
-                f"Parameter '{name}' must be a string, got {type(value).__name__}.\n"
-                f"Description: {self.description}"
+                f"Parameter '{name}' must be a string, got {type(value).__name__}.\n" f"Description: {self.description}"
             )
 
         # Validate allowed values
@@ -199,9 +192,7 @@ class ObjectConstraint:
 
         # Check allowed keys (if specified)
         if self.allowed_keys is not None:
-            invalid_keys = [
-                key for key in value.keys() if key not in self.allowed_keys
-            ]
+            invalid_keys = [key for key in value.keys() if key not in self.allowed_keys]
             if invalid_keys:
                 raise ModelRegistryError(
                     f"Parameter '{name}' contains invalid keys: {', '.join(invalid_keys)}.\n"

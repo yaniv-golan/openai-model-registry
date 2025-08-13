@@ -1,0 +1,58 @@
+overrides:
+  azure:
+    models:
+      gpt-4o:
+        pricing:
+          scheme: per_token
+          unit: million_tokens
+          input_cost_per_unit: 5.0
+          output_cost_per_unit: 20.0
+          currency: USD
+        parameters:
+          max_tokens:
+            max: 12000
+        capabilities:
+          tools:
+          - file_search
+          - mcp
+      gpt-4o-mini:
+        pricing:
+          scheme: per_token
+          unit: million_tokens
+          input_cost_per_unit: 0.3
+          output_cost_per_unit: 1.2
+          currency: USD
+        parameters:
+          max_tokens:
+            max: 12000
+        capabilities:
+          tools:
+          - file_search
+      gpt-4-turbo:
+        pricing:
+          scheme: per_token
+          unit: million_tokens
+          input_cost_per_unit: 10.0
+          output_cost_per_unit: 30.0
+          currency: USD
+        capabilities:
+          tools:
+          - file_search
+      gpt-35-turbo:
+        release: '2023-03-01'
+        status: ga
+        context_window:
+          total: 16385
+          max_output: 4096
+        capabilities:
+          features:
+          - streaming
+          - function_calling
+          tools: []
+        pricing:
+          scheme: per_token
+          unit: million_tokens
+          input_cost_per_unit: 0.0
+          output_cost_per_unit: 0.0
+          currency: USD
+        deprecation_headers: []

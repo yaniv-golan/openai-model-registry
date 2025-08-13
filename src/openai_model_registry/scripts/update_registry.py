@@ -36,9 +36,7 @@ def refresh_registry(
             registry._load_capabilities()  # Force revalidation
             print("✅ Config validation successful")
             if verbose:
-                print(
-                    f"\nLocal registry file: {registry.config.registry_path}"
-                )
+                print(f"\nLocal registry file: {registry.config.registry_path}")
             return 0
 
         if check_only:
@@ -69,9 +67,7 @@ def refresh_registry(
             return 0
 
         # Perform the update
-        result = registry.refresh_from_remote(
-            url=url, force=force, validate_only=validate
-        )
+        result = registry.refresh_from_remote(url=url, force=force, validate_only=validate)
         if result.success:
             print("✅ Registry updated successfully")
             if verbose:
@@ -98,9 +94,7 @@ def refresh_registry(
 @click.option("-f", "--force", is_flag=True, help="Skip confirmation prompt")
 @click.option("--url", help="Custom config URL")
 @click.option("--validate", is_flag=True, help="Validate without updating")
-@click.option(
-    "--check", is_flag=True, help="Check for updates without downloading"
-)
+@click.option("--check", is_flag=True, help="Check for updates without downloading")
 def main(
     verbose: bool = False,
     force: bool = False,
@@ -126,7 +120,7 @@ def main(
         $ openai-model-registry-update -v
 
         # Update from custom URL without confirmation
-        $ openai-model-registry-update -f --url https://example.com/models.yml
+        $ openai-model-registry-update -f --url https://example.com/models.yaml
 
         # Validate current configuration without updating
         $ openai-model-registry-update --validate
