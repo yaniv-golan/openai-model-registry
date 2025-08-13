@@ -25,14 +25,14 @@ jobs:
         uses: snok/install-poetry@v1
         with:
           virtualenvs-create: true
-          version: '1.8.3'
+          version: '2.0.1'
 
       - name: Show Poetry version
         run: poetry --version
 
       - name: Install project
         run: |
-          poetry install --only main
+          poetry install
 
       - name: Run pricing updater
         run: |
