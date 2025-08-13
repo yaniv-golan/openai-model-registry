@@ -24,8 +24,11 @@ jobs:
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
-          version: latest
+          version: '1.8.3'
           virtualenvs-create: true
+
+      - name: Show Poetry version
+        run: poetry --version
 
       - name: Build package
         run: poetry build
@@ -342,7 +345,7 @@ jobs:
              [ "${{ needs.test_clean_environments.result }}" = "success" ] && \
              [ "${{ needs.test_dependency_resolution.result }}" = "success" ]; then
             echo "✅ All critical tests passed"
-          else
+          else:
             echo "❌ Some tests failed"
             exit 1
           fi

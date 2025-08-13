@@ -12,6 +12,10 @@ requires-python = ">=3.9,<4.0"
 dynamic = ["dependencies"]
 
 [tool.poetry]
+name = "openai-model-registry"
+version = "1.0.0rc1"
+description = "Registry for OpenAI models with capability and parameter validation"
+authors = ["Yaniv Golan <yaniv@golan.name>"]
 packages = [
     {include = "openai_model_registry", from = "src"},
     {include = "data", to = "openai_model_registry"}
@@ -85,7 +89,7 @@ ignore_missing_imports = true
 [tool.black]
 line-length = 120
 target-version = ["py39"]
-include = '\.pyi?$'
+include = '\\.pyi?$'
 preview = false
 required-version = "23.3.0"
 
