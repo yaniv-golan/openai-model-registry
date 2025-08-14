@@ -11,7 +11,11 @@ from ..utils import ExitCode, handle_error
 
 @click.group()
 def update() -> None:
-    """Manage registry data updates."""
+    """Manage registry data updates.
+
+    Keep your model registry data current with the latest OpenAI models,
+    capabilities, and pricing information from GitHub releases.
+    """
     pass
 
 
@@ -19,9 +23,14 @@ def update() -> None:
 @click.option("--url", type=str, help="Override update URL.")
 @click.pass_context
 def check(ctx: click.Context, url: Optional[str] = None) -> None:
-    """Check for available updates.
+    """Check if newer model data is available without downloading.
 
-    Exit code 0 if up-to-date, 10 if update available (CI-friendly).
+    Shows current and latest versions. Useful for CI/CD pipelines
+    to detect when updates are needed.
+
+    Exit codes:
+      0: Registry is up to date
+     10: Update available (CI-friendly)
     """
     try:
         registry = ModelRegistry.get_default()
@@ -80,9 +89,20 @@ def check(ctx: click.Context, url: Optional[str] = None) -> None:
 @click.option("--url", type=str, help="Override update URL.")
 @click.pass_context
 def apply(ctx: click.Context, force: bool = False, url: Optional[str] = None) -> None:
-    """Apply available updates."""
+    """Download and install available updates.
+
+    Only downloads if an update is actually available (unless --force is used).
+    Use 'omr update check' first to see what updates are available.
+
+    This command only applies updates - it doesn't check or validate first.
+    For a complete check-and-update workflow, use 'omr update refresh' instead.
+    """
     try:
         registry = ModelRegistry.get_default()
+
+        # Get version info before update
+        update_info = registry.get_update_info()
+        current_version_before = update_info.current_version
 
         if url:
             # Use refresh_from_remote for URL override
@@ -96,19 +116,39 @@ def apply(ctx: click.Context, force: bool = False, url: Optional[str] = None) ->
             success = registry.update_data(force=force)
             message = "Update completed successfully" if success else "Update failed"
 
+        # Get version info after update
+        update_info_after = registry.get_update_info()
+        current_version_after = update_info_after.current_version
+
         format_type = ctx.obj["format"]
 
         if format_type == "json":
-            result_data = {"success": success, "message": message}
+            result_data = {
+                "success": success,
+                "message": message,
+                "version_before": current_version_before,
+                "version_after": current_version_after,
+            }
             format_json(result_data)
         else:
             console = create_console(no_color=ctx.obj["no_color"])
             if success:
                 console.print("✅ [green]Update applied successfully[/green]")
-                console.print(f"Message: {message}")
+                if current_version_before != current_version_after:
+                    console.print(
+                        f"Updated from: {current_version_before or 'bundled'} → {current_version_after or 'bundled'}"
+                    )
+                else:
+                    console.print(f"Version: {current_version_after or 'bundled'} (already up to date)")
+                # Show message without "Message:" prefix if it's not generic
+                if message and message not in ["Update completed successfully", "Update failed"]:
+                    console.print(message)
             else:
                 console.print("❌ [red]Update failed[/red]")
-                console.print(f"Error: {message}")
+                console.print(f"Version: {current_version_before or 'bundled'} (unchanged)")
+                # Show error message without "Error:" prefix if it's meaningful
+                if message and message != "Update failed":
+                    console.print(message)
 
         exit(ExitCode.SUCCESS if success else ExitCode.GENERIC_ERROR)
 
@@ -127,11 +167,31 @@ def refresh(
     validate_only: bool = False,
     force: bool = False,
 ) -> None:
-    """One-shot validate/check/apply wrapper around refresh_from_remote."""
+    """Complete update workflow: check, validate, and apply in one command.
+
+    This is the recommended way to update your registry. It automatically:
+    1. Checks for available updates
+    2. Validates the remote data integrity
+    3. Downloads and applies updates if available
+
+    Use --validate-only to test remote data without downloading.
+    This is the most convenient command for regular updates.
+    """
     try:
         registry = ModelRegistry.get_default()
 
+        # Get version info before update
+        update_info = registry.get_update_info()
+        current_version_before = update_info.current_version
+
         result = registry.refresh_from_remote(url=url, force=force, validate_only=validate_only)
+
+        # Get version info after update (only if not validate_only)
+        if not validate_only:
+            update_info_after = registry.get_update_info()
+            current_version_after = update_info_after.current_version
+        else:
+            current_version_after = current_version_before
 
         format_type = ctx.obj["format"]
 
@@ -141,6 +201,8 @@ def refresh(
                 "status": result.status.value if hasattr(result.status, "value") else str(result.status),
                 "message": result.message,
                 "validate_only": validate_only,
+                "version_before": current_version_before,
+                "version_after": current_version_after,
             }
             format_json(result_data)
         else:
@@ -152,9 +214,26 @@ def refresh(
             else:
                 console.print(f"❌ [red]{action} failed[/red]")
 
-            console.print(f"Status: {result.status}")
+            # Show version information with friendly status
+            if not validate_only and current_version_before != current_version_after:
+                console.print(
+                    f"Updated from: {current_version_before or 'bundled'} → {current_version_after or 'bundled'}"
+                )
+            else:
+                # Show friendly status instead of enum
+                status_str = result.status.value if hasattr(result.status, "value") else str(result.status)
+                if status_str == "already_current":
+                    version_suffix = " (already up to date)"
+                elif status_str == "updated":
+                    version_suffix = " (updated)"
+                else:
+                    version_suffix = f" ({status_str.replace('_', ' ')})"
+
+                console.print(f"Version: {current_version_before or 'bundled'}{version_suffix}")
+
+            # Show message without "Message:" prefix
             if result.message:
-                console.print(f"Message: {result.message}")
+                console.print(result.message)
 
         exit(ExitCode.SUCCESS if result.success else ExitCode.GENERIC_ERROR)
 
@@ -165,7 +244,11 @@ def refresh(
 @update.command("show-config")
 @click.pass_context
 def show_config(ctx: click.Context) -> None:
-    """Show effective update-related configuration."""
+    """Show current update configuration and environment settings.
+
+    Displays data sources, update policies, version pinning, and
+    other settings that affect how updates work.
+    """
     try:
         registry = ModelRegistry.get_default()
         data_info = registry.get_data_info()
