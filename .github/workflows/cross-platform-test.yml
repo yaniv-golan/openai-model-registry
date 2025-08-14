@@ -76,17 +76,17 @@ jobs:
 
       - name: Test basic import
         run: |
-          python -c "import openai_model_registry; print('✅ Package imports successfully')"
-          python -c "from openai_model_registry import ModelRegistry; print('✅ ModelRegistry imports successfully')"
+          python -c "import openai_model_registry; print('[OK] Package imports successfully')"
+          python -c "from openai_model_registry import ModelRegistry; print('[OK] ModelRegistry imports successfully')"
 
       - name: Test CLI functionality (if available)
         run: |
           python -c "
           try:
               from openai_model_registry.cli import main
-              print('✅ CLI module available')
+              print('[OK] CLI module available')
           except ImportError:
-              print('ℹ️  CLI module not available (expected)')
+              print('INFO: CLI module not available (expected)')
           "
 
       - name: Test registry creation
@@ -95,7 +95,7 @@ jobs:
           from openai_model_registry import ModelRegistry, RegistryConfig
           config = RegistryConfig(auto_update=False)
           registry = ModelRegistry(config)
-          print('✅ Registry created successfully')
+          print('[OK] Registry created successfully')
           print(f'Registry has {len(registry.models)} models')
           "
 
@@ -107,10 +107,10 @@ jobs:
           registry = ModelRegistry(config)
           try:
               capabilities = registry.get_capabilities('gpt-4o')
-              print('✅ Model lookup successful')
+              print('[OK] Model lookup successful')
               print(f'Model: {capabilities.model_name}')
           except Exception as e:
-              print(f'⚠️  Model lookup failed (may be expected): {e}')
+              print(f'WARN: Model lookup failed (may be expected): {e}')
           "
 
   test_installation_methods:
@@ -157,6 +157,7 @@ jobs:
         if: matrix.method != 'pip-install'
         run: |
           python -c "import openai_model_registry; print('✅ Installation successful')"
+
 
   test_clean_environments:
     name: Test Clean Environment - Python ${{ matrix.python-version }}
@@ -221,7 +222,7 @@ jobs:
           python -m pip install --upgrade pip
           # Install with --dry-run to check dependency resolution
           pip install --dry-run dist/*.whl
-          echo "✅ Dependency resolution successful"
+          echo "[OK] Dependency resolution successful"
 
       - name: Install and check dependencies
         run: |
@@ -266,9 +267,9 @@ jobs:
           end = time.time()
           print(f'Import time: {end - start:.3f} seconds')
           if end - start > 2.0:
-              print('⚠️  Import time is slow (> 2 seconds)')
+              print('WARN: Import time is slow (> 2 seconds)')
           else:
-              print('✅ Import time is acceptable')
+              print('[OK] Import time is acceptable')
           "
 
   test_memory_usage:
@@ -319,9 +320,9 @@ jobs:
           print(f'Memory increase: {memory_increase:.1f} MB')
 
           if memory_increase > 100:
-              print('⚠️  High memory usage (> 100 MB)')
+              print('WARN: High memory usage (> 100 MB)')
           else:
-              print('✅ Memory usage is acceptable')
+              print('[OK] Memory usage is acceptable')
           "
 
   report_results:
@@ -344,8 +345,8 @@ jobs:
              [ "${{ needs.test_installation_methods.result }}" = "success" ] && \
              [ "${{ needs.test_clean_environments.result }}" = "success" ] && \
              [ "${{ needs.test_dependency_resolution.result }}" = "success" ]; then
-            echo "✅ All critical tests passed"
+            echo "[OK] All critical tests passed"
           else
-            echo "❌ Some tests failed"
+            echo "ERROR: Some tests failed"
             exit 1
           fi
