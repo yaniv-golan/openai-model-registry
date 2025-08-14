@@ -1,14 +1,103 @@
 {
     "type": "object",
     "properties": {
-        "last_update_date": {
+        "proceed": {
+            "type": "boolean"
+        },
+        "confidence": {
             "type": "string",
+            "enum": [
+                "high",
+                "medium",
+                "low"
+            ]
+        },
+        "reasons": {
+            "type": "string"
+        },
+        "last_update_date": {
+            "type": [
+                "string",
+                "null"
+            ],
             "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
         },
-        "models_updated": {
+        "updated_models": {
             "type": "array",
             "items": {
-                "type": "string"
+                "type": "object",
+                "properties": {
+                    "model": {
+                        "type": "string"
+                    },
+                    "evidence_url": {
+                        "type": "string",
+                        "pattern": "^https://"
+                    },
+                    "old_pricing": {
+                        "type": "object",
+                        "properties": {
+                            "scheme": {
+                                "type": "string"
+                            },
+                            "unit": {
+                                "type": "string"
+                            },
+                            "input_cost_per_unit": {
+                                "type": "number"
+                            },
+                            "output_cost_per_unit": {
+                                "type": "number"
+                            },
+                            "currency": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "scheme",
+                            "unit",
+                            "input_cost_per_unit",
+                            "output_cost_per_unit",
+                            "currency"
+                        ],
+                        "additionalProperties": false
+                    },
+                    "new_pricing": {
+                        "type": "object",
+                        "properties": {
+                            "scheme": {
+                                "type": "string"
+                            },
+                            "unit": {
+                                "type": "string"
+                            },
+                            "input_cost_per_unit": {
+                                "type": "number"
+                            },
+                            "output_cost_per_unit": {
+                                "type": "number"
+                            },
+                            "currency": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "scheme",
+                            "unit",
+                            "input_cost_per_unit",
+                            "output_cost_per_unit",
+                            "currency"
+                        ],
+                        "additionalProperties": false
+                    }
+                },
+                "required": [
+                    "model",
+                    "evidence_url",
+                    "old_pricing",
+                    "new_pricing"
+                ],
+                "additionalProperties": false
             }
         },
         "new_models": {
@@ -23,37 +112,18 @@
                         "type": "string",
                         "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
                     },
-                    "sources": {
-                        "type": "array",
-                        "items": {
-                            "type": "string",
-                            "pattern": "^https://"
-                        },
-                        "minItems": 1,
-                        "maxItems": 8
+                    "evidence_url": {
+                        "type": "string",
+                        "pattern": "^https://"
                     },
                     "initial_pricing": {
                         "type": "object",
                         "properties": {
                             "scheme": {
-                                "type": "string",
-                                "enum": [
-                                    "per_token",
-                                    "per_minute",
-                                    "per_image",
-                                    "per_request",
-                                    "per 1M tokens"
-                                ]
+                                "type": "string"
                             },
                             "unit": {
-                                "type": "string",
-                                "enum": [
-                                    "million_tokens",
-                                    "minute",
-                                    "image",
-                                    "request",
-                                    "tokens"
-                                ]
+                                "type": "string"
                             },
                             "input_cost_per_unit": {
                                 "type": "number"
@@ -78,41 +148,39 @@
                 "required": [
                     "model",
                     "announced_date",
-                    "sources"
+                    "evidence_url"
                 ],
                 "additionalProperties": false
             }
         },
-        "sources": {
+        "rumors": {
             "type": "array",
             "items": {
                 "type": "object",
                 "properties": {
-                    "title": {
+                    "model": {
                         "type": "string"
                     },
-                    "url": {
-                        "type": "string",
-                        "pattern": "^https://"
+                    "sources": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "pattern": "^https://"
+                        },
+                        "minItems": 1,
+                        "maxItems": 8
                     }
                 },
                 "required": [
-                    "title",
-                    "url"
-                ]
-            },
-            "minItems": 1,
-            "maxItems": 8
-        },
-        "notes": {
-            "type": "string"
+                    "model",
+                    "sources"
+                ],
+                "additionalProperties": false
+            }
         }
     },
     "required": [
-        "last_update_date",
-        "models_updated",
-        "sources",
-        "new_models"
+        "proceed"
     ],
     "additionalProperties": false
 }
