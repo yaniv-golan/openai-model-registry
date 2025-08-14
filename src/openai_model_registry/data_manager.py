@@ -227,6 +227,9 @@ class DataManager:
             with open(checksums_file, "r") as f:
                 checksum_lines = f.read().strip().split("\n")
 
+            # Files should be in the same directory as the checksums file
+            checksums_dir = checksums_file.parent
+
             for line in checksum_lines:
                 if not line.strip():
                     continue
@@ -236,7 +239,7 @@ class DataManager:
                     continue
 
                 expected_hash, filename = parts
-                file_path = self._data_dir / filename
+                file_path = checksums_dir / filename
 
                 if not file_path.exists():
                     logger.error(f"File {filename} not found for checksum verification")
@@ -287,7 +290,7 @@ class DataManager:
                 return False
 
             # Move files to final location
-            for filename in [MODELS_YAML, OVERRIDES_YAML]:
+            for filename in [MODELS_YAML, OVERRIDES_YAML, CHECKSUMS_TXT]:
                 temp_file = temp_path / filename
                 if temp_file.exists():
                     final_path = self._data_dir / filename
