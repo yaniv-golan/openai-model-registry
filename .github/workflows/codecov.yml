@@ -32,7 +32,15 @@ jobs:
           poetry install
           poetry run pip install pytest-cov
 
+      - name: Ensure pipx is available (for ostruct via pipx)
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y pipx
+          pipx --version
+
       - name: Run tests with coverage
+        env:
+          OMR_ALLOW_PIPX: "1"
         run: |
           poetry run pytest --cov=src/openai_model_registry --cov-report=xml
 
