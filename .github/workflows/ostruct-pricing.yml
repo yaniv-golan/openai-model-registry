@@ -50,6 +50,7 @@ jobs:
           fi
 
       - name: Quick detector for pricing/model changes
+        id: detect
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         if: steps.check-secrets.outputs.skip_fetch != 'true'
@@ -68,15 +69,13 @@ jobs:
           # Use pipx to run ostruct deterministically
           pipx run --spec ostruct-cli==1.6.1 ostruct run scripts/ostruct/pricing_change_detector.j2 scripts/ostruct/pricing_change_detector_schema.json --enable-tool web-search --tool-choice web-search --ws-context-size low -V today="$TODAY" -J allowed_models="$ALLOWED_MODELS" --model gpt-4.1 --temperature 0 --progress none > detector.json || true
           echo "Detector output:" && cat detector.json || true
-          # Gate: on Mon-Sat, skip if no changes detected; on Sunday always proceed
-          DOW=$(date -u +%u)
-          if [ "$DOW" -ne 7 ]; then
-            if jq -e '(.last_update_date? // empty) or ((.new_models // []) | length > 0)' detector.json >/dev/null; then
-              echo "Changes detected; proceeding"
-            else
-              echo "No changes detected; skipping pricing fetch on daily run"
-              echo "::set-output name=skip_fetch::true" || true
-            fi
+          # Decide proceed based on detector schema's proceed flag
+          PROCEED=$(jq -r '.proceed // false' detector.json)
+          echo "proceed=$PROCEED" >> $GITHUB_OUTPUT
+          if [ "$PROCEED" != "true" ]; then
+            echo "No actionable changes per detector; downstream fetch will be skipped"
+          else
+            echo "Detector indicates proceed=true"
           fi
 
       - name: Set dynamic matrix
@@ -88,7 +87,7 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OMR_ALLOW_PIPX: "1"
-        if: steps.check-secrets.outputs.skip_fetch != 'true' && steps.set-matrix.outputs.matrix != ''
+        if: steps.check-secrets.outputs.skip_fetch != 'true' && steps.detect.outputs.proceed == 'true' && steps.set-matrix.outputs.matrix != ''
         run: |
           echo "Dynamic models:" && cat matrix.json
           for m in $(jq -r '.[]' matrix.json); do
@@ -103,7 +102,7 @@ jobs:
 
       - name: Validate pricing schema for cached files
         run: |
-          python - <<'PY'
+          poetry run python - <<'PY'
           import json, glob, sys
           from pathlib import Path
           import yaml
