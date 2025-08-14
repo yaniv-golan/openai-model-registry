@@ -401,6 +401,10 @@ app.add_command(models.models)
 app.add_command(providers.providers)
 app.add_command(cache.cache)
 
+# Expose ModelRegistry on the Click group for tests that patch
+# openai_model_registry.cli.app.ModelRegistry
+app.ModelRegistry = ModelRegistry  # type: ignore[attr-defined]
+
 
 if __name__ == "__main__":
     app()
