@@ -50,6 +50,8 @@ jobs:
           poetry install
 
       - name: Run validation
+        env:
+          OMR_TEST_ALLOW_FAKE: "1"
         run: |
           poetry run python -c "import openai_model_registry; print('✅ Package imports successfully')"
           poetry check
