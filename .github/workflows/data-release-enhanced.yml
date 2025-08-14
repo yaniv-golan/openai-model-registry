@@ -41,7 +41,7 @@ jobs:
         with:
           filters: |
             data:
-              - 'src/openai_model_registry/config/**'
+              - 'data/**'
 
       - name: Determine if should release
         id: should-release
@@ -96,8 +96,8 @@ jobs:
                   return False
 
           files = [
-              'src/openai_model_registry/config/models.yml',
-              'src/openai_model_registry/config/parameter_constraints.yml'
+              'data/models.yaml',
+              'data/overrides.yaml'
           ]
           all_valid = all(validate_yaml(f) for f in files)
           sys.exit(0 if all_valid else 1)
@@ -144,21 +144,16 @@ jobs:
       - name: Create data package
         run: |
           mkdir -p dist/data-package
-          cd src/openai_model_registry/config
-
-          # Create checksums
-          if [ -f models.yml ]; then
-            sha256sum models.yml >> checksums.txt
-          fi
-          if [ -f parameter_constraints.yml ]; then
-            sha256sum parameter_constraints.yml >> checksums.txt
-          fi
-
-          # Copy files to package directory
-          cp -r * ../../../dist/data-package/
+          # Copy current data assets
+          cp -r data/* dist/data-package/
+          cd dist/data-package
+          # Regenerate checksums for packaged files (overwrite any existing)
+          rm -f checksums.txt
+          if [ -f models.yaml ]; then sha256sum models.yaml >> checksums.txt; fi
+          if [ -f overrides.yaml ]; then sha256sum overrides.yaml >> checksums.txt; fi
 
           # Create version info
-          cat > ../../../dist/data-package/version.json << EOF
+          cat > version.json << EOF
           {
             "version": "${{ steps.version-info.outputs.version }}",
             "tag": "${{ steps.version-info.outputs.tag }}",
@@ -243,8 +238,8 @@ jobs:
 
           ## 📋 Files Included
 
-          - \`models.yml\` - Model definitions and capabilities
-          - \`parameter_constraints.yml\` - Parameter validation rules
+          - \`models.yaml\` - Model definitions and capabilities
+          - \`overrides.yaml\` - Provider-specific overrides
           - \`checksums.txt\` - SHA256 checksums for verification
           - \`version.json\` - Version metadata
 
