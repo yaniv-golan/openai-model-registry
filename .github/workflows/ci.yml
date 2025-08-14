@@ -34,6 +34,12 @@ jobs:
         run: |
           poetry install
 
+      - name: Ensure pipx is available (for ostruct via pipx)
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y pipx
+          pipx --version
+
       - name: Lint with ruff
         run: |
           poetry run pip install ruff==0.3.6
@@ -45,6 +51,6 @@ jobs:
 
       - name: Test with pytest
         env:
-          OMR_TEST_ALLOW_FAKE: "1"
+          OMR_ALLOW_PIPX: "1"
         run: |
           poetry run pytest -m "not live and not slow and not flaky"
