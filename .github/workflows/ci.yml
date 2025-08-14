@@ -34,10 +34,6 @@ jobs:
         run: |
           poetry install
 
-      - name: Install ostruct-cli (for pricing tests)
-        run: |
-          poetry run pip install ostruct-cli==1.6.1
-
       - name: Lint with ruff
         run: |
           poetry run pip install ruff==0.3.6
@@ -48,5 +44,7 @@ jobs:
           poetry run mypy
 
       - name: Test with pytest
+        env:
+          OMR_TEST_ALLOW_FAKE: "1"
         run: |
           poetry run pytest -m "not live and not slow and not flaky"
