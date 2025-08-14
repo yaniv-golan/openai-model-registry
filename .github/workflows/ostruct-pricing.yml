@@ -38,9 +38,21 @@ jobs:
           sudo apt-get install -y pipx
           pipx --version
 
+      - name: Check for API key (guard)
+        id: check-secrets
+        run: |
+          if [ -z "${{ secrets.OPENAI_API_KEY }}" ]; then
+            echo "skip_fetch=true" >> $GITHUB_OUTPUT
+            echo "## Missing OPENAI_API_KEY – skipping ostruct pricing fetch" >> $GITHUB_STEP_SUMMARY
+            echo "::warning::OPENAI_API_KEY is not set; skipping pricing fetch steps."
+          else
+            echo "skip_fetch=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Quick detector for pricing/model changes
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        if: steps.check-secrets.outputs.skip_fetch != 'true'
         run: |
           TODAY=$(date -u +%F)
           # Build allowed_models and dynamic matrix from data/models.yaml using Python
@@ -76,7 +88,7 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OMR_ALLOW_PIPX: "1"
-        if: steps.set-matrix.outputs.matrix != '' && (success() && ( ! contains( toJson(needs), 'skip_fetch') ))
+        if: steps.check-secrets.outputs.skip_fetch != 'true' && steps.set-matrix.outputs.matrix != ''
         run: |
           echo "Dynamic models:" && cat matrix.json
           for m in $(jq -r '.[]' matrix.json); do
