@@ -32,13 +32,19 @@ jobs:
         run: |
           poetry install
 
+      - name: Ensure pipx is available (for ostruct via pipx)
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y pipx
+          pipx --version
+
       - name: Quick detector for pricing/model changes
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           TODAY=$(date -u +%F)
           # Build allowed_models and dynamic matrix from data/models.yaml using Python
-          python - <<'PY'
+          poetry run python - <<'PY'
           import json, yaml
           from pathlib import Path
           data = yaml.safe_load(Path('data/models.yaml').read_text())
@@ -69,6 +75,7 @@ jobs:
       - name: Fetch pricing via ostruct
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OMR_ALLOW_PIPX: "1"
         if: steps.set-matrix.outputs.matrix != '' && (success() && ( ! contains( toJson(needs), 'skip_fetch') ))
         run: |
           echo "Dynamic models:" && cat matrix.json
