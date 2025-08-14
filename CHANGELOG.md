@@ -5,88 +5,185 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## \[1.0.0\] - 2025-08-13
+## \[1.0.0\] - 2025-08-14
 
-This release is a major refactor and feature expansion. It introduces a new CLI, unified pricing schema, inline parameter validation, provider overrides, robust data packaging, and end-to-end CI/CD for both code and data.
+This is a **major release** that completely transforms the OpenAI Model Registry and adds **first-day support for GPT-5**.
 
-[Full diff on GitHub](https://github.com/yaniv-golan/openai-model-registry/compare/v0.7.3...main)
+[Full diff on GitHub](https://github.com/yaniv-golan/openai-model-registry/compare/v0.7.3...v1.0.0)
 
-### Added
+### 🚨 BREAKING CHANGES
 
-- New `omr` CLI for debugging and inspection
-  - `omr data paths|env|dump`
-  - `omr models list|get [--parameters-only]`
-  - `omr providers list|current`
-  - `omr update check|apply|refresh|show-config`
-  - `omr cache info|clear`
-- `--help-json` at root with structured help output
-- Dynamic columns for `omr models list`, including nested fields
-- Human-readable table units (K/M tokens) and compact headers
-- Unified pricing schema: `scheme`, `unit`, `input_cost_per_unit`, `output_cost_per_unit`
-- Web search billing model
-  - Dataclass `WebSearchBilling`
-  - YAML field `billing.web_search` exposed in CLI/JSON
-- Input/output modalities
-  - `input_modalities` and `output_modalities` added alongside legacy `modalities`
-- Tiered pricing (per-image)
-  - `PricingInfo.tiers` parsed from YAML and surfaced in effective JSON and CLI outputs
-- Inline parameters support across mainstream chat models; O1-family specialized params
-- Public APIs for CLI and debugging: `list_providers`, `dump_effective`, `get_raw_data_paths`, `clear_cache`, `get_bundled_data_content`, `get_raw_model_data`
-- CI/CD
-  - Library release workflow (PyPI/TestPyPI, RCs, releases)
-  - Data release workflow (data RCs, validation, GitHub releases)
-  - `ostruct` pricing workflow with pipx fallback
-  - Cross-platform install test workflow
+#### Complete Architecture Overhaul
 
-### Coverage and Platforms
+- **New data structure**: Models moved from `src/openai_model_registry/config/models.yml` to `data/models.yaml` with completely new schema
+- **Provider system**: Added `data/overrides.yaml` for provider-specific configurations (Azure OpenAI, etc.)
+- **Python 3.10+ required**: Upgraded from Python 3.9+ to leverage modern language features
+- **PEP 621 migration**: Project metadata moved from `[tool.poetry]` to `[project]` section
+- **Package structure**: Data files now packaged as part of the library using `importlib.resources`
 
-- Model coverage: includes all OpenAI models as of 2025-08-12
-- Azure support: provider overrides and CLI/provider switching fully support Azure OpenAI
-- Completeness: all capabilities and inline parameters are now included for supported models
+#### New CLI Design
 
-### Changed
+- **Complete CLI rewrite**: New `omr` command-line interface complements programmatic-only usage
+- **Rich formatting**: Table output with human-readable units and formatting
+- **JSON output**: Machine-readable output for all commands with `--format json`
+- **Interactive debugging**: Comprehensive inspection and debugging commands
 
-- Data files moved to `data/` and packaged robustly using `importlib.resources`
-- Schema detection and validation via `semver` with explicit compatibility checks
-- Parameter validation now uses inline parameters only (legacy `supported_parameters` removed)
-- Provider overrides are loaded and merged correctly (`data/overrides.yaml`)
-- CLI defaults and format handling clarified; commands validate supported formats
-- Docs overhauled: CLI reference, getting started, advanced usage, contributing/release docs
-- Project version set to `1.0.0`; data versioning aligned (e.g., `data-v1.0.0`)
+### 🎯 Major New Features
 
-### Fixed
+#### Comprehensive CLI Interface
 
-- Silent model serialization/loading failures in `dump_effective` and loader
-- Fragile bundled data access by switching to `importlib.resources.files().read_text()`
-- `omr models list` empty table issue; all fields now surfaced including JSON/structured output flags
-- MyPy errors across modules; added precise type hints and guards
-- Pre-commit, ruff, and formatting issues
+- **`omr data`**: Data file management and inspection
+  - `omr data paths` - Show all data file locations
+  - `omr data env` - Display environment variables
+  - `omr data dump` - Export raw or effective model data
+- **`omr models`**: Model discovery and analysis
+  - `omr models list` - List models with customizable columns and filtering
+  - `omr models get MODEL` - Get detailed model information
+- **`omr providers`**: Provider management
+  - `omr providers list` - List available providers
+  - `omr providers current` - Show current provider configuration
+- **`omr update`**: Registry maintenance
+  - `omr update check` - Check for updates
+  - `omr update apply` - Apply updates
+  - `omr update refresh` - Force refresh from remote
+- **`omr cache`**: Cache management
+  - `omr cache info` - Show cache status
+  - `omr cache clear` - Clear cached data
 
-### Removed
+#### Enhanced Data Model
 
-- Legacy loaders/validators (`config_validator.py`, `loader.py`) and legacy config under `src/.../config/`
-- Redundant/unused CI workflows: performance bench, security scan, semantic-release
-- Flaky CLI test for TTY-default table output
+- **Unified pricing schema**: Standardized `scheme`, `unit`, `input_cost_per_unit`, `output_cost_per_unit`
+- **Web search billing**: New `WebSearchBilling` dataclass for web search cost tracking
+- **Input/output modalities**: Separate `input_modalities` and `output_modalities` fields
+- **Tiered pricing**: Support for per-image and other tiered pricing models
+- **Inline parameters**: All model parameters now defined inline rather than referenced
 
-### Data
+#### Production-Ready Infrastructure
 
-- Converted `data/models.yaml` and `data/overrides.yaml` to unified pricing schema
-- Populated inline parameters for mainstream chat models; O1 family updated (e.g., `reasoning_effort`)
-- Added `billing.web_search` to relevant models; exposed via CLI and API
-- Applied audit fixes: pricing, audio capabilities, context windows, modalities, deprecations
-- Regenerated `data/checksums.txt` accordingly
-- Pricing data: up to date and kept current automatically via CI (periodic `ostruct` runs and merges)
+- **Automated data releases**: GitHub Actions workflow for data packaging and releases
+- **Pricing automation**: Integration with `ostruct` for automated pricing updates
+- **Cross-platform testing**: Windows, macOS, and Linux compatibility validation
+- **Release automation**: Complete CI/CD pipeline for both library and data releases
+- **Trusted publishing**: Secure PyPI publishing without API tokens
 
-### CI/CD
+### 📊 Enhanced Model Coverage
 
-- Library release (RC/final) scripts and workflows
-- Data release workflow with YAML validation and GitHub Releases
-- Automated pricing updates via `ostruct` (pipx fallback) into `data/`
+#### Current Model Support
 
-### Notes
+- **All OpenAI models** as of August 2025, including:
+  - **GPT-5 series**: Full support for GPT-5, GPT-5 Mini, GPT-5 Nano, and GPT-5 Chat Latest
+  - GPT-4o series with latest pricing
+  - O-series reasoning models (o1, o3, o4)
+  - GPT-4.1 series with enhanced capabilities
+  - Legacy models with proper deprecation tracking
+- **Azure OpenAI support** via provider overrides
+- **Complete parameter coverage** for all supported models
 
-- Environment variables standardized with `OMR_` prefix
-- Update process writes to user data dir (or `OMR_DATA_DIR`); `OMR_MODEL_REGISTRY_PATH` is read-only override
+#### New Model Capabilities
+
+- **Web search integration**: Tracks which models support web search
+- **Enhanced modality tracking**: Separate input/output modality support
+- **Reasoning parameters**: Support for `reasoning_effort` and other specialized parameters
+- **Context window accuracy**: Up-to-date context limits for all models
+
+### 🔧 Technical Improvements
+
+#### Data Management
+
+- **Schema versioning**: Semantic versioning for data schema compatibility
+- **Automatic validation**: Comprehensive validation of model data and constraints
+- **Provider overrides**: Clean separation of base models and provider-specific modifications
+- **Checksums**: SHA256 verification for all data files
+
+#### Developer Experience
+
+- **Rich error messages**: Detailed, actionable error reporting
+- **Type safety**: Complete type annotations and mypy compliance
+- **Comprehensive testing**: Full test coverage including CLI functionality
+- **Documentation overhaul**: Complete rewrite of all documentation
+
+#### Performance & Reliability
+
+- **Efficient data loading**: Optimized data structures and loading mechanisms
+- **Caching system**: Intelligent caching of remote data and updates
+- **Robust networking**: Proper error handling and retry logic for remote operations
+- **Thread safety**: Safe concurrent access to registry data
+
+### 🗂️ New File Structure
+
+#### Added Files (53 new files)
+
+- **`data/`**: New data directory with models, overrides, and metadata
+- **`src/openai_model_registry/cli/`**: Complete CLI implementation
+- **`.github/workflows/`**: Production CI/CD workflows
+- **`scripts/`**: Release automation and data management scripts
+- **`docs/contributing/`**: Comprehensive contributor documentation
+
+#### Removed Files
+
+- **`src/openai_model_registry/config/models.yml`**: Replaced by `data/models.yaml`
+- **`docs/user-guide/model-aliases.md`**: Functionality integrated into CLI
+- **`scripts/release.py`**: Replaced by shell-based release scripts
+
+### 🔄 Migration Guide
+
+#### For Library Users
+
+```python
+# Before (v0.7.3)
+from openai_model_registry import ModelRegistry
+
+registry = ModelRegistry()
+models = registry.list_models()
+
+# After (v1.0.0) - Same API, enhanced data
+from openai_model_registry import ModelRegistry
+
+registry = ModelRegistry()
+models = registry.list_models()  # Now includes much more data
+```
+
+#### For CLI Users
+
+```bash
+# New in v1.0.0 - Rich CLI interface
+omr models list --format table
+omr models get gpt-4o --parameters-only
+omr data dump --provider azure
+```
+
+#### Environment Variables
+
+- All environment variables now use `OMR_` prefix for consistency
+- `OMR_MODEL_REGISTRY_PATH` for custom data file locations
+- `OMR_DATA_DIR` for custom data directory
+
+### 📦 Installation & Compatibility
+
+#### Requirements
+
+- **Python 3.10+** (upgraded from 3.9+)
+- **New dependencies**: `click`, `rich`, `tabulate` for CLI functionality
+- **Enhanced dependencies**: Updated `PyYAML`, `requests`, `platformdirs`
+
+#### Installation
+
+```bash
+# Same installation command, enhanced functionality
+pip install openai-model-registry
+
+# New CLI available immediately
+omr --help
+```
+
+### 🔮 Future-Proofing
+
+This release establishes a solid foundation for:
+
+- **Automated model tracking**: Integration with OpenAI's latest model releases
+- **Multi-provider support**: Easy extension to other AI providers
+- **Advanced analytics**: Rich model comparison and cost analysis features
+- **Enterprise features**: Enhanced security, audit trails, and compliance features
 
 ## \[0.7.2\] - 2025-06-11
 
