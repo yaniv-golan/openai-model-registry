@@ -69,7 +69,13 @@ def run_ostruct(model: str) -> Dict[str, Any]:
 
     # Test-only fallback to avoid failing unit tests on missing tooling
     if os.getenv("OMR_TEST_ALLOW_FAKE", "").lower() in {"1", "true", "yes"}:
-        return {"last_update_date": None, "new_models": []}
+        # Return minimal deterministic payload compatible with tests
+        return {
+            "model": model,
+            "currency": "USD",
+            "input_per_million": 0.0,
+            "output_per_million": 0.0,
+        }
 
     raise RuntimeError("ostruct CLI not found. Install it or run with OMR_ALLOW_PIPX=1 and pipx available.")
 
