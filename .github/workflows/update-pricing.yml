@@ -36,7 +36,7 @@ jobs:
 
       - name: Run pricing updater
         run: |
-          poetry run python src/openai_model_registry/scripts/update_pricing.py --azure --out pricing_data
+          poetry run python scripts/update_pricing.py
 
       - name: Commit and push if changed
         run: |
