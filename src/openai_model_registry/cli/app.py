@@ -6,6 +6,12 @@ from typing import Optional
 import click
 import rich_click as rich_click
 
+# Make ModelRegistry available at module scope so tests can patch it
+try:  # pragma: no cover - import for test patching convenience
+    from ..registry import ModelRegistry as ModelRegistry  # noqa: F401
+except Exception:  # pragma: no cover
+    ModelRegistry = None  # type: ignore
+
 # Expose ModelRegistry at module scope for tests monkeypatching
 from .utils import (
     ExitCode,

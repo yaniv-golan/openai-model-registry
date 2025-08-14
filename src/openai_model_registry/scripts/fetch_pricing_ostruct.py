@@ -35,6 +35,7 @@ def run_ostruct(model: str) -> Dict[str, Any]:
     Resolution order:
     1) Use system-resolved "ostruct" if available (recommended, provisioned by CI)
     2) If not found and OMR_ALLOW_PIPX in {1, true, yes}, try pipx run with pinned version
+    3) If OMR_TEST_ALLOW_FAKE=1, return a minimal deterministic stub for tests
     """
     base_args = [
         "run",
@@ -65,6 +66,10 @@ def run_ostruct(model: str) -> Dict[str, Any]:
     allow_pipx = os.getenv("OMR_ALLOW_PIPX", "").lower() in {"1", "true", "yes"}
     if allow_pipx and shutil.which("pipx"):
         return _exec(["pipx", "run", "--spec", "ostruct-cli==1.6.1", "ostruct", *base_args])
+
+    # Test-only fallback to avoid failing unit tests on missing tooling
+    if os.getenv("OMR_TEST_ALLOW_FAKE", "").lower() in {"1", "true", "yes"}:
+        return {"last_update_date": None, "new_models": []}
 
     raise RuntimeError("ostruct CLI not found. Install it or run with OMR_ALLOW_PIPX=1 and pipx available.")
 
