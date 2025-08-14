@@ -1988,21 +1988,26 @@ class ModelRegistry:
                     error_message="No releases found on GitHub",
                 )
 
-            latest_version = latest_release.get("tag_name", "")
+            latest_version_raw = latest_release.get("tag_name", "")
             current_version = self._data_manager._get_current_version()
+
+            # Clean the latest version to match current version format (remove data-v prefix)
+            latest_version = latest_version_raw
+            if latest_version_raw.startswith("data-v"):
+                latest_version = latest_version_raw[len("data-v") :]
 
             # Get current version info with date
             current_version_info = self._data_manager._get_current_version_info()
             current_version_date = current_version_info.get("published_at") if current_version_info else None
 
             update_available = not (
-                current_version and self._data_manager._compare_versions(latest_version, current_version) <= 0
+                current_version and self._data_manager._compare_versions(latest_version_raw, current_version) <= 0
             )
 
             # Get accumulated changes between current and latest version
             accumulated_changes = []
             if update_available:
-                accumulated_changes = self._data_manager.get_accumulated_changes(current_version, latest_version)
+                accumulated_changes = self._data_manager.get_accumulated_changes(current_version, latest_version_raw)
 
             # Estimate update size based on assets
             update_size_estimate = None

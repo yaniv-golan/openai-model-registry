@@ -42,43 +42,55 @@ def check(ctx: click.Context, url: Optional[str] = None) -> None:
         format_type = ctx.obj["format"]
 
         if format_type == "json":
+            # Determine if update is available based on the actual status
+            status_val = (
+                refresh_result.status.value if hasattr(refresh_result.status, "value") else str(refresh_result.status)
+            )
+            update_available = status_val == "update_available"
+
             result_data = {
-                "update_available": not refresh_result.success or refresh_result.status.value != "up_to_date",
+                "update_available": update_available,
                 "current_version": update_info.current_version,
                 "latest_version": update_info.latest_version,
                 "message": refresh_result.message,
-                "status": refresh_result.status.value
-                if hasattr(refresh_result.status, "value")
-                else str(refresh_result.status),
+                "status": status_val,
             }
             format_json(result_data)
         else:
             # Table/human readable format
             console = create_console(no_color=ctx.obj["no_color"])
 
-            if (
-                refresh_result.success
-                and hasattr(refresh_result.status, "value")
-                and refresh_result.status.value == "up_to_date"
-            ):
+            status_val = (
+                refresh_result.status.value if hasattr(refresh_result.status, "value") else str(refresh_result.status)
+            )
+
+            if status_val == "already_current":
                 console.print("✅ [green]Registry is up to date[/green]")
                 console.print(f"Current version: {update_info.current_version or 'bundled'}")
-            else:
+            elif status_val == "update_available":
                 console.print("🔄 [yellow]Update available[/yellow]")
                 console.print(f"Current version: {update_info.current_version or 'bundled'}")
                 console.print(f"Latest version: {update_info.latest_version}")
+                # Only show message if it's meaningful and not contradictory
+                if refresh_result.message and "up to date" not in refresh_result.message.lower():
+                    console.print(refresh_result.message)
+            else:
+                # Handle error or unknown status
+                console.print("❌ [red]Check failed[/red]")
+                console.print(f"Status: {status_val}")
                 if refresh_result.message:
-                    console.print(f"Details: {refresh_result.message}")
+                    console.print(refresh_result.message)
 
         # Exit with appropriate code for CI
-        if (
-            refresh_result.success
-            and hasattr(refresh_result.status, "value")
-            and refresh_result.status.value == "up_to_date"
-        ):
+        status_val = (
+            refresh_result.status.value if hasattr(refresh_result.status, "value") else str(refresh_result.status)
+        )
+        if status_val == "already_current":
             exit(ExitCode.SUCCESS)
-        else:
+        elif status_val == "update_available":
             exit(ExitCode.UPDATE_AVAILABLE)
+        else:
+            exit(ExitCode.GENERIC_ERROR)
 
     except Exception as e:
         handle_error(e, ExitCode.GENERIC_ERROR)

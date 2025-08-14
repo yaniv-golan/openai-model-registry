@@ -181,7 +181,7 @@ class TestExitCodes:
         mock_result = Mock()
         mock_result.success = True
         mock_result.status = Mock()
-        mock_result.status.value = "up_to_date"
+        mock_result.status.value = "already_current"
         mock_result.message = "Already up to date"
 
         mock_registry.check_for_updates.return_value = mock_result
