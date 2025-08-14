@@ -17,6 +17,10 @@ The OpenAI Model Registry provides:
 
 See the [Getting Started](getting-started.md) guide to install and begin using the library.
 
+## For AI Assistants
+
+If you're an AI assistant or LLM helping users with this library, check out our [`llms.txt`](../llms.txt) file which provides comprehensive, token-efficient documentation designed specifically for programmatic assistance.
+
 ## Features
 
 - [CLI Reference](cli.md) - Command-line interface for debugging and inspection

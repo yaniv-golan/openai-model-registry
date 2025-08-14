@@ -65,6 +65,7 @@ This is a **major release** that completely transforms the OpenAI Model Registry
 - **Cross-platform testing**: Windows, macOS, and Linux compatibility validation
 - **Release automation**: Complete CI/CD pipeline for both library and data releases
 - **Trusted publishing**: Secure PyPI publishing without API tokens
+- **LLM-friendly documentation**: `llms.txt` file following [llmstxt.org](https://llmstxt.org/) specification for AI assistant integration
 
 ### 📊 Enhanced Model Coverage
 

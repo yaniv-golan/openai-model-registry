@@ -1,0 +1,200 @@
+# OpenAI Model Registry
+
+> Python library and CLI for OpenAI model capabilities, parameter validation, pricing data, and provider management (OpenAI, Azure). Includes GPT-5 family, automated updates, and comprehensive model metadata.
+
+Installation: `pip install openai-model-registry`. Python 3.10+ required. Auto-updates model data from GitHub releases.
+
+## Python API Complete Reference
+
+```python
+from openai_model_registry import ModelRegistry, ModelCapabilities, WebSearchBilling
+registry = ModelRegistry()  # Auto-loads latest data
+
+# Core model access
+caps = registry.get_capabilities("gpt-5")  # Returns ModelCapabilities
+models_dict = registry.models  # Dict[str, ModelCapabilities] - all models
+
+# ModelCapabilities properties (all available attributes):
+caps.model_name           # str: registry model name
+caps.openai_model_name    # str: OpenAI API model name
+caps.context_window       # int: max context tokens
+caps.max_output_tokens    # int: max output tokens
+caps.deprecation          # DeprecationInfo: deprecation status/dates
+caps.supports_vision      # bool: image inputs
+caps.supports_functions   # bool: function calling
+caps.supports_streaming   # bool: streaming responses
+caps.supports_structured  # bool: structured outputs
+caps.supports_web_search  # bool: web search capability
+caps.supports_audio      # bool: audio inputs
+caps.supports_json_mode   # bool: JSON mode
+caps.pricing             # PricingInfo: cost per token
+caps.input_modalities    # List[str]: ['text', 'image', 'audio']
+caps.output_modalities   # List[str]: ['text', 'image', 'audio']
+caps.min_version         # ModelVersion: minimum API version
+caps.aliases            # List[str]: alternative model names
+caps.inline_parameters   # Dict[str, Any]: parameter constraints
+caps.web_search_billing  # WebSearchBilling: web search costs
+caps.is_sunset          # bool: model is sunset
+caps.is_deprecated      # bool: model is deprecated/sunset
+
+# Parameter validation
+registry.validate_parameters("gpt-4o", {"temperature": 0.7, "max_tokens": 1000})
+caps.validate_parameter("temperature", 0.7)  # Single parameter
+caps.validate_parameters({"temperature": 0.7, "max_tokens": 1000})  # Multiple
+
+# Constraint access
+constraint = caps.get_constraint("temperature")  # NumericConstraint/EnumConstraint/ObjectConstraint
+constraint = registry.get_parameter_constraint("numeric_constraints.temperature")
+
+# Pricing details
+pricing = caps.pricing  # PricingInfo object
+pricing.scheme          # str: "per_token"
+pricing.unit           # str: "1M tokens"
+pricing.input_cost_per_unit   # float: input cost per unit
+pricing.output_cost_per_unit  # float: output cost per unit
+pricing.currency       # str: "USD"
+
+# Web search billing (if available)
+ws_billing = caps.web_search_billing  # WebSearchBilling or None
+ws_billing.call_fee_per_1000          # float: fee per 1000 calls
+ws_billing.content_token_policy       # "included_in_call_fee" or "billed_at_model_rate"
+ws_billing.currency                   # str: "USD"
+ws_billing.notes                      # Optional[str]
+
+# Data management
+registry.list_providers()             # List[str]: available providers
+registry.dump_effective()             # Dict: full merged dataset
+registry.get_data_info()             # Dict: data sources/versions
+registry.get_data_version()          # Optional[str]: current data version
+registry.clear_cache()               # Clear cached data
+registry.get_raw_data_paths()        # Dict: paths to data files
+registry.get_bundled_data_content("models.yaml")  # str: file content
+registry.get_raw_model_data("gpt-5") # Dict: raw model data without overrides
+
+# Updates
+registry.check_for_updates()         # RefreshResult: update status
+registry.check_data_updates()        # bool: updates available
+registry.get_update_info()           # UpdateInfo: detailed update info
+registry.update_data(force=True)     # bool: apply updates
+registry.manual_update_workflow()    # bool: interactive update
+
+# Deprecation handling
+registry.assert_model_active("gpt-5")  # Raises ModelSunsetError if sunset
+headers = registry.get_sunset_headers("gpt-5")  # Dict: HTTP deprecation headers
+```
+
+## CLI Complete Command Reference
+
+```bash
+# Model commands
+omr models list [OPTIONS]
+  --format {table,json,yaml}    # Output format
+  --filter TEXT                 # Filter by model name pattern
+  --columns LIST               # Comma-separated column names
+  --show-deprecated           # Include deprecated models
+  --show-sunset              # Include sunset models
+  --provider {openai,azure}   # Provider to use
+
+omr models get MODEL [OPTIONS]
+  --format {table,json,yaml}   # Output format
+  --parameters-only           # Show only parameters
+  --effective                 # Show effective (merged) data
+  --raw                      # Show raw data without overrides
+  --provider {openai,azure}   # Provider to use
+
+# Data commands
+omr data paths                 # Show all data file locations
+omr data env                   # Show environment variables
+omr data dump [OPTIONS]
+  --format {json,yaml}         # Output format
+  --provider {openai,azure}    # Provider to use
+  --effective                  # Show merged data (default)
+  --raw                       # Show raw data without overrides
+
+# Provider commands
+omr providers list             # List available providers
+omr providers current          # Show current provider
+
+# Update commands
+omr update check              # Check for available updates
+omr update apply              # Apply available updates
+omr update refresh            # Force refresh from remote
+omr update show-config        # Show update configuration
+
+# Cache commands
+omr cache info               # Show cache information
+omr cache clear [FILES...]   # Clear cache files
+
+# Global options (all commands)
+--help-json                  # JSON help output
+--provider {openai,azure}    # Override provider
+--verbose                    # Verbose output
+--debug                     # Debug output
+
+# Environment variable usage
+OMR_PROVIDER=azure omr models list
+OMR_DEBUG=1 omr models get gpt-5
+OMR_MODEL_REGISTRY_PATH=/custom/path omr data dump
+
+# JSON automation examples
+omr models list --format json | jq '.[] | select(.name | contains("gpt-5"))'
+omr models get gpt-4o --format json --parameters-only | jq '.parameters'
+omr data dump --format json | jq '.models | keys | length'  # Count models
+```
+
+## Environment Variables
+
+- `OMR_PROVIDER`: Set provider (openai, azure)
+- `OMR_MODEL_REGISTRY_PATH`: Custom data file path
+- `OMR_DATA_DIR`: Custom data directory
+- `OMR_DISABLE_DATA_UPDATES`: Disable auto-updates
+- `OMR_DATA_VERSION_PIN`: Pin to specific data version
+
+## Model Coverage
+
+GPT-5 family: gpt-5, gpt-5-mini, gpt-5-nano, gpt-5-chat-latest
+GPT-4o family: gpt-4o, gpt-4o-mini, gpt-4o-search-preview variants
+GPT-4.1 family: gpt-4.1, gpt-4.1-mini, gpt-4.1-nano (1M context)
+O-series: o1, o3, o4-mini (reasoning models with reasoning_effort parameter)
+Legacy: gpt-4-turbo, gpt-3.5-turbo variants with deprecation tracking
+
+## Error Handling
+
+```python
+from openai_model_registry import (
+    ModelNotSupportedError,
+    ParameterValidationError,
+    ModelSunsetError
+)
+
+try:
+    caps = registry.get_capabilities("invalid-model")
+except ModelNotSupportedError as e:
+    print(f"Model not found: {e}")
+
+try:
+    registry.validate_parameters("gpt-4o", temperature=2.5)  # Invalid
+except ParameterValidationError as e:
+    print(f"Invalid parameter: {e}")
+```
+
+## Data Structure
+
+Models stored in `data/models.yaml` with provider overrides in `data/overrides.yaml`. Schema includes:
+- context_window, max_output_tokens, supports_streaming
+- input_modalities, output_modalities
+- pricing (scheme, unit, input_cost_per_unit, output_cost_per_unit)
+- parameters (inline constraints: temperature, max_tokens, etc.)
+- deprecation info, release_date, description
+
+## Resources
+
+- [Python API Reference](https://yaniv-golan.github.io/openai-model-registry/api/model-registry/): Complete API documentation
+- [CLI Commands](https://yaniv-golan.github.io/openai-model-registry/user-guide/cli/): Full CLI reference
+- [Basic Usage Example](examples/basic_usage.py): Working Python code
+- [CLI Integration Example](examples/cli_integration.py): Subprocess patterns
+
+## Optional
+
+- [Advanced Usage](https://yaniv-golan.github.io/openai-model-registry/user-guide/advanced-usage/): Provider overrides, data inspection
+- [Testing Guide](https://yaniv-golan.github.io/openai-model-registry/user-guide/testing/): Mock patterns, pyfakefs usage

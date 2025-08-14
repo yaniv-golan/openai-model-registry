@@ -25,6 +25,10 @@ OpenAI Model Registry provides a centralized registry of OpenAI model informatio
 pip install openai-model-registry
 ```
 
+## For AI Assistants and LLMs
+
+This project includes an [`llms.txt`](/llms.txt) file following the [llmstxt.org](https://llmstxt.org/) specification. This provides comprehensive, token-efficient documentation designed specifically for AI assistants to understand and help users work with the OpenAI Model Registry programmatically.
+
 ## Quick Start
 
 ```python

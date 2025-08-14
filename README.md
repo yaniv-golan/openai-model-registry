@@ -9,6 +9,7 @@
 A Python package that provides information about OpenAI models and validates parameters before API calls.
 
 📚 **[View the Documentation](https://yaniv-golan.github.io/openai-model-registry/)**
+🤖 **[AI Assistant Documentation](llms.txt)** - LLM-optimized reference following [llmstxt.org](https://llmstxt.org/)
 
 ## Why Use OpenAI Model Registry?
 
