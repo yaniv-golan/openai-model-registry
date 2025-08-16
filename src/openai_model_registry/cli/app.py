@@ -3,8 +3,12 @@
 import os
 from typing import Optional
 
-import click
-import rich_click as rich_click
+# Import guards for optional CLI dependencies
+try:
+    import click
+    import rich_click as rich_click
+except ImportError as e:
+    raise ImportError("CLI dependencies not available. Install with: pip install openai-model-registry[cli]") from e
 
 # Make ModelRegistry available at module scope so tests can patch it
 try:  # pragma: no cover - import for test patching convenience

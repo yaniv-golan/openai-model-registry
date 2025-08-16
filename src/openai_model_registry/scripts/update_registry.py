@@ -4,7 +4,11 @@
 import sys
 from typing import Optional, Union
 
-import click
+# Import guard for optional CLI dependencies
+try:
+    import click
+except ImportError as e:
+    raise ImportError("CLI dependencies not available. Install with: pip install openai-model-registry[cli]") from e
 
 from ..errors import ModelNotSupportedError, ModelVersionError
 from ..registry import ModelRegistry, RefreshStatus
