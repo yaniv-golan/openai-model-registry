@@ -6,6 +6,8 @@ This guide explains important considerations when using the OpenAI Model Registr
 
 Azure OpenAI provides access to OpenAI's models through Microsoft's cloud infrastructure, but there are important differences in feature support compared to OpenAI's direct API. The most significant difference relates to **web search capabilities**.
 
+The OpenAI Model Registry includes built-in **provider support** to handle these differences automatically. You can use `--provider azure` or set `OMR_PROVIDER=azure` to get Azure-specific model configurations that reflect platform limitations.
+
 ## Web Search Limitations on Azure
 
 ### Standard Azure OpenAI APIs (Chat & Responses)
@@ -36,7 +38,33 @@ The OpenAI Model Registry reflects the **underlying model capabilities** as defi
 
 ## Recommended Approach for Azure Users
 
-### 1. Check Your Endpoint Type
+### 1. Use the Built-in Provider System (Recommended)
+
+The simplest approach is to use the registry's built-in Azure provider:
+
+```bash
+# Set Azure provider globally
+export OMR_PROVIDER=azure
+
+# Or use CLI flag
+omr --provider azure models get gpt-4o
+```
+
+```python
+import os
+from openai_model_registry import ModelRegistry
+
+# Set provider via environment
+os.environ["OMR_PROVIDER"] = "azure"
+registry = ModelRegistry.get_default()
+
+# Get Azure-adjusted capabilities
+capabilities = registry.get_capabilities("gpt-4o")
+print(f"Web search support (Azure-adjusted): {capabilities.supports_web_search}")
+# This will reflect Azure limitations automatically
+```
+
+### 2. Manual Endpoint Detection (Alternative)
 
 Before using web search capabilities, determine if you're using Azure OpenAI:
 
@@ -285,10 +313,28 @@ def create_search_enabled_request(model, messages):
 
 ## Summary
 
-- **The OpenAI Model Registry correctly reflects model capabilities** as defined by OpenAI
+- **Use `--provider azure` or `OMR_PROVIDER=azure`** for automatic Azure-specific configurations
+- **The registry's provider system** handles platform differences automatically
 - **Azure's standard endpoints don't support `web_search_preview`** regardless of model capabilities
-- **Always check your endpoint type** before attempting to use web search features
+- **Provider overrides** in `overrides.yaml` adjust capabilities for Azure limitations
 - **Consider Azure Assistants API** for web search functionality on Azure
 - **Implement graceful fallbacks** for robust cross-platform applications
+
+## Provider System Details
+
+The registry uses `data/overrides.yaml` to apply Azure-specific adjustments:
+
+```yaml
+overrides:
+  azure:
+    models:
+      gpt-4o:
+        capabilities:
+          supports_web_search: false  # Disabled for Azure standard endpoints
+        pricing:
+          input_cost_per_unit: 5.0    # Azure-specific pricing
+```
+
+For more details on the provider system, see [Advanced Usage → Data files and provider overrides](advanced-usage.md#data-files-and-provider-overrides).
 
 For the most up-to-date information on Azure OpenAI feature support, consult [Microsoft's Azure OpenAI documentation](https://docs.microsoft.com/en-us/azure/cognitive-services/openai/).
