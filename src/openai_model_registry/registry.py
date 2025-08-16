@@ -348,7 +348,7 @@ class ModelCapabilities:
         param_type = param_config.get("type")
 
         # Handle numeric parameters (temperature, top_p, etc.)
-        if param_type == "numeric":
+        if param_type == "number":
             if not isinstance(value, (int, float)):
                 raise ParameterValidationError(
                     f"Parameter '{name}' expects a numeric value",
@@ -379,6 +379,22 @@ class ModelCapabilities:
         elif name in ["max_tokens", "n", "logprobs", "top_logprobs"] and isinstance(value, int):
             min_val = param_config.get("min")
             max_val = param_config.get("max")
+
+            if min_val is not None and value < min_val:
+                raise ParameterValidationError(
+                    f"Parameter '{name}' value {value} is below minimum {min_val}",
+                    param_name=name,
+                    value=value,
+                    model=self.model_name,
+                )
+
+            if max_val is not None and value > max_val:
+                raise ParameterValidationError(
+                    f"Parameter '{name}' value {value} is above maximum {max_val}",
+                    param_name=name,
+                    value=value,
+                    model=self.model_name,
+                )
         # Handle enum parameters declared inline
         elif param_type == "enum":
             allowed_values = param_config.get("enum", [])

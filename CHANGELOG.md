@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## \[1.0.4\] - 2025-01-31
+
+### Fixed
+
+- **Critical Parameter Validation Bug**: Fixed parameter validation that was completely broken due to type string mismatch
+  - **Root Cause**: Validation code checked for `param_type == "numeric"` but parameter configs used `"type": "number"`
+  - **Impact**: All numeric parameter bounds (temperature, top_p, etc.) were being ignored
+  - **Fix**: Corrected type check to match actual parameter configuration format
+  - **Examples**: `temperature=3.0` and `temperature=-1.0` now properly raise `ParameterValidationError`
+- **Integer Parameter Validation**: Added missing min/max validation for integer parameters
+  - **Root Cause**: Code retrieved min/max values but never actually validated them
+  - **Impact**: Integer parameters like `max_tokens` had no bounds checking
+  - **Fix**: Added proper min/max comparisons and error raising for integer parameters
+  - **Examples**: `max_tokens=100000` now properly raises `ParameterValidationError` when exceeding model limits
+
+### Technical Details
+
+- Fixed `_validate_inline_parameter` method in `ModelCapabilities` class
+- Both numeric (float) and integer parameter validation now properly enforce constraints
+- Validation errors provide clear, actionable error messages with parameter names and limits
+- All boundary conditions (min/max values) are properly tested and enforced
+
 ## \[1.0.3\] - 2025-08-16
 
 ### Added
