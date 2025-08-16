@@ -110,31 +110,42 @@ jobs:
             RELEASE_TYPE="Release"
             PRERELEASE="${{ github.event.inputs.prerelease || 'false' }}"
           fi
+
+          # Extract changelog content for this version
+          VERSION_SECTION=""
+          if [ -f "CHANGELOG.md" ]; then
+            # Extract the section for this version from CHANGELOG.md
+            VERSION_SECTION=$(awk "/^## \\\\\\\\\\[${{ env.VERSION }}\\\\\\\\\\]/{flag=1; next} /^## \\\\\\\\\\[/{flag=0} flag" CHANGELOG.md | head -50)
+          fi
+
           cat > release_notes.md << EOF
           # OpenAI Model Registry $RELEASE_TYPE ${{ env.VERSION }}
 
           ## 📦 Installation
 
-          ```bash
+          \`\`\`bash
           pip install openai-model-registry==${{ env.VERSION }}
-          ```
+          \`\`\`
 
           ## 🔄 Upgrade
 
-          ```bash
+          \`\`\`bash
           pip install --upgrade openai-model-registry
-          ```
+          \`\`\`
 
-          ## 📋 What's New
+          ## 📋 What's New in ${{ env.VERSION }}
 
-          - See [CHANGELOG.md](https://github.com/yaniv-golan/openai-model-registry/blob/main/CHANGELOG.md) for detailed changes
-          - Full commit history: [\`${{ env.TAG }}\`](https://github.com/yaniv-golan/openai-model-registry/commits/${{ env.TAG }})
+          $VERSION_SECTION
+
+          ---
+
+          **📚 Full Details:** [CHANGELOG.md](https://github.com/yaniv-golan/openai-model-registry/blob/main/CHANGELOG.md) | **🔍 Commits:** [\`${{ env.TAG }}\`](https://github.com/yaniv-golan/openai-model-registry/commits/${{ env.TAG }})
 
           ## 🔗 Links
 
-          - [PyPI Package](https://pypi.org/project/openai-model-registry/${{ env.VERSION }}/)
-          - [Documentation](https://openai-model-registry.readthedocs.io/)
-          - [GitHub Repository](https://github.com/yaniv-golan/openai-model-registry)
+          - [📦 PyPI Package](https://pypi.org/project/openai-model-registry/${{ env.VERSION }}/)
+          - [📖 Documentation](https://openai-model-registry.readthedocs.io/)
+          - [🐙 GitHub Repository](https://github.com/yaniv-golan/openai-model-registry)
 
           EOF
           echo "prerelease=$PRERELEASE" >> $GITHUB_OUTPUT
