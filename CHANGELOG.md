@@ -20,6 +20,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Fix**: Added proper min/max comparisons and error raising for integer parameters
   - **Examples**: `max_tokens=100000` now properly raises `ParameterValidationError` when exceeding model limits
 
+### Improved
+
+- **GitHub Release Notes**: Enhanced automated release notes generation to extract actual changelog content instead of generic templates
+
 ### Technical Details
 
 - Fixed `_validate_inline_parameter` method in `ModelCapabilities` class
