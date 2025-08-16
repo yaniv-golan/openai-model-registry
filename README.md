@@ -36,11 +36,13 @@ Typical benefits:
 ## Installation
 
 ### Core Library (Recommended)
+
 ```bash
 pip install openai-model-registry
 ```
 
 ### With CLI Tools
+
 ```bash
 pip install openai-model-registry[cli]
 ```
@@ -48,6 +50,7 @@ pip install openai-model-registry[cli]
 The core library provides all programmatic functionality. Add the `[cli]` extra if you want to use the `omr` command-line tools.
 
 > **💡 Which installation should I choose?**
+>
 > - **Core only** (`pip install openai-model-registry`) - Perfect for programmatic use in applications, scripts, or libraries
 > - **With CLI** (`pip install openai-model-registry[cli]`) - Adds command-line tools for interactive exploration and debugging
 
@@ -195,7 +198,7 @@ The registry uses local files for model information:
 
 ```text
 # Default locations (XDG Base Directory spec)
-Linux: ~/.config/openai-model-registry/
+Linux: ~/.local/share/openai-model-registry/
 macOS: ~/Library/Application Support/openai-model-registry/
 Windows: %LOCALAPPDATA%\openai-model-registry\
 ```
@@ -215,6 +218,14 @@ os.environ["OMR_PARAMETER_CONSTRAINTS_PATH"] = (
 from openai_model_registry import ModelRegistry
 
 registry = ModelRegistry.get_default()
+```
+
+### Environment variables
+
+```text
+OMR_DATA_DIR                # Override user data dir where updates are written
+OMR_MODEL_REGISTRY_PATH     # Read-only override for models.yaml load path
+OMR_DISABLE_DATA_UPDATES    # Set to 1/true to disable automatic data update checks
 ```
 
 ## Documentation
