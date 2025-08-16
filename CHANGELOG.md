@@ -5,6 +5,70 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## \[1.0.3\] - 2025-08-16
+
+### Added
+
+- **Optional CLI Dependencies**: CLI dependencies (`click`, `rich-click`, `rich`) are now optional extras
+  - Core library can be installed without CLI dependencies: `pip install openai-model-registry`
+  - CLI functionality available with extras: `pip install openai-model-registry[cli]`
+  - Import guards provide helpful error messages when CLI dependencies are missing
+  - Maintains full backward compatibility for existing installations
+
+### Changed
+
+- **Dependency Management**: Moved CLI dependencies to optional extras in `pyproject.toml`
+  - `click` version constraint updated from `">=8.1.0,<8.2"` to `">=8.1.0,<9.0"`
+  - Added `[tool.poetry.extras]` section with `cli = ["click", "rich-click", "rich"]`
+- **Import System**: Enhanced import guards across CLI modules
+  - Added import guards in `cli/__init__.py`, `cli/app.py`, and `scripts/update_registry.py`
+  - Consistent error messaging guides users to install CLI extras when needed
+
+### Fixed
+
+- **Data Release Notes**: Improved GitHub Actions workflow for data releases
+  - Fixed Python syntax errors in release notes (separated bash and Python examples)
+  - Removed misleading auto-update claims (clarified auto-update is optional and disabled by default)
+  - Added links to data changelog for detailed version information
+  - Added manual update instructions for existing users
+
+### Technical Details
+
+- **Installation Flexibility**: Users can now choose between lightweight core-only installation or full CLI-enabled installation
+- **Error Handling**: Import guards catch missing CLI dependencies and provide clear installation instructions
+- **Backward Compatibility**: Existing installations continue to work unchanged
+- **Test Coverage**: All 169 tests pass, ensuring no regressions in functionality
+
+## \[1.0.2\] - 2025-08-15
+
+### Fixed
+
+- **CLI Output Improvements**: Enhanced user experience for update commands
+  - Fixed version format consistency in `get_update_info` to show clean version (1.0.1) instead of raw tag (data-v1.0.1)
+  - Improved `omr update` commands output with version_before/version_after in JSON format
+  - Enhanced output format: 'Updated from: X → Y' or 'Version: X (status)' instead of technical messages
+  - Removed unfriendly 'Message:' and 'Details:' prefixes from user-facing output
+  - Replaced enum status values with human-readable text
+- **CLI Logic Fixes**: Corrected update command behavior
+  - Fixed `omr update check` boolean logic for update_available detection
+  - Corrected exit codes (0 for up-to-date, 10 for update available)
+  - Filtered contradictory status messages
+  - Improved help text for all `omr update` commands with clearer descriptions
+
+### Technical Details
+
+- Updated CLI command output formatting across update.py
+- Enhanced registry.py version handling logic
+- Fixed test expectations to use correct RefreshStatus enum values
+- Improved user experience for version checking and updating workflows
+
+## \[1.0.1\] - 2025-08-15
+
+### Technical
+
+- **Version Bump**: Maintenance release with version number update only
+- No functional changes or new features in this release
+
 ## \[1.0.0\] - 2025-08-14
 
 This is a **major release** that completely transforms the OpenAI Model Registry and adds **first-day support for GPT-5**.
