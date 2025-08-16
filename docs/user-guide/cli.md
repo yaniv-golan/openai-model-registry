@@ -4,13 +4,15 @@ The OpenAI Model Registry CLI (`omr`) provides a powerful command-line interface
 
 ## Installation
 
-The CLI is automatically installed when you install the openai-model-registry package:
+The CLI requires the optional `[cli]` extra dependencies:
 
 ```bash
-pip install openai-model-registry
+pip install openai-model-registry[cli]
 ```
 
 After installation, the `omr` command should be available in your shell.
+
+> **Note**: The core library (`pip install openai-model-registry`) does not include CLI dependencies. You must install the `[cli]` extra to use the `omr` command.
 
 ## Quick Start
 

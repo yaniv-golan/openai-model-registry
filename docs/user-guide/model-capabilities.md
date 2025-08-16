@@ -16,7 +16,7 @@ Model capabilities represent the features, limitations, and parameters supported
 
 **Note on Naming Conventions:**
 
-- **`gpt-4`** → resolves to the latest dated GPT-4 release (`gpt-4o-2025-05-13`).
+- **`gpt-4`** → resolves to the latest dated GPT-4 release (e.g., `gpt-4o-2024-08-06`).
 - **`*-mini`** → a lower-cost, smaller-context sibling model.
 - **Structured output** means the model supports JSON schema / function calling.
 - **Web search** means the model can search the web for up-to-date information.

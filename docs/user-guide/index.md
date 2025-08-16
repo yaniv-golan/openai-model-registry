@@ -19,7 +19,7 @@ See the [Getting Started](getting-started.md) guide to install and begin using t
 
 ## For AI Assistants
 
-If you're an AI assistant or LLM helping users with this library, check out our [`llms.txt`](../llms.txt) file which provides comprehensive, token-efficient documentation designed specifically for programmatic assistance.
+If you're an AI assistant or LLM helping users with this library, check out our [`llms.txt`](https://raw.githubusercontent.com/yaniv-golan/openai-model-registry/main/llms.txt) file which provides comprehensive, token-efficient documentation designed specifically for programmatic assistance.
 
 ## Features
 

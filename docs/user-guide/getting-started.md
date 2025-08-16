@@ -4,11 +4,23 @@ This guide will help you install the OpenAI Model Registry and start using its f
 
 ## Installation
 
+### Core Library
 Install the OpenAI Model Registry package using pip:
 
 ```bash
 pip install openai-model-registry
 ```
+
+### With CLI Tools
+If you want to use the `omr` command-line interface, install with the CLI extra:
+
+```bash
+pip install openai-model-registry[cli]
+```
+
+> **💡 Which installation should I choose?**
+> - **Core only**: Perfect for programmatic use in applications, scripts, or libraries
+> - **With CLI**: Adds command-line tools for interactive exploration and debugging
 
 ## Basic Usage
 
