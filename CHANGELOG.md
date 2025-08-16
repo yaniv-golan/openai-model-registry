@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Improved
 
 - **GitHub Release Notes**: Enhanced automated release notes generation to extract actual changelog content instead of generic templates
+- **Documentation**: Updated installation instructions, Azure OpenAI guide, and CLI documentation with clearer examples and current best practices
 
 ### Technical Details
 
