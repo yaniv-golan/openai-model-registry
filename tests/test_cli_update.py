@@ -494,9 +494,14 @@ class TestUpdateShowConfig:
 
         # Clear OMR environment variables
         omr_vars = [key for key in os.environ.keys() if key.startswith("OMR_")]
-        test_env = {var: None for var in omr_vars}  # None values remove variables
 
-        with patch.dict(os.environ, test_env, clear=False):
+        # Save original values and remove them temporarily
+        original_values = {var: os.environ.get(var) for var in omr_vars}
+        for var in omr_vars:
+            if var in os.environ:
+                del os.environ[var]
+
+        try:
             result = cli_runner.invoke(app, ["--format", "json", "update", "show-config"])
 
             assert result.exit_code == 0
@@ -505,6 +510,11 @@ class TestUpdateShowConfig:
             assert output_data["update_settings"]["version_pinned"] is False
             assert output_data["update_settings"]["custom_data_dir"] is False
             assert output_data["update_settings"]["custom_registry_path"] is False
+        finally:
+            # Restore original environment variables
+            for var, value in original_values.items():
+                if value is not None:
+                    os.environ[var] = value
 
     @patch("openai_model_registry.cli.commands.update.ModelRegistry")
     def test_update_show_config_error_handling(self, mock_registry_class: MagicMock, cli_runner: CliRunner) -> None:

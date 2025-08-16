@@ -300,9 +300,14 @@ class TestDataEnv:
         """Test data env when no OMR variables are set."""
         # Clear all OMR environment variables
         omr_vars = [key for key in os.environ.keys() if key.startswith("OMR_")]
-        test_env = {var: None for var in omr_vars}  # None values remove variables
 
-        with patch.dict(os.environ, test_env, clear=False):
+        # Save original values and remove them temporarily
+        original_values = {var: os.environ.get(var) for var in omr_vars}
+        for var in omr_vars:
+            if var in os.environ:
+                del os.environ[var]
+
+        try:
             result = cli_runner.invoke(app, ["data", "env"])
 
             assert result.exit_code == 0
@@ -310,3 +315,8 @@ class TestDataEnv:
             output_data = json.loads(result.output)
             assert "set_count" in output_data
             assert output_data["set_count"] == 0
+        finally:
+            # Restore original environment variables
+            for var, value in original_values.items():
+                if value is not None:
+                    os.environ[var] = value
