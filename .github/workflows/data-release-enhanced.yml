@@ -261,16 +261,7 @@ jobs:
 
           - \`models.yaml\` - Model definitions and capabilities
           - \`overrides.yaml\` - Provider-specific overrides
-          - \`checksums.txt\` - SHA256 checksums for verification
           - \`version.json\` - Version metadata
-
-          ## 🔍 Verification
-
-          Verify file integrity using the provided checksums:
-          \`\`\`bash
-          cd data-package
-          sha256sum -c checksums.txt
-          \`\`\`
 
           ## 🔗 Links
 
