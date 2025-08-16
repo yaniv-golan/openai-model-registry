@@ -35,6 +35,7 @@ def _fake_subprocess_run(cmd: list[str], capture_output: bool, text: bool, check
 
 
 @patch("subprocess.run", _fake_subprocess_run)  # noqa: D401
+@patch.dict("os.environ", {"OMR_TEST_ALLOW_FAKE": "1"})
 def test_run_ostruct_mock(tmp_path: Path) -> None:
     """Script returns dict and writes YAML deterministically."""
     # Ensure OUTPUT_DIR points to tmp

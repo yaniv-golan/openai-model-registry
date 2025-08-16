@@ -85,7 +85,7 @@ class TestHelpJson:
 class TestProviderResolution:
     """Test provider resolution precedence."""
 
-    @patch("openai_model_registry.cli.app.ModelRegistry")
+    @patch("openai_model_registry.cli.app.app.ModelRegistry")
     def test_cli_flag_precedence(self, mock_registry_class: MagicMock, cli_runner: CliRunner) -> None:
         """Test CLI flag takes precedence over environment."""
         mock_registry = Mock()
@@ -99,7 +99,7 @@ class TestProviderResolution:
         assert "azure" in result.output
         assert "CLI flag" in result.output
 
-    @patch("openai_model_registry.cli.app.ModelRegistry")
+    @patch("openai_model_registry.cli.app.app.ModelRegistry")
     def test_env_var_precedence(self, mock_registry_class: MagicMock, cli_runner: CliRunner) -> None:
         """Test environment variable precedence over default."""
         mock_registry = Mock()
@@ -113,7 +113,7 @@ class TestProviderResolution:
         assert "azure" in result.output
         assert "Environment variable" in result.output
 
-    @patch("openai_model_registry.cli.app.ModelRegistry")
+    @patch("openai_model_registry.cli.app.app.ModelRegistry")
     def test_default_precedence(self, mock_registry_class: MagicMock, cli_runner: CliRunner) -> None:
         """Test default provider when no CLI flag or env var."""
         mock_registry = Mock()
