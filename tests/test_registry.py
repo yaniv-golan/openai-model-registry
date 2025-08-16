@@ -92,8 +92,8 @@ def registry(test_config_dir: Path) -> Generator[ModelRegistry, None, None]:
                     "supports_streaming": True,
                 },
                 "parameters": {
-                    "temperature": {"type": "numeric", "min": 0.0, "max": 2.0, "default": 1.0, "allow_float": True},
-                    "max_completion_tokens": {"type": "numeric", "min": 1, "default": 1, "allow_float": False},
+                    "temperature": {"type": "number", "min": 0.0, "max": 2.0, "default": 1.0, "allow_float": True},
+                    "max_completion_tokens": {"type": "number", "min": 1, "default": 1, "allow_float": False},
                 },
                 "description": "Test model alias",
             },
@@ -105,8 +105,8 @@ def registry(test_config_dir: Path) -> Generator[ModelRegistry, None, None]:
                     "supports_streaming": True,
                 },
                 "parameters": {
-                    "temperature": {"type": "numeric", "min": 0.0, "max": 2.0, "default": 1.0, "allow_float": True},
-                    "max_completion_tokens": {"type": "numeric", "min": 1, "default": 1, "allow_float": False},
+                    "temperature": {"type": "number", "min": 0.0, "max": 2.0, "default": 1.0, "allow_float": True},
+                    "max_completion_tokens": {"type": "number", "min": 1, "default": 1, "allow_float": False},
                 },
                 "description": "Test model for unit tests",
                 "min_version": {
