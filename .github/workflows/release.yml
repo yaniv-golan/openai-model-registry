@@ -47,7 +47,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          poetry install
+          poetry install --extras cli
 
       - name: Run validation
         env:

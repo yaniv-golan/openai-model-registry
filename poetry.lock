@@ -2592,4 +2592,4 @@ cli = ["click", "rich", "rich-click"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4.0"
-content-hash = "a67ff6f0dd62f2ba7c8006fbe56afc66a2f8d0f1ed2f9266d51047902755b786"
+content-hash = "9d85d1f138f910c26b1c7a6960c2913a761a8bc5d96c423a129977221e08d22e"

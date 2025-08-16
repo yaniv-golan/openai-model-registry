@@ -32,7 +32,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          poetry install
+          poetry install --extras cli
 
       - name: Ensure pipx is available (for ostruct via pipx)
         run: |
