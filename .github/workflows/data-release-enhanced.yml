@@ -221,13 +221,37 @@ jobs:
 
           This release contains updated model registry configuration files.
 
+          ## 📋 What's Changed
+
+          See the [Data Changelog](https://github.com/yaniv-golan/openai-model-registry/blob/main/data/data-changelog.md#v${{ steps.version-info.outputs.version }}) for detailed information about model updates, additions, and changes in this release.
+
           ## 📦 Installation
 
-          ### Using the Registry
+          ### Install the Library
           \`\`\`bash
           pip install openai-model-registry
+          \`\`\`
+
+          ### Basic Usage
+          \`\`\`python
           from openai_model_registry import ModelRegistry
-          registry = ModelRegistry()  # Will auto-update to this version
+
+          # Default usage (no auto-update)
+          registry = ModelRegistry()
+
+          # Enable auto-updates (optional)
+          from openai_model_registry.registry import RegistryConfig
+          registry = ModelRegistry(RegistryConfig(auto_update=True))
+          \`\`\`
+
+          ### Manual Update for Existing Users
+          If you already have the library installed, update your data manually:
+          \`\`\`bash
+          # Check for updates
+          omr update check
+
+          # Apply updates
+          omr update apply
           \`\`\`
 
           ### Manual Download
@@ -254,6 +278,7 @@ jobs:
           ## 🔗 Links
 
           - [Model Registry Library](https://pypi.org/project/openai-model-registry/)
+          - [Data Changelog](https://github.com/yaniv-golan/openai-model-registry/blob/main/data/data-changelog.md)
           - [Documentation](https://openai-model-registry.readthedocs.io/)
           - [GitHub Repository](https://github.com/yaniv-golan/openai-model-registry)
 
