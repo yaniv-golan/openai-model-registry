@@ -147,7 +147,6 @@ jobs:
           # Copy current data assets
           cp -r data/* dist/data-package/
           cd dist/data-package
-          # Checksum generation removed - checksums provide no real security
 
           # Create version info
           cat > version.json << EOF
