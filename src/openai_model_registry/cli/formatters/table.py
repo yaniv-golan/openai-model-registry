@@ -243,7 +243,6 @@ def format_data_paths_table(paths: Dict[str, Any], console: Optional[Console] = 
     table.add_column("Source", style="yellow")
     table.add_column("Path", style="dim")
     table.add_column("Status", justify="center")
-    table.add_column("Checksum", justify="center")
     table.add_column("Modified", style="dim")
 
     for file_type, path_info in paths.items():
@@ -251,36 +250,22 @@ def format_data_paths_table(paths: Dict[str, Any], console: Optional[Console] = 
             path = path_info.get("path", "N/A")
             source = path_info.get("source", "Unknown")
             exists = path_info.get("exists", False)
-            checksum_verified = path_info.get("checksum_verified")
             last_modified = path_info.get("last_modified", "N/A")
         else:
             path = str(path_info) if path_info else "Bundled"
             source = "User Data" if path_info else "Bundled"
             exists = path_info is not None
-            checksum_verified = None
             last_modified = "N/A"
 
         # Status column
         status = "✓" if exists else "✗"
         status_style = "green" if exists else "red"
 
-        # Checksum column
-        if checksum_verified is True:
-            checksum = "✓"
-            checksum_style = "green"
-        elif checksum_verified is False:
-            checksum = "✗"
-            checksum_style = "red"
-        else:
-            checksum = "N/A"
-            checksum_style = "dim"
-
         table.add_row(
             file_type,
             source,
             path,
             Text(status, style=status_style),
-            Text(checksum, style=checksum_style),
             last_modified,
         )
 

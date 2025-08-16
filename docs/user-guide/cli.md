@@ -279,7 +279,7 @@ omr cache clear
 omr cache clear --yes
 ```
 
-**Warning**: This removes cached `models.yaml`, `overrides.yaml`, and `checksums.txt` files. The registry will fall back to bundled data until the next update.
+**Warning**: This removes cached `models.yaml` and `overrides.yaml` files. The registry will fall back to bundled data until the next update.
 
 ## Environment Variables
 

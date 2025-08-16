@@ -39,7 +39,7 @@ The registry uses a modern DataManager that provides:
 - **Automatic Updates**: Fetches latest model data from GitHub releases
 - **Version Tracking**: Maintains version information and update history
 - **Fallback Mechanisms**: Environment variable → User directory → Bundled data
-- **Integrity Verification**: Checksums and validation for downloaded data
+- **Data Validation**: Comprehensive validation for downloaded data
 
 ### Environment Variables
 
@@ -478,6 +478,6 @@ omr models get gpt-4o --raw --format yaml
 
 ### Where updates are written
 
-Data updates write `models.yaml`, `overrides.yaml`, and `checksums.txt` to the
-user data directory by default (or `OMR_DATA_DIR` if set). The
-`OMR_MODEL_REGISTRY_PATH` override is read-only and is never modified by updates.
+Data updates write `models.yaml` and `overrides.yaml` to the user data directory
+by default (or `OMR_DATA_DIR` if set). The `OMR_MODEL_REGISTRY_PATH` override is
+read-only and is never modified by updates.

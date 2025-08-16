@@ -375,10 +375,66 @@ class ModelCapabilities:
                     model=self.model_name,
                 )
 
+        # Handle canonical numeric schema (min_value/max_value)
+        elif param_type == "numeric":
+            allow_float = param_config.get("allow_float", True)
+            allow_int = param_config.get("allow_int", True)
+
+            if not isinstance(value, (int, float)):
+                raise ParameterValidationError(
+                    f"Parameter '{name}' expects a numeric value",
+                    param_name=name,
+                    value=value,
+                    model=self.model_name,
+                )
+
+            # Enforce numeric subtype rules when provided
+            if isinstance(value, float) and not allow_float:
+                raise ParameterValidationError(
+                    f"Parameter '{name}' does not allow float values",
+                    param_name=name,
+                    value=value,
+                    model=self.model_name,
+                )
+            if isinstance(value, int) and not allow_int:
+                raise ParameterValidationError(
+                    f"Parameter '{name}' does not allow integer values",
+                    param_name=name,
+                    value=value,
+                    model=self.model_name,
+                )
+
+            min_val = param_config.get("min_value")
+            max_val = param_config.get("max_value")
+
+            if min_val is not None and value < min_val:
+                raise ParameterValidationError(
+                    f"Parameter '{name}' value {value} is below minimum {min_val}",
+                    param_name=name,
+                    value=value,
+                    model=self.model_name,
+                )
+
+            if max_val is not None and value > max_val:
+                raise ParameterValidationError(
+                    f"Parameter '{name}' value {value} is above maximum {max_val}",
+                    param_name=name,
+                    value=value,
+                    model=self.model_name,
+                )
+
         # Handle integer parameters (max_tokens, etc.)
-        elif name in ["max_tokens", "n", "logprobs", "top_logprobs"] and isinstance(value, int):
-            min_val = param_config.get("min")
-            max_val = param_config.get("max")
+        elif param_type == "integer":
+            if not isinstance(value, int):
+                raise ParameterValidationError(
+                    f"Parameter '{name}' expects an integer value",
+                    param_name=name,
+                    value=value,
+                    model=self.model_name,
+                )
+            # Support both min/max (models.yaml) and min_value/max_value (constraints)
+            min_val = param_config.get("min") or param_config.get("min_value")
+            max_val = param_config.get("max") or param_config.get("max_value")
 
             if min_val is not None and value < min_val:
                 raise ParameterValidationError(
@@ -503,48 +559,27 @@ class ModelRegistry:
             content = self._data_manager.get_data_file_content("models.yaml")
             if content is None:
                 error_msg = "Could not load models.yaml from DataManager"
-                log_error(
-                    LogEvent.MODEL_REGISTRY,
-                    error_msg,
-                )
-                return ConfigResult(
-                    success=False,
-                    error=error_msg,
-                    path="models.yaml",
-                )
+                log_error(LogEvent.MODEL_REGISTRY, error_msg)
+                return ConfigResult(success=False, error=error_msg, path="models.yaml")
 
             # Validate YAML content before parsing
             if not content.strip():
                 error_msg = "models.yaml file is empty"
-                log_error(
-                    LogEvent.MODEL_REGISTRY,
-                    error_msg,
-                    path="models.yaml",
-                )
-                return ConfigResult(
-                    success=False,
-                    error=error_msg,
-                    path="models.yaml",
-                )
+                log_error(LogEvent.MODEL_REGISTRY, error_msg, path="models.yaml")
+                return ConfigResult(success=False, error=error_msg, path="models.yaml")
 
-            # Check for obvious corruption patterns
+            # Check for obvious corruption patterns (heuristic)
             if "&" in content and "*" in content:
-                # This is a heuristic check for YAML anchors and references
-                # which can cause circular reference issues
                 try:
-                    # Try to detect circular references by checking for repeated anchor patterns
                     import re
 
                     anchor_pattern = r"&(\w+)"
                     reference_pattern = r"\*(\w+)"
-
                     anchors = set(re.findall(anchor_pattern, content))
                     references = set(re.findall(reference_pattern, content))
 
-                    # If we have self-referencing anchors, it's likely circular
                     for anchor in anchors:
                         if anchor in references:
-                            # Additional check: look for patterns like "&anchor\n  key: *anchor"
                             circular_pattern = rf"&{anchor}.*?\*{anchor}"
                             if re.search(circular_pattern, content, re.DOTALL):
                                 error_msg = f"Detected circular reference in YAML with anchor '{anchor}'"
@@ -567,31 +602,15 @@ class ModelRegistry:
             # Additional validation after YAML parsing
             if data is None:
                 error_msg = "YAML parsing resulted in None - file may be corrupted"
-                log_error(
-                    LogEvent.MODEL_REGISTRY,
-                    error_msg,
-                    path="models.yaml",
-                )
-                return ConfigResult(
-                    success=False,
-                    error=error_msg,
-                    path="models.yaml",
-                )
+                log_error(LogEvent.MODEL_REGISTRY, error_msg, path="models.yaml")
+                return ConfigResult(success=False, error=error_msg, path="models.yaml")
 
             if not isinstance(data, dict):
                 error_msg = (
                     f"Invalid configuration format in models.yaml: expected dictionary, got {type(data).__name__}"
                 )
-                log_error(
-                    LogEvent.MODEL_REGISTRY,
-                    error_msg,
-                    path="models.yaml",
-                )
-                return ConfigResult(
-                    success=False,
-                    error=error_msg,
-                    path="models.yaml",
-                )
+                log_error(LogEvent.MODEL_REGISTRY, error_msg, path="models.yaml")
+                return ConfigResult(success=False, error=error_msg, path="models.yaml")
 
             # Load and apply provider overrides
             try:
@@ -610,11 +629,7 @@ class ModelRegistry:
             return ConfigResult(success=True, data=data, path="models.yaml")
         except yaml.YAMLError as e:
             error_msg = f"YAML parsing error in models.yaml: {e}"
-            log_error(
-                LogEvent.MODEL_REGISTRY,
-                error_msg,
-                path="models.yaml",
-            )
+            log_error(LogEvent.MODEL_REGISTRY, error_msg, path="models.yaml")
             return ConfigResult(
                 success=False,
                 error=error_msg,
@@ -623,10 +638,7 @@ class ModelRegistry:
             )
         except Exception as e:
             error_msg = f"Error loading model registry config: {e}"
-            log_warning(
-                LogEvent.MODEL_REGISTRY,
-                error_msg,
-            )
+            log_warning(LogEvent.MODEL_REGISTRY, error_msg)
             return ConfigResult(
                 success=False,
                 error=error_msg,
@@ -1656,8 +1668,7 @@ class ModelRegistry:
                     )
                 else:
                     # Fallback to manual update if DataManager fails
-                    # Note: This fallback has limitations - it only updates models.yaml
-                    # without overrides.yaml or checksums.txt, which may cause desync
+                    # Note: This fallback downloads models.yaml and attempts overrides.yaml
                     log_warning(
                         LogEvent.MODEL_REGISTRY,
                         "DataManager update failed, using limited fallback (models.yaml only)",
@@ -1666,12 +1677,11 @@ class ModelRegistry:
                     with open(target_path, "w") as f:
                         yaml.safe_dump(remote_config, f)
 
-                    # Try to download overrides.yaml and checksums.txt if possible
+                    # Try to download overrides.yaml if possible
                     try:
                         overrides_url = "https://raw.githubusercontent.com/yaniv-golan/openai-model-registry/main/data/overrides.yaml"
-                        checksums_url = "https://raw.githubusercontent.com/yaniv-golan/openai-model-registry/main/data/checksums.txt"
 
-                        # Simple fallback downloads with checksum verification
+                        # Simple fallback downloads
                         try:
                             import requests
                         except ImportError:
@@ -1679,59 +1689,17 @@ class ModelRegistry:
 
                         if requests is not None:
                             try:
-                                # Download checksums.txt first for verification
-                                checksums_resp = requests.get(checksums_url, timeout=30)
-                                if checksums_resp.status_code == 200:
-                                    checksums_content = checksums_resp.text
-                                    checksums_path = get_user_data_dir() / "checksums.txt"
-
-                                    # Parse checksums for verification
-                                    checksums = {}
-                                    for line in checksums_content.strip().split("\n"):
-                                        if line.strip() and " " in line:
-                                            parts = line.strip().split(" ", 1)
-                                            if len(parts) == 2:
-                                                checksums[parts[1]] = parts[0]
-
-                                    # Download overrides.yaml
-                                    overrides_resp = requests.get(overrides_url, timeout=30)
-                                    if overrides_resp.status_code == 200:
-                                        overrides_content = overrides_resp.text
-
-                                        # Verify checksum if available
-                                        if "overrides.yaml" in checksums:
-                                            import hashlib
-
-                                            actual_hash = hashlib.sha256(overrides_content.encode()).hexdigest()
-                                            expected_hash = checksums["overrides.yaml"]
-
-                                            if actual_hash == expected_hash:
-                                                overrides_path = get_user_data_dir() / "overrides.yaml"
-                                                with open(overrides_path, "w") as f:
-                                                    f.write(overrides_content)
-                                                log_info(
-                                                    LogEvent.MODEL_REGISTRY,
-                                                    "Downloaded and verified overrides.yaml in fallback",
-                                                )
-                                            else:
-                                                log_warning(
-                                                    LogEvent.MODEL_REGISTRY,
-                                                    f"Checksum mismatch for overrides.yaml in fallback: expected {expected_hash}, got {actual_hash}",
-                                                )
-                                        else:
-                                            # No checksum available, save anyway but warn
-                                            overrides_path = get_user_data_dir() / "overrides.yaml"
-                                            with open(overrides_path, "w") as f:
-                                                f.write(overrides_content)
-                                            log_warning(
-                                                LogEvent.MODEL_REGISTRY,
-                                                "Downloaded overrides.yaml in fallback without checksum verification",
-                                            )
-
-                                    # Save checksums.txt after successful verification
-                                    with open(checksums_path, "w") as f:
-                                        f.write(checksums_content)
-                                    log_info(LogEvent.MODEL_REGISTRY, "Downloaded checksums.txt in fallback")
+                                # Download overrides.yaml
+                                overrides_resp = requests.get(overrides_url, timeout=30)
+                                if overrides_resp.status_code == 200:
+                                    overrides_content = overrides_resp.text
+                                    overrides_path = get_user_data_dir() / "overrides.yaml"
+                                    with open(overrides_path, "w") as f:
+                                        f.write(overrides_content)
+                                    log_info(
+                                        LogEvent.MODEL_REGISTRY,
+                                        "Downloaded overrides.yaml in fallback",
+                                    )
 
                             except requests.RequestException as e:
                                 log_warning(
@@ -2030,7 +1998,7 @@ class ModelRegistry:
             total_size = 0
             assets = latest_release.get("assets", [])
             for asset in assets:
-                if asset.get("name") in ["models.yaml", "overrides.yaml", "checksums.txt"]:
+                if asset.get("name") in ["models.yaml", "overrides.yaml"]:
                     total_size += asset.get("size", 0)
 
             if total_size > 0:
@@ -2418,7 +2386,7 @@ class ModelRegistry:
 
         # Default files to clear if none specified
         if files is None:
-            files = ["models.yaml", "overrides.yaml", "checksums.txt"]
+            files = ["models.yaml", "overrides.yaml"]
 
         cleared_files = []
         for filename in files:

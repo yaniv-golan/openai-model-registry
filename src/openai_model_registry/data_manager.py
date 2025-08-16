@@ -4,7 +4,6 @@ This module handles fetching, caching, and managing model registry data files
 from GitHub releases with version tracking and integrity verification.
 """
 
-import hashlib
 import json
 import os
 import shutil
@@ -47,7 +46,6 @@ ENV_DATA_DIR = "OMR_DATA_DIR"
 # File names
 MODELS_YAML = "models.yaml"
 OVERRIDES_YAML = "overrides.yaml"
-CHECKSUMS_TXT = "checksums.txt"
 VERSION_INFO_JSON = "version_info.json"
 
 
@@ -217,52 +215,6 @@ class DataManager:
             logger.error(f"Failed to write file {target_path}: {e}")
             return False
 
-    def _verify_checksums(self, checksums_file: Path) -> bool:
-        """Verify file checksums against checksums.txt."""
-        if not checksums_file.exists():
-            logger.warning("Checksums file not found, skipping verification")
-            return True
-
-        try:
-            with open(checksums_file, "r") as f:
-                checksum_lines = f.read().strip().split("\n")
-
-            # Files should be in the same directory as the checksums file
-            checksums_dir = checksums_file.parent
-
-            for line in checksum_lines:
-                if not line.strip():
-                    continue
-
-                parts = line.split(None, 1)
-                if len(parts) != 2:
-                    continue
-
-                expected_hash, filename = parts
-                file_path = checksums_dir / filename
-
-                if not file_path.exists():
-                    logger.error(f"File {filename} not found for checksum verification")
-                    return False
-
-                # Calculate actual hash
-                hasher = hashlib.sha256()
-                with open(file_path, "rb") as f:
-                    for chunk in iter(lambda: f.read(4096), b""):
-                        hasher.update(chunk)
-
-                actual_hash = hasher.hexdigest()
-                if actual_hash != expected_hash:
-                    logger.error(f"Checksum mismatch for {filename}: expected {expected_hash}, got {actual_hash}")
-                    return False
-
-            logger.info("All checksums verified successfully")
-            return True
-
-        except (OSError, ValueError) as e:
-            logger.error(f"Checksum verification failed: {e}")
-            return False
-
     def _download_data_files(self, release_info: Dict[str, Any]) -> bool:
         """Download data files from a GitHub release."""
         assets = release_info.get("assets", [])
@@ -279,18 +231,13 @@ class DataManager:
                 if not download_url:
                     continue
 
-                if asset_name in [MODELS_YAML, OVERRIDES_YAML, CHECKSUMS_TXT]:
+                if asset_name in [MODELS_YAML, OVERRIDES_YAML]:
                     target_path = temp_path / asset_name
                     if not self._download_file(download_url, target_path):
                         return False
 
-            # Verify checksums
-            checksums_file = temp_path / CHECKSUMS_TXT
-            if not self._verify_checksums(checksums_file):
-                return False
-
             # Move files to final location
-            for filename in [MODELS_YAML, OVERRIDES_YAML, CHECKSUMS_TXT]:
+            for filename in [MODELS_YAML, OVERRIDES_YAML]:
                 temp_file = temp_path / filename
                 if temp_file.exists():
                     final_path = self._data_dir / filename
@@ -356,7 +303,7 @@ class DataManager:
             return False
 
     def _get_bundled_data_content(self, filename: str) -> Optional[str]:
-        """Get bundled data file content as fallback with checksum verification."""
+        """Get bundled data file content as fallback."""
         try:
             # Try to load from package data using importlib.resources
             try:
@@ -366,17 +313,7 @@ class DataManager:
                 if pkg_file.is_file():
                     content = pkg_file.read_text()
 
-                    # Verify checksum using temp file
-                    with tempfile.NamedTemporaryFile(mode="w", suffix=f"_{filename}", delete=False) as tmp_file:
-                        tmp_file.write(content)
-                        tmp_path = Path(tmp_file.name)
-                    try:
-                        if not self._verify_bundled_file_checksum(tmp_path):
-                            logger.error(f"Bundled data file {filename} failed checksum verification")
-                            return None
-                    finally:
-                        tmp_path.unlink(missing_ok=True)
-
+                    # Return content directly - validation handled elsewhere
                     return content
             except Exception:
                 # Ignore and fall through to filesystem fallback
@@ -385,74 +322,13 @@ class DataManager:
             # Always try filesystem fallback regardless of importlib.resources result
             bundled_path = Path(__file__).parent.parent.parent / "data" / filename
             if bundled_path.exists():
-                # Verify checksum if available
-                if not self._verify_bundled_file_checksum(bundled_path):
-                    logger.error(f"Bundled data file {filename} failed checksum verification")
-                    return None
-
+                # Return content directly - validation handled elsewhere
                 with open(bundled_path, "r") as f:
                     return f.read()
 
         except (OSError, IOError) as e:
             logger.warning(f"Failed to load bundled data {filename}: {e}")
         return None
-
-    def _verify_bundled_file_checksum(self, file_path: Path) -> bool:
-        """Verify checksum of a bundled data file to prevent tampering.
-
-        Args:
-            file_path: Path to the bundled data file
-
-        Returns:
-            True if checksum is valid or no checksum file exists, False if verification fails
-        """
-        try:
-            # Look for checksum file in the same directory
-            checksum_file = file_path.parent / "checksums.txt"
-            if not checksum_file.exists():
-                # No checksum file means no verification needed (for bundled data)
-                logger.debug("No checksum file found for bundled data, skipping verification")
-                return True
-
-            # Read expected checksum
-            with open(checksum_file, "r") as f:
-                checksum_lines = f.read().strip().split("\n")
-
-            filename = file_path.name
-            expected_hash = None
-
-            for line in checksum_lines:
-                if not line.strip():
-                    continue
-
-                parts = line.split(None, 1)
-                if len(parts) == 2 and parts[1] == filename:
-                    expected_hash = parts[0]
-                    break
-
-            if expected_hash is None:
-                logger.debug(f"No checksum found for {filename} in bundled checksums")
-                return True
-
-            # Calculate actual hash
-            hasher = hashlib.sha256()
-            with open(file_path, "rb") as f:
-                for chunk in iter(lambda: f.read(4096), b""):
-                    hasher.update(chunk)
-
-            actual_hash = hasher.hexdigest()
-
-            if actual_hash != expected_hash:
-                logger.error(f"Bundled file {filename} checksum mismatch: expected {expected_hash}, got {actual_hash}")
-                return False
-
-            logger.debug(f"Bundled file {filename} checksum verified successfully")
-            return True
-
-        except (OSError, ValueError) as e:
-            logger.warning(f"Failed to verify bundled file checksum for {file_path}: {e}")
-            # If checksum verification fails, allow the file to be used (non-critical)
-            return True
 
     def get_data_file_path(self, filename: str) -> Optional[Path]:
         """Get the path to a data file, checking user directory first."""

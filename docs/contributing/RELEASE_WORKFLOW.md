@@ -131,7 +131,6 @@ Data releases are automatically triggered when configuration files change:
 
    - `models.yaml` - Model definitions
    - `overrides.yaml` - Provider-specific overrides
-   - Update `checksums.txt` if needed
 
 1. **Commit and push** to `main`:
 
@@ -156,12 +155,12 @@ Use this checklist when publishing a new data release (or RC):
 1. Update files:
    - `data/models.yaml`
    - `data/overrides.yaml`
-   - Regenerate `data/checksums.txt`
+
    - Update `data/data-changelog.md` (summarize changes, breaking notes)
 1. Tag and publish:
    - RC: `data-vX.Y.Z-rcN`
    - Final: `data-vX.Y.Z`
-   - Attach assets: `models.yaml`, `overrides.yaml`, `checksums.txt`
+   - Attach assets: `models.yaml`, `overrides.yaml`
    - Provide clear Release notes and link to changelog
 1. Verify client awareness:
    - Run `omr --format json update check` → exit code `10` indicates an available update
@@ -171,7 +170,7 @@ Use this checklist when publishing a new data release (or RC):
    - Clients may pin via `OMR_DATA_VERSION_PIN`
    - Clients may disable updates via `OMR_DISABLE_DATA_UPDATES`
 1. Confirm integrity:
-   - Checksums verified for assets
+   - Assets properly attached and downloadable
    - Fallback raw URLs (only if needed) should be tag-pinned for immutability
 
 ### Manual Data Releases
@@ -197,7 +196,8 @@ For manual data releases or RCs:
    curl -L https://github.com/yaniv-golan/openai-model-registry/releases/download/data-v1.0.0/openai-model-registry-data-1.0.0.tar.gz -o data.tar.gz
    tar -xzf data.tar.gz
    cd data-package
-   sha256sum -c checksums.txt
+   # Verify files are present
+   ls -la models.yaml overrides.yaml
    ```
 
 ## Hot-Fix Workflow

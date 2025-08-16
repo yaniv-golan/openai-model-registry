@@ -73,7 +73,7 @@ def get_cache_info() -> Dict[str, Any]:
 
         if cache_dir.exists():
             # Look for common cache files
-            cache_files = ["models.yaml", "overrides.yaml", "checksums.txt"]
+            cache_files = ["models.yaml", "overrides.yaml"]
 
             for filename in cache_files:
                 file_path = cache_dir / filename
@@ -138,7 +138,7 @@ def info(ctx: click.Context) -> None:
 def clear(ctx: click.Context, yes: bool = False) -> None:
     """Clear cached registry data files.
 
-    This will remove cached models.yaml, overrides.yaml, and checksums.txt files
+    This will remove cached models.yaml and overrides.yaml files
     from the user data directory. The registry will fall back to bundled data
     until the next update.
     """

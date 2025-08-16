@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file.
 
+## \[1.0.5\] - 2024-12-19
+
+### Enhanced
+
+- **Parameter Validation System**: Improved numeric parameter validation with enhanced schema support
+  - Added support for `type: "numeric"` with `min_value`/`max_value` constraints
+  - Enhanced validation with `allow_float` and `allow_int` type restrictions
+  - Standardized parameter schema across all model definitions
+  - Better error messages for parameter validation failures
+
+### Changed
+
+- **Model Parameter Schema**: Standardized parameter definitions in `models.yaml`
+  - Updated from `type: "number"` with `min`/`max` to `type: "numeric"` with `min_value`/`max_value`
+  - Consistent parameter validation across all models
+  - Backward compatibility maintained for existing parameter validation
+
+### Improved
+
+- **Data Integrity**: Streamlined data validation and removed redundant verification mechanisms
+- **Code Quality**: Simplified data management code and removed unused functionality
+- **Documentation**: Updated CLI documentation and release workflow guides
+- **Test Coverage**: Added comprehensive test coverage for CLI commands and parameter validation
+
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
@@ -185,7 +209,7 @@ This is a **major release** that completely transforms the OpenAI Model Registry
 - **Schema versioning**: Semantic versioning for data schema compatibility
 - **Automatic validation**: Comprehensive validation of model data and constraints
 - **Provider overrides**: Clean separation of base models and provider-specific modifications
-- **Checksums**: SHA256 verification for all data files
+- **Data Validation**: Comprehensive validation for all data files
 
 #### Developer Experience
 

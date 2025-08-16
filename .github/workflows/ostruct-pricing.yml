@@ -128,6 +128,5 @@ jobs:
             pricing_data/*.yaml
             data/models.yaml
             data/overrides.yaml
-            data/checksums.txt
           default_author: github_actions
           pull: false

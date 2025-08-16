@@ -30,7 +30,7 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 MODELS_PATH = ROOT / "data" / "models.yaml"
 OVERRIDES_PATH = ROOT / "data" / "overrides.yaml"
-CHECKSUMS_PATH = ROOT / "data" / "checksums.txt"
+# Checksums removed - no longer needed
 
 
 DEFAULT_CAP_KEYS = [
@@ -139,29 +139,15 @@ def update_overrides() -> None:
 
 
 def recompute_checksums() -> None:
-    """Recompute SHA256 checksums for data files and write checksums.txt."""
-    import hashlib
-
-    def sha256(path: Path) -> str:
-        h = hashlib.sha256()
-        with path.open("rb") as f:
-            for chunk in iter(lambda: f.read(8192), b""):
-                h.update(chunk)
-        return h.hexdigest()
-
-    lines = []
-    for fname in ["models.yaml", "overrides.yaml"]:
-        fpath = ROOT / "data" / fname
-        if fpath.exists():
-            lines.append(f"{sha256(fpath)} {fname}")
-    CHECKSUMS_PATH.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    """Legacy function - checksums no longer used."""
+    print("Checksums are no longer generated - this function is deprecated")
 
 
 def main() -> None:
-    """Run conversion and checksum recompute pipeline."""
+    """Run conversion pipeline."""
     update_models()
     update_overrides()
-    recompute_checksums()
+    recompute_checksums()  # Legacy call - does nothing now
     print("Conversion complete.")
 
 

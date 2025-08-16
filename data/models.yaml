@@ -30,29 +30,29 @@ models:
       supports_web_search: true
     parameters:
       temperature:
-        type: number
-        min: 0.0
-        max: 2.0
+        type: numeric
+        min_value: 0.0
+        max_value: 2.0
         default: 1.0
       top_p:
-        type: number
-        min: 0.0
-        max: 1.0
+        type: numeric
+        min_value: 0.0
+        max_value: 1.0
         default: 1.0
       max_tokens:
-        type: integer
-        min: 1
-        max: 16384
+        type: numeric
+        min_value: 1
+        max_value: 16384
         default: null
       frequency_penalty:
-        type: number
-        min: -2.0
-        max: 2.0
+        type: numeric
+        min_value: -2.0
+        max_value: 2.0
         default: 0.0
       presence_penalty:
-        type: number
-        min: -2.0
-        max: 2.0
+        type: numeric
+        min_value: -2.0
+        max_value: 2.0
         default: 0.0
       response_format:
         type: enum
@@ -98,29 +98,29 @@ models:
       supports_web_search: true
     parameters:
       temperature:
-        type: number
-        min: 0.0
-        max: 2.0
+        type: numeric
+        min_value: 0.0
+        max_value: 2.0
         default: 1.0
       top_p:
-        type: number
-        min: 0.0
-        max: 1.0
+        type: numeric
+        min_value: 0.0
+        max_value: 1.0
         default: 1.0
       max_tokens:
-        type: integer
-        min: 1
-        max: 16384
+        type: numeric
+        min_value: 1
+        max_value: 16384
         default: null
       frequency_penalty:
-        type: number
-        min: -2.0
-        max: 2.0
+        type: numeric
+        min_value: -2.0
+        max_value: 2.0
         default: 0.0
       presence_penalty:
-        type: number
-        min: -2.0
-        max: 2.0
+        type: numeric
+        min_value: -2.0
+        max_value: 2.0
         default: 0.0
       response_format:
         type: enum
@@ -166,29 +166,29 @@ models:
       supports_web_search: true
     parameters:
       temperature:
-        type: number
-        min: 0.0
-        max: 2.0
+        type: numeric
+        min_value: 0.0
+        max_value: 2.0
         default: 1.0
       top_p:
-        type: number
-        min: 0.0
-        max: 1.0
+        type: numeric
+        min_value: 0.0
+        max_value: 1.0
         default: 1.0
       max_tokens:
-        type: integer
-        min: 1
-        max: 16384
+        type: numeric
+        min_value: 1
+        max_value: 16384
         default: null
       frequency_penalty:
-        type: number
-        min: -2.0
-        max: 2.0
+        type: numeric
+        min_value: -2.0
+        max_value: 2.0
         default: 0.0
       presence_penalty:
-        type: number
-        min: -2.0
-        max: 2.0
+        type: numeric
+        min_value: -2.0
+        max_value: 2.0
         default: 0.0
       response_format:
         type: enum
@@ -229,29 +229,29 @@ models:
       supports_web_search: true
     parameters:
       temperature:
-        type: number
-        min: 0.0
-        max: 2.0
+        type: numeric
+        min_value: 0.0
+        max_value: 2.0
         default: 1.0
       top_p:
-        type: number
-        min: 0.0
-        max: 1.0
+        type: numeric
+        min_value: 0.0
+        max_value: 1.0
         default: 1.0
       max_tokens:
-        type: integer
-        min: 1
-        max: 16384
+        type: numeric
+        min_value: 1
+        max_value: 16384
         default: null
       frequency_penalty:
-        type: number
-        min: -2.0
-        max: 2.0
+        type: numeric
+        min_value: -2.0
+        max_value: 2.0
         default: 0.0
       presence_penalty:
-        type: number
-        min: -2.0
-        max: 2.0
+        type: numeric
+        min_value: -2.0
+        max_value: 2.0
         default: 0.0
       response_format:
         type: enum
@@ -297,16 +297,19 @@ models:
       supports_audio: false
     parameters:
       temperature:
-        min: 0.0
-        max: 2.0
+        type: numeric
+        min_value: 0.0
+        max_value: 2.0
         default: 1.0
       top_p:
-        min: 0.0
-        max: 1.0
+        type: numeric
+        min_value: 0.0
+        max_value: 1.0
         default: 1.0
       max_tokens:
-        min: 1
-        max: 16384
+        type: numeric
+        min_value: 1
+        max_value: 16384
         default: null
       frequency_penalty:
         min: -2.0
@@ -355,16 +358,19 @@ models:
       supports_audio: false
     parameters:
       temperature:
-        min: 0.0
-        max: 2.0
+        type: numeric
+        min_value: 0.0
+        max_value: 2.0
         default: 1.0
       top_p:
-        min: 0.0
-        max: 1.0
+        type: numeric
+        min_value: 0.0
+        max_value: 1.0
         default: 1.0
       max_tokens:
-        min: 1
-        max: 16384
+        type: numeric
+        min_value: 1
+        max_value: 16384
         default: null
       frequency_penalty:
         min: -2.0
@@ -409,29 +415,29 @@ models:
       supports_audio: false
     parameters:
       temperature:
-        type: number
-        min: 0.0
-        max: 2.0
+        type: numeric
+        min_value: 0.0
+        max_value: 2.0
         default: 1.0
       top_p:
-        type: number
-        min: 0.0
-        max: 1.0
+        type: numeric
+        min_value: 0.0
+        max_value: 1.0
         default: 1.0
       max_tokens:
-        type: integer
-        min: 1
-        max: 32768
+        type: numeric
+        min_value: 1
+        max_value: 32768
         default: null
       frequency_penalty:
-        type: number
-        min: -2.0
-        max: 2.0
+        type: numeric
+        min_value: -2.0
+        max_value: 2.0
         default: 0.0
       presence_penalty:
-        type: number
-        min: -2.0
-        max: 2.0
+        type: numeric
+        min_value: -2.0
+        max_value: 2.0
         default: 0.0
       response_format:
         type: enum
@@ -477,29 +483,29 @@ models:
       supports_audio: false
     parameters:
       temperature:
-        type: number
-        min: 0.0
-        max: 2.0
+        type: numeric
+        min_value: 0.0
+        max_value: 2.0
         default: 1.0
       top_p:
-        type: number
-        min: 0.0
-        max: 1.0
+        type: numeric
+        min_value: 0.0
+        max_value: 1.0
         default: 1.0
       max_tokens:
-        type: integer
-        min: 1
-        max: 32768
+        type: numeric
+        min_value: 1
+        max_value: 32768
         default: null
       frequency_penalty:
-        type: number
-        min: -2.0
-        max: 2.0
+        type: numeric
+        min_value: -2.0
+        max_value: 2.0
         default: 0.0
       presence_penalty:
-        type: number
-        min: -2.0
-        max: 2.0
+        type: numeric
+        min_value: -2.0
+        max_value: 2.0
         default: 0.0
       response_format:
         type: enum
@@ -545,16 +551,19 @@ models:
       supports_audio: false
     parameters:
       temperature:
-        min: 0.0
-        max: 2.0
+        type: numeric
+        min_value: 0.0
+        max_value: 2.0
         default: 1.0
       top_p:
-        min: 0.0
-        max: 1.0
+        type: numeric
+        min_value: 0.0
+        max_value: 1.0
         default: 1.0
       max_tokens:
-        min: 1
-        max: 32768
+        type: numeric
+        min_value: 1
+        max_value: 32768
         default: null
       frequency_penalty:
         min: -2.0
@@ -610,9 +619,9 @@ models:
         - medium
         - high
       max_tokens:
-        type: integer
-        min: 1
-        max: 100000
+        type: numeric
+        min_value: 1
+        max_value: 100000
         default: null
     deprecation:
       status: active
@@ -654,9 +663,9 @@ models:
         - medium
         - high
       max_tokens:
-        type: integer
-        min: 1
-        max: 100000
+        type: numeric
+        min_value: 1
+        max_value: 100000
         default: null
     deprecation:
       status: active
@@ -698,9 +707,9 @@ models:
         - medium
         - high
       max_tokens:
-        type: integer
-        min: 1
-        max: 65536
+        type: numeric
+        min_value: 1
+        max_value: 65536
         default: null
     deprecation:
       status: active
@@ -742,9 +751,9 @@ models:
         - medium
         - high
       max_tokens:
-        type: integer
-        min: 1
-        max: 65536
+        type: numeric
+        min_value: 1
+        max_value: 65536
         default: null
     deprecation:
       status: active
@@ -786,9 +795,9 @@ models:
         - medium
         - high
       max_tokens:
-        type: integer
-        min: 1
-        max: 32768
+        type: numeric
+        min_value: 1
+        max_value: 32768
         default: null
     deprecation:
       status: preview
@@ -824,12 +833,14 @@ models:
       supports_audio: false
     parameters:
       temperature:
-        min: 1.0
-        max: 1.0
+        type: numeric
+        min_value: 1.0
+        max_value: 1.0
         default: 1.0
       max_tokens:
-        min: 1
-        max: 32768
+        type: numeric
+        min_value: 1
+        max_value: 32768
         default: null
     deprecation:
       status: active
@@ -865,12 +876,14 @@ models:
       supports_audio: false
     parameters:
       temperature:
-        min: 1.0
-        max: 1.0
+        type: numeric
+        min_value: 1.0
+        max_value: 1.0
         default: 1.0
       max_tokens:
-        min: 1
-        max: 32768
+        type: numeric
+        min_value: 1
+        max_value: 32768
         default: null
     deprecation:
       status: active
@@ -911,12 +924,14 @@ models:
       supports_audio: false
     parameters:
       temperature:
-        min: 1.0
-        max: 1.0
+        type: numeric
+        min_value: 1.0
+        max_value: 1.0
         default: 1.0
       max_tokens:
-        min: 1
-        max: 65536
+        type: numeric
+        min_value: 1
+        max_value: 65536
         default: null
     deprecation:
       status: active
@@ -957,12 +972,14 @@ models:
       supports_audio: false
     parameters:
       temperature:
-        min: 1.0
-        max: 1.0
+        type: numeric
+        min_value: 1.0
+        max_value: 1.0
         default: 1.0
       max_tokens:
-        min: 1
-        max: 65536
+        type: numeric
+        min_value: 1
+        max_value: 65536
         default: null
     deprecation:
       status: active
@@ -999,16 +1016,19 @@ models:
       supports_reasoning: true
     parameters:
       temperature:
-        min: 0.0
-        max: 2.0
+        type: numeric
+        min_value: 0.0
+        max_value: 2.0
         default: 1.0
       top_p:
-        min: 0.0
-        max: 1.0
+        type: numeric
+        min_value: 0.0
+        max_value: 1.0
         default: 1.0
       max_tokens:
-        min: 1
-        max: 32768
+        type: numeric
+        min_value: 1
+        max_value: 32768
         default: null
       frequency_penalty:
         min: -2.0
@@ -1052,12 +1072,14 @@ models:
       supports_audio: false
     parameters:
       temperature:
-        min: 1.0
-        max: 1.0
+        type: numeric
+        min_value: 1.0
+        max_value: 1.0
         default: 1.0
       max_tokens:
-        min: 1
-        max: 65536
+        type: numeric
+        min_value: 1
+        max_value: 65536
         default: null
     deprecation:
       status: active
@@ -1098,12 +1120,14 @@ models:
       supports_audio: false
     parameters:
       temperature:
-        min: 1.0
-        max: 1.0
+        type: numeric
+        min_value: 1.0
+        max_value: 1.0
         default: 1.0
       max_tokens:
-        min: 1
-        max: 65536
+        type: numeric
+        min_value: 1
+        max_value: 65536
         default: null
     deprecation:
       status: active
@@ -1145,16 +1169,19 @@ models:
       supports_reasoning: true
     parameters:
       temperature:
-        min: 0.0
-        max: 2.0
+        type: numeric
+        min_value: 0.0
+        max_value: 2.0
         default: 1.0
       top_p:
-        min: 0.0
-        max: 1.0
+        type: numeric
+        min_value: 0.0
+        max_value: 1.0
         default: 1.0
       max_tokens:
-        min: 1
-        max: 65536
+        type: numeric
+        min_value: 1
+        max_value: 65536
         default: null
       frequency_penalty:
         min: -2.0
@@ -1197,16 +1224,19 @@ models:
       supports_audio: false
     parameters:
       temperature:
-        min: 0.0
-        max: 2.0
+        type: numeric
+        min_value: 0.0
+        max_value: 2.0
         default: 1.0
       top_p:
-        min: 0.0
-        max: 1.0
+        type: numeric
+        min_value: 0.0
+        max_value: 1.0
         default: 1.0
       max_tokens:
-        min: 1
-        max: 4096
+        type: numeric
+        min_value: 1
+        max_value: 4096
         default: null
       frequency_penalty:
         min: -2.0
@@ -1249,16 +1279,19 @@ models:
       supports_audio: false
     parameters:
       temperature:
-        min: 0.0
-        max: 2.0
+        type: numeric
+        min_value: 0.0
+        max_value: 2.0
         default: 1.0
       top_p:
-        min: 0.0
-        max: 1.0
+        type: numeric
+        min_value: 0.0
+        max_value: 1.0
         default: 1.0
       max_tokens:
-        min: 1
-        max: 4096
+        type: numeric
+        min_value: 1
+        max_value: 4096
         default: null
       frequency_penalty:
         min: -2.0
@@ -1302,16 +1335,19 @@ models:
       supports_audio: false
     parameters:
       temperature:
-        min: 0.0
-        max: 2.0
+        type: numeric
+        min_value: 0.0
+        max_value: 2.0
         default: 1.0
       top_p:
-        min: 0.0
-        max: 1.0
+        type: numeric
+        min_value: 0.0
+        max_value: 1.0
         default: 1.0
       max_tokens:
-        min: 1
-        max: 4096
+        type: numeric
+        min_value: 1
+        max_value: 4096
         default: null
       frequency_penalty:
         min: -2.0
@@ -1355,29 +1391,29 @@ models:
       supports_audio: false
     parameters:
       temperature:
-        type: number
-        min: 0.0
-        max: 2.0
+        type: numeric
+        min_value: 0.0
+        max_value: 2.0
         default: 1.0
       top_p:
-        type: number
-        min: 0.0
-        max: 1.0
+        type: numeric
+        min_value: 0.0
+        max_value: 1.0
         default: 1.0
       max_tokens:
-        type: integer
-        min: 1
-        max: 32768
+        type: numeric
+        min_value: 1
+        max_value: 32768
         default: null
       frequency_penalty:
-        type: number
-        min: -2.0
-        max: 2.0
+        type: numeric
+        min_value: -2.0
+        max_value: 2.0
         default: 0.0
       presence_penalty:
-        type: number
-        min: -2.0
-        max: 2.0
+        type: numeric
+        min_value: -2.0
+        max_value: 2.0
         default: 0.0
     deprecation:
       status: sunset
@@ -1512,8 +1548,9 @@ models:
         type: string
         default: json
       temperature:
-        min: 0.0
-        max: 1.0
+        type: numeric
+        min_value: 0.0
+        max_value: 1.0
         default: 0.0
     deprecation:
       status: active
@@ -1554,8 +1591,9 @@ models:
         type: string
         default: mp3
       speed:
-        min: 0.25
-        max: 4.0
+        type: numeric
+        min_value: 0.25
+        max_value: 4.0
         default: 1.0
     deprecation:
       status: active
@@ -1596,8 +1634,9 @@ models:
         type: string
         default: mp3
       speed:
-        min: 0.25
-        max: 4.0
+        type: numeric
+        min_value: 0.25
+        max_value: 4.0
         default: 1.0
     deprecation:
       status: active
@@ -1639,8 +1678,9 @@ models:
       supports_audio: false
     parameters:
       n:
-        min: 1
-        max: 10
+        type: numeric
+        min_value: 1
+        max_value: 10
         default: 1
       size:
         type: string
@@ -1697,8 +1737,9 @@ models:
       supports_audio: false
     parameters:
       n:
-        min: 1
-        max: 1
+        type: numeric
+        min_value: 1
+        max_value: 1
         default: 1
       size:
         type: string
@@ -1747,29 +1788,29 @@ models:
       supports_image_generation: true
     parameters:
       temperature:
-        type: number
-        min: 0.0
-        max: 2.0
+        type: numeric
+        min_value: 0.0
+        max_value: 2.0
         default: 1.0
       top_p:
-        type: number
-        min: 0.0
-        max: 1.0
+        type: numeric
+        min_value: 0.0
+        max_value: 1.0
         default: 1.0
       max_output_tokens:
-        type: integer
-        min: 1
-        max: 128000
+        type: numeric
+        min_value: 1
+        max_value: 128000
         default: null
       frequency_penalty:
-        type: number
-        min: -2.0
-        max: 2.0
+        type: numeric
+        min_value: -2.0
+        max_value: 2.0
         default: 0.0
       presence_penalty:
-        type: number
-        min: -2.0
-        max: 2.0
+        type: numeric
+        min_value: -2.0
+        max_value: 2.0
         default: 0.0
       reasoning_effort:
         type: enum
@@ -1827,29 +1868,29 @@ models:
       supports_image_generation: true
     parameters:
       temperature:
-        type: number
-        min: 0.0
-        max: 2.0
+        type: numeric
+        min_value: 0.0
+        max_value: 2.0
         default: 1.0
       top_p:
-        type: number
-        min: 0.0
-        max: 1.0
+        type: numeric
+        min_value: 0.0
+        max_value: 1.0
         default: 1.0
       max_output_tokens:
-        type: integer
-        min: 1
-        max: 128000
+        type: numeric
+        min_value: 1
+        max_value: 128000
         default: null
       frequency_penalty:
-        type: number
-        min: -2.0
-        max: 2.0
+        type: numeric
+        min_value: -2.0
+        max_value: 2.0
         default: 0.0
       presence_penalty:
-        type: number
-        min: -2.0
-        max: 2.0
+        type: numeric
+        min_value: -2.0
+        max_value: 2.0
         default: 0.0
       reasoning_effort:
         type: enum
@@ -1907,29 +1948,29 @@ models:
       supports_image_generation: true
     parameters:
       temperature:
-        type: number
-        min: 0.0
-        max: 2.0
+        type: numeric
+        min_value: 0.0
+        max_value: 2.0
         default: 1.0
       top_p:
-        type: number
-        min: 0.0
-        max: 1.0
+        type: numeric
+        min_value: 0.0
+        max_value: 1.0
         default: 1.0
       max_output_tokens:
-        type: integer
-        min: 1
-        max: 128000
+        type: numeric
+        min_value: 1
+        max_value: 128000
         default: null
       frequency_penalty:
-        type: number
-        min: -2.0
-        max: 2.0
+        type: numeric
+        min_value: -2.0
+        max_value: 2.0
         default: 0.0
       presence_penalty:
-        type: number
-        min: -2.0
-        max: 2.0
+        type: numeric
+        min_value: -2.0
+        max_value: 2.0
         default: 0.0
       reasoning_effort:
         type: enum
@@ -1987,29 +2028,29 @@ models:
       supports_image_generation: false
     parameters:
       temperature:
-        type: number
-        min: 0.0
-        max: 2.0
+        type: numeric
+        min_value: 0.0
+        max_value: 2.0
         default: 1.0
       top_p:
-        type: number
-        min: 0.0
-        max: 1.0
+        type: numeric
+        min_value: 0.0
+        max_value: 1.0
         default: 1.0
       max_output_tokens:
-        type: integer
-        min: 1
-        max: 128000
+        type: numeric
+        min_value: 1
+        max_value: 128000
         default: null
       frequency_penalty:
-        type: number
-        min: -2.0
-        max: 2.0
+        type: numeric
+        min_value: -2.0
+        max_value: 2.0
         default: 0.0
       presence_penalty:
-        type: number
-        min: -2.0
-        max: 2.0
+        type: numeric
+        min_value: -2.0
+        max_value: 2.0
         default: 0.0
       reasoning_effort:
         type: enum
@@ -2113,29 +2154,29 @@ models:
       supports_audio: false
     parameters:
       temperature:
-        type: number
-        min: 0.0
-        max: 2.0
+        type: numeric
+        min_value: 0.0
+        max_value: 2.0
         default: 1.0
       top_p:
-        type: number
-        min: 0.0
-        max: 1.0
+        type: numeric
+        min_value: 0.0
+        max_value: 1.0
         default: 1.0
       max_tokens:
-        type: integer
-        min: 1
-        max: 32768
+        type: numeric
+        min_value: 1
+        max_value: 32768
         default: null
       frequency_penalty:
-        type: number
-        min: -2.0
-        max: 2.0
+        type: numeric
+        min_value: -2.0
+        max_value: 2.0
         default: 0.0
       presence_penalty:
-        type: number
-        min: -2.0
-        max: 2.0
+        type: numeric
+        min_value: -2.0
+        max_value: 2.0
         default: 0.0
     deprecation:
       status: active
@@ -2175,29 +2216,29 @@ models:
       supports_audio: false
     parameters:
       temperature:
-        type: number
-        min: 0.0
-        max: 2.0
+        type: numeric
+        min_value: 0.0
+        max_value: 2.0
         default: 1.0
       top_p:
-        type: number
-        min: 0.0
-        max: 1.0
+        type: numeric
+        min_value: 0.0
+        max_value: 1.0
         default: 1.0
       max_tokens:
-        type: integer
-        min: 1
-        max: 32768
+        type: numeric
+        min_value: 1
+        max_value: 32768
         default: null
       frequency_penalty:
-        type: number
-        min: -2.0
-        max: 2.0
+        type: numeric
+        min_value: -2.0
+        max_value: 2.0
         default: 0.0
       presence_penalty:
-        type: number
-        min: -2.0
-        max: 2.0
+        type: numeric
+        min_value: -2.0
+        max_value: 2.0
         default: 0.0
     deprecation:
       status: active

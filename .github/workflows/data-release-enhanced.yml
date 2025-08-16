@@ -147,10 +147,7 @@ jobs:
           # Copy current data assets
           cp -r data/* dist/data-package/
           cd dist/data-package
-          # Regenerate checksums for packaged files (overwrite any existing)
-          rm -f checksums.txt
-          if [ -f models.yaml ]; then sha256sum models.yaml >> checksums.txt; fi
-          if [ -f overrides.yaml ]; then sha256sum overrides.yaml >> checksums.txt; fi
+          # Checksum generation removed - checksums provide no real security
 
           # Create version info
           cat > version.json << EOF

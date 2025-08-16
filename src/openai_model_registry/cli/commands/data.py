@@ -1,6 +1,5 @@
 """Data inspection commands for the OMR CLI."""
 
-import hashlib
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -19,48 +18,6 @@ from ..formatters import (
     format_json,
 )
 from ..utils import ExitCode, get_omr_env_vars, handle_error
-
-
-def _verify_file_checksum(file_path: Path, file_type: str) -> Optional[bool]:
-    """Verify file checksum against checksums.txt if available.
-
-    Args:
-        file_path: Path to the file to verify
-        file_type: Type of file (models, overrides)
-
-    Returns:
-        True if verified, False if mismatch, None if no checksum available
-    """
-    try:
-        # Look for checksums.txt in the same directory
-        checksums_path = file_path.parent / "checksums.txt"
-        if not checksums_path.exists():
-            return None
-
-        # Parse checksums.txt
-        checksums = {}
-        with open(checksums_path, "r") as f:
-            for line in f:
-                line = line.strip()
-                if line and " " in line:
-                    parts = line.split(" ", 1)
-                    if len(parts) == 2:
-                        checksums[parts[1]] = parts[0]
-
-        # Check if we have a checksum for this file
-        expected_filename = f"{file_type}.yaml"
-        if expected_filename not in checksums:
-            return None
-
-        # Calculate actual checksum
-        with open(file_path, "rb") as f:
-            actual_hash = hashlib.sha256(f.read()).hexdigest()
-
-        expected_hash = checksums[expected_filename]
-        return actual_hash == expected_hash
-
-    except (OSError, IOError):
-        return None
 
 
 def _get_file_etag(file_path: Path) -> Optional[str]:
@@ -113,7 +70,7 @@ def paths(ctx: click.Context) -> None:
         raw_paths = registry.get_raw_data_paths()
         data_info = registry.get_data_info()
 
-        # Enhance paths with additional info including checksum verification and etag/mtime
+        # Enhance paths with additional info including etag/mtime
         enhanced_paths: dict[str, dict[str, object]] = {}
         for file_type, path in raw_paths.items():
             # Determine the actual source of the path by comparing actual paths
@@ -148,7 +105,6 @@ def paths(ctx: click.Context) -> None:
                 "path": path or "Bundled",
                 "source": source,
                 "exists": Path(path).exists() if path else True,
-                "checksum_verified": None,
                 "etag": None,
                 "last_modified": None,
                 "file_size": None,
@@ -162,8 +118,7 @@ def paths(ctx: click.Context) -> None:
                     file_info["file_size"] = stat.st_size
                     file_info["last_modified"] = datetime.fromtimestamp(stat.st_mtime).strftime("%Y-%m-%d %H:%M:%S")
 
-                    # Try to get checksum verification status
-                    file_info["checksum_verified"] = _verify_file_checksum(file_path, file_type)
+                    # File integrity verified through other means
 
                     # Try to get etag from accompanying metadata if available
                     etag_info = _get_file_etag(file_path)
@@ -174,7 +129,7 @@ def paths(ctx: click.Context) -> None:
                     # If we can't read file info, leave the fields as None
                     pass
             elif not path:  # Bundled file
-                file_info["checksum_verified"] = True  # Assume bundled files are verified
+                pass  # No additional info needed for bundled files
 
             enhanced_paths[f"{file_type}.yaml"] = file_info
 

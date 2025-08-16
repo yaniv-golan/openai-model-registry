@@ -92,8 +92,14 @@ def registry(test_config_dir: Path) -> Generator[ModelRegistry, None, None]:
                     "supports_streaming": True,
                 },
                 "parameters": {
-                    "temperature": {"type": "number", "min": 0.0, "max": 2.0, "default": 1.0, "allow_float": True},
-                    "max_completion_tokens": {"type": "number", "min": 1, "default": 1, "allow_float": False},
+                    "temperature": {
+                        "type": "numeric",
+                        "min_value": 0.0,
+                        "max_value": 2.0,
+                        "default": 1.0,
+                        "allow_float": True,
+                    },
+                    "max_completion_tokens": {"type": "numeric", "min_value": 1, "default": 1, "allow_float": False},
                 },
                 "description": "Test model alias",
             },
@@ -105,8 +111,14 @@ def registry(test_config_dir: Path) -> Generator[ModelRegistry, None, None]:
                     "supports_streaming": True,
                 },
                 "parameters": {
-                    "temperature": {"type": "number", "min": 0.0, "max": 2.0, "default": 1.0, "allow_float": True},
-                    "max_completion_tokens": {"type": "number", "min": 1, "default": 1, "allow_float": False},
+                    "temperature": {
+                        "type": "numeric",
+                        "min_value": 0.0,
+                        "max_value": 2.0,
+                        "default": 1.0,
+                        "allow_float": True,
+                    },
+                    "max_completion_tokens": {"type": "numeric", "min_value": 1, "default": 1, "allow_float": False},
                 },
                 "description": "Test model for unit tests",
                 "min_version": {
@@ -128,7 +140,13 @@ def registry(test_config_dir: Path) -> Generator[ModelRegistry, None, None]:
                     "supports_function_calling": True,
                 },
                 "parameters": {
-                    "temperature": {"type": "numeric", "min": 0.0, "max": 2.0, "default": 1.0, "allow_float": True},
+                    "temperature": {
+                        "type": "numeric",
+                        "min_value": 0.0,
+                        "max_value": 2.0,
+                        "default": 1.0,
+                        "allow_float": True,
+                    },
                     "reasoning_effort": {"type": "enum", "enum": ["low", "medium", "high"], "default": "medium"},
                 },
                 "description": "GPT-4o base alias",
@@ -143,7 +161,13 @@ def registry(test_config_dir: Path) -> Generator[ModelRegistry, None, None]:
                     "supports_function_calling": True,
                 },
                 "parameters": {
-                    "temperature": {"type": "numeric", "min": 0.0, "max": 2.0, "default": 1.0, "allow_float": True},
+                    "temperature": {
+                        "type": "numeric",
+                        "min_value": 0.0,
+                        "max_value": 2.0,
+                        "default": 1.0,
+                        "allow_float": True,
+                    },
                     "reasoning_effort": {"type": "enum", "enum": ["low", "medium", "high"], "default": "medium"},
                 },
                 "description": "GPT-4o test model",
