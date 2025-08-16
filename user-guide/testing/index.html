@@ -1,0 +1,1683 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A lightweight Python package for validating OpenAI model parameters and capabilities">
+      
+      
+        <meta name="author" content="Yaniv Golan">
+      
+      
+        <link rel="canonical" href="https://yaniv-golan.github.io/openai-model-registry/user-guide/testing/">
+      
+      
+        <link rel="prev" href="../advanced-usage/">
+      
+      
+        <link rel="next" href="../../api/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.16">
+    
+    
+      
+        <title>Testing - OpenAI Model Registry</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.7e37652d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#testing-with-openai-model-registry" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="OpenAI Model Registry" class="md-header__button md-logo" aria-label="OpenAI Model Registry" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            OpenAI Model Registry
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Testing
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/yaniv-golan/openai-model-registry" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path fill="currentColor" d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    yaniv-golan/openai-model-registry
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="OpenAI Model Registry" class="md-nav__button md-logo" aria-label="OpenAI Model Registry" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    OpenAI Model Registry
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/yaniv-golan/openai-model-registry" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path fill="currentColor" d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    yaniv-golan/openai-model-registry
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    User Guide
+    
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            User Guide
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting Started
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    CLI Reference
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../model-capabilities/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Model Capabilities
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameter-validation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Parameter Validation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../advanced-usage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Advanced Usage
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Testing
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Testing
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#basic-testing-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Basic Testing Patterns
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Basic Testing Patterns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#simple-mocking" class="md-nav__link">
+    <span class="md-ellipsis">
+      Simple Mocking
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testing-with-real-registry-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing with Real Registry Data
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-with-pyfakefs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing with pyfakefs
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Testing with pyfakefs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#case-1-mock-the-directory-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Case 1: Mock the Directory Functions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#case-2-environment-variable-override" class="md-nav__link">
+    <span class="md-ellipsis">
+      Case 2: Environment Variable Override
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-registry-updates-and-network-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing Registry Updates and Network Operations
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-different-model-configurations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing Different Model Configurations
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Best Practices
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-always-clear-registry-cache" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Always Clear Registry Cache
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-use-realistic-test-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Use Realistic Test Data
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-test-error-conditions" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Test Error Conditions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-test-parameter-validation-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Test Parameter Validation Integration
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#integration-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Integration Testing
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cli-based-debugging" class="md-nav__link">
+    <span class="md-ellipsis">
+      CLI-Based Debugging
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../api/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    API Reference
+    
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            API Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/model-registry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    ModelRegistry
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/model-capabilities/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    ModelCapabilities
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Contributing
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Contributing
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_2" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../contributing/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    Release Process
+    
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            Release Process
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/RELEASE_CHECKLIST/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Release Checklist
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/RELEASE_WORKFLOW/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Release Workflow
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/cli-maintainers-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    CLI Maintainers Guide
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Changelog
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#basic-testing-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Basic Testing Patterns
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Basic Testing Patterns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#simple-mocking" class="md-nav__link">
+    <span class="md-ellipsis">
+      Simple Mocking
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testing-with-real-registry-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing with Real Registry Data
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-with-pyfakefs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing with pyfakefs
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Testing with pyfakefs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#case-1-mock-the-directory-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Case 1: Mock the Directory Functions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#case-2-environment-variable-override" class="md-nav__link">
+    <span class="md-ellipsis">
+      Case 2: Environment Variable Override
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-registry-updates-and-network-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing Registry Updates and Network Operations
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-different-model-configurations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing Different Model Configurations
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Best Practices
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-always-clear-registry-cache" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Always Clear Registry Cache
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-use-realistic-test-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Use Realistic Test Data
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-test-error-conditions" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Test Error Conditions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-test-parameter-validation-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Test Parameter Validation Integration
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#integration-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Integration Testing
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cli-based-debugging" class="md-nav__link">
+    <span class="md-ellipsis">
+      CLI-Based Debugging
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="testing-with-openai-model-registry">Testing with OpenAI Model Registry<a class="headerlink" href="#testing-with-openai-model-registry" title="Permanent link">&para;</a></h1>
+<p>This guide shows how to test your applications that use the OpenAI Model Registry, including working with pytest, pyfakefs, and mocking strategies.</p>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>When testing applications that use OpenAI Model Registry, you may encounter challenges related to:</p>
+<ul>
+<li><strong>Filesystem interactions</strong> - The registry reads configuration from disk</li>
+<li><strong>Singleton behavior</strong> - The default registry instance is cached</li>
+<li><strong>Cross-platform paths</strong> - The registry uses platform-specific directories</li>
+<li><strong>Network operations</strong> - Registry updates fetch data from remote sources</li>
+</ul>
+<p>This guide provides patterns and best practices for handling these scenarios in your tests.</p>
+<h2 id="basic-testing-patterns">Basic Testing Patterns<a class="headerlink" href="#basic-testing-patterns" title="Permanent link">&para;</a></h2>
+<h3 id="simple-mocking">Simple Mocking<a class="headerlink" href="#simple-mocking" title="Permanent link">&para;</a></h3>
+<p>For basic tests where you just need to mock registry responses:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">unittest.mock</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mock</span><span class="p">,</span> <span class="n">patch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openai_model_registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelRegistry</span><span class="p">,</span> <span class="n">ModelCapabilities</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_my_function_with_mocked_registry</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test your function with a completely mocked registry.&quot;&quot;&quot;</span>
+
+    <span class="c1"># Create a mock capabilities object</span>
+    <span class="n">mock_capabilities</span> <span class="o">=</span> <span class="n">Mock</span><span class="p">(</span><span class="n">spec</span><span class="o">=</span><span class="n">ModelCapabilities</span><span class="p">)</span>
+    <span class="n">mock_capabilities</span><span class="o">.</span><span class="n">context_window</span> <span class="o">=</span> <span class="mi">4096</span>
+    <span class="n">mock_capabilities</span><span class="o">.</span><span class="n">max_output_tokens</span> <span class="o">=</span> <span class="mi">1024</span>
+    <span class="n">mock_capabilities</span><span class="o">.</span><span class="n">supports_streaming</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="c1"># Mock the registry</span>
+    <span class="n">mock_registry</span> <span class="o">=</span> <span class="n">Mock</span><span class="p">(</span><span class="n">spec</span><span class="o">=</span><span class="n">ModelRegistry</span><span class="p">)</span>
+    <span class="n">mock_registry</span><span class="o">.</span><span class="n">get_capabilities</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="n">mock_capabilities</span>
+
+    <span class="k">with</span> <span class="n">patch</span><span class="p">(</span>
+        <span class="s2">&quot;openai_model_registry.ModelRegistry.get_default&quot;</span><span class="p">,</span> <span class="n">return_value</span><span class="o">=</span><span class="n">mock_registry</span>
+    <span class="p">):</span>
+
+        <span class="c1"># Your application code here</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">my_function_that_uses_registry</span><span class="p">(</span><span class="s2">&quot;gpt-4o&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Verify the registry was called correctly</span>
+        <span class="n">mock_registry</span><span class="o">.</span><span class="n">get_capabilities</span><span class="o">.</span><span class="n">assert_called_once_with</span><span class="p">(</span><span class="s2">&quot;gpt-4o&quot;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">result</span><span class="o">.</span><span class="n">expected_property</span> <span class="o">==</span> <span class="n">expected_value</span>
+</code></pre></div>
+<h3 id="testing-with-real-registry-data">Testing with Real Registry Data<a class="headerlink" href="#testing-with-real-registry-data" title="Permanent link">&para;</a></h3>
+<p>If you want to test with actual registry data but control the configuration:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">unittest.mock</span><span class="w"> </span><span class="kn">import</span> <span class="n">patch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openai_model_registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelRegistry</span><span class="p">,</span> <span class="n">RegistryConfig</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_my_function_with_real_registry</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test with real registry using temporary configuration.&quot;&quot;&quot;</span>
+
+    <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">temp_dir</span><span class="p">:</span>
+        <span class="c1"># Create a custom registry configuration</span>
+        <span class="n">temp_registry_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">temp_dir</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;models.yaml&quot;</span>
+        <span class="n">temp_constraints_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">temp_dir</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;constraints.yml&quot;</span>
+
+        <span class="c1"># Copy or create test configuration files</span>
+        <span class="c1"># (you can copy from the package&#39;s data directory or create custom ones)</span>
+
+        <span class="n">config</span> <span class="o">=</span> <span class="n">RegistryConfig</span><span class="p">(</span>
+            <span class="n">registry_path</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">temp_registry_file</span><span class="p">),</span>
+            <span class="n">constraints_path</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">temp_constraints_file</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="n">registry</span> <span class="o">=</span> <span class="n">ModelRegistry</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+
+        <span class="c1"># Test your code with this registry</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">my_function_that_uses_registry_instance</span><span class="p">(</span><span class="n">registry</span><span class="p">,</span> <span class="s2">&quot;gpt-4o&quot;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">result</span><span class="o">.</span><span class="n">is_valid</span>
+</code></pre></div>
+<h2 id="testing-with-pyfakefs">Testing with pyfakefs<a class="headerlink" href="#testing-with-pyfakefs" title="Permanent link">&para;</a></h2>
+<p>When your tests need to interact with the filesystem (especially when using pyfakefs), you need to handle the registry's cross-platform directory behavior.</p>
+<h3 id="case-1-mock-the-directory-functions">Case 1: Mock the Directory Functions<a class="headerlink" href="#case-1-mock-the-directory-functions" title="Permanent link">&para;</a></h3>
+<p>The cleanest approach is to mock the platformdirs functions:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">unittest.mock</span><span class="w"> </span><span class="kn">import</span> <span class="n">patch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openai_model_registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelRegistry</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_my_app_with_fake_registry_paths</span><span class="p">(</span><span class="n">fs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test your app with fake filesystem paths.&quot;&quot;&quot;</span>
+
+    <span class="c1"># Set up fake directories</span>
+    <span class="n">fake_data_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;/fake_data/openai-model-registry&quot;</span><span class="p">)</span>
+    <span class="n">fake_config_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;/fake_config/openai-model-registry&quot;</span><span class="p">)</span>
+
+    <span class="n">fs</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">fake_data_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">fs</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">fake_config_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Create fake registry file</span>
+    <span class="n">fake_models_file</span> <span class="o">=</span> <span class="n">fake_data_dir</span> <span class="o">/</span> <span class="s2">&quot;models.yaml&quot;</span>
+    <span class="n">fs</span><span class="o">.</span><span class="n">create_file</span><span class="p">(</span>
+        <span class="n">fake_models_file</span><span class="p">,</span>
+        <span class="n">contents</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">version: &quot;2.0.0&quot;</span>
+<span class="s2">models:</span>
+<span class="s2">  test-model-2024-01-01:</span>
+<span class="s2">    context_window: 4096</span>
+<span class="s2">    max_output_tokens: 1024</span>
+<span class="s2">    deprecation:</span>
+<span class="s2">      status: &quot;active&quot;</span>
+<span class="s2">      reason: &quot;test model&quot;</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Mock the directory functions</span>
+    <span class="k">with</span> <span class="n">patch</span><span class="p">(</span>
+        <span class="s2">&quot;openai_model_registry.config_paths.get_user_data_dir&quot;</span><span class="p">,</span>
+        <span class="n">return_value</span><span class="o">=</span><span class="n">fake_data_dir</span><span class="p">,</span>
+    <span class="p">),</span> <span class="n">patch</span><span class="p">(</span>
+        <span class="s2">&quot;openai_model_registry.config_paths.get_user_config_dir&quot;</span><span class="p">,</span>
+        <span class="n">return_value</span><span class="o">=</span><span class="n">fake_config_dir</span><span class="p">,</span>
+    <span class="p">):</span>
+
+        <span class="c1"># Clear any cached registry instances</span>
+        <span class="n">ModelRegistry</span><span class="o">.</span><span class="n">cleanup</span><span class="p">()</span>
+
+        <span class="c1"># Test your application</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">my_application_function</span><span class="p">()</span>
+
+        <span class="c1"># Your assertions here</span>
+        <span class="k">assert</span> <span class="n">result</span><span class="o">.</span><span class="n">model_used</span> <span class="o">==</span> <span class="s2">&quot;test-model&quot;</span>
+</code></pre></div>
+<h3 id="case-2-environment-variable-override">Case 2: Environment Variable Override<a class="headerlink" href="#case-2-environment-variable-override" title="Permanent link">&para;</a></h3>
+<p>Use environment variables to redirect the registry to fake locations:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">unittest.mock</span><span class="w"> </span><span class="kn">import</span> <span class="n">patch</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_my_app_with_custom_registry_path</span><span class="p">(</span><span class="n">fs</span><span class="p">,</span> <span class="n">monkeypatch</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test using environment variable to set custom registry path.&quot;&quot;&quot;</span>
+
+    <span class="c1"># Create fake registry file</span>
+    <span class="n">custom_registry_path</span> <span class="o">=</span> <span class="s2">&quot;/custom/registry/models.yaml&quot;</span>
+    <span class="n">fs</span><span class="o">.</span><span class="n">create_file</span><span class="p">(</span>
+        <span class="n">custom_registry_path</span><span class="p">,</span>
+        <span class="n">contents</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">version: &quot;2.0.0&quot;</span>
+<span class="s2">models:</span>
+<span class="s2">  custom-model-2024-01-01:</span>
+<span class="s2">    context_window: 8192</span>
+<span class="s2">    max_output_tokens: 2048</span>
+<span class="s2">    deprecation:</span>
+<span class="s2">      status: &quot;active&quot;</span>
+<span class="s2">      reason: &quot;custom model&quot;</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Set environment variable</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setenv</span><span class="p">(</span><span class="s2">&quot;OMR_MODEL_REGISTRY_PATH&quot;</span><span class="p">,</span> <span class="n">custom_registry_path</span><span class="p">)</span>
+
+    <span class="c1"># Clear registry cache to pick up new environment</span>
+    <span class="n">ModelRegistry</span><span class="o">.</span><span class="n">cleanup</span><span class="p">()</span>
+
+    <span class="c1"># Test your application</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">my_app_function_that_uses_custom_model</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="s2">&quot;custom-model&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">models_used</span>
+</code></pre></div>
+<h2 id="testing-registry-updates-and-network-operations">Testing Registry Updates and Network Operations<a class="headerlink" href="#testing-registry-updates-and-network-operations" title="Permanent link">&para;</a></h2>
+<p>When testing code that triggers registry updates:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">unittest.mock</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mock</span><span class="p">,</span> <span class="n">patch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openai_model_registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelRegistry</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openai_model_registry.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">RefreshStatus</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_my_app_handles_registry_updates</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test your app&#39;s behavior when registry updates are available.&quot;&quot;&quot;</span>
+
+    <span class="k">with</span> <span class="n">patch</span><span class="p">(</span><span class="s2">&quot;requests.get&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">mock_get</span><span class="p">,</span> <span class="n">patch</span><span class="p">(</span>
+        <span class="s2">&quot;openai_model_registry.config_paths.get_user_data_dir&quot;</span>
+    <span class="p">)</span> <span class="k">as</span> <span class="n">mock_data_dir</span><span class="p">:</span>
+
+        <span class="c1"># Mock successful update response</span>
+        <span class="n">mock_response</span> <span class="o">=</span> <span class="n">Mock</span><span class="p">()</span>
+        <span class="n">mock_response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">=</span> <span class="mi">200</span>
+        <span class="n">mock_response</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">version: &quot;2.0.0&quot;</span>
+<span class="s2">models: </span><span class="si">{}</span>
+<span class="s2">&quot;&quot;&quot;</span>
+        <span class="n">mock_get</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="n">mock_response</span>
+
+        <span class="c1"># Test your application&#39;s update handling</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">my_app_check_for_updates</span><span class="p">()</span>
+
+        <span class="k">assert</span> <span class="n">result</span><span class="o">.</span><span class="n">update_available</span> <span class="o">==</span> <span class="kc">True</span>
+        <span class="k">assert</span> <span class="n">result</span><span class="o">.</span><span class="n">handled_correctly</span> <span class="o">==</span> <span class="kc">True</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_my_app_handles_network_errors</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test your app&#39;s behavior when registry updates fail.&quot;&quot;&quot;</span>
+
+    <span class="k">with</span> <span class="n">patch</span><span class="p">(</span><span class="s2">&quot;requests.get&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">mock_get</span><span class="p">:</span>
+        <span class="c1"># Mock network error</span>
+        <span class="n">mock_get</span><span class="o">.</span><span class="n">side_effect</span> <span class="o">=</span> <span class="ne">ConnectionError</span><span class="p">(</span><span class="s2">&quot;Network unavailable&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Test your application&#39;s error handling</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">my_app_check_for_updates</span><span class="p">()</span>
+
+        <span class="k">assert</span> <span class="n">result</span><span class="o">.</span><span class="n">update_failed</span> <span class="o">==</span> <span class="kc">True</span>
+        <span class="k">assert</span> <span class="n">result</span><span class="o">.</span><span class="n">fallback_used</span> <span class="o">==</span> <span class="kc">True</span>
+</code></pre></div>
+<h2 id="testing-different-model-configurations">Testing Different Model Configurations<a class="headerlink" href="#testing-different-model-configurations" title="Permanent link">&para;</a></h2>
+<p>Test how your application handles different model scenarios:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">unittest.mock</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mock</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openai_model_registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelCapabilities</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openai_model_registry.deprecation</span><span class="w"> </span><span class="kn">import</span> <span class="n">DeprecationInfo</span>
+
+
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">deprecated_model_capabilities</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create capabilities for a deprecated model.&quot;&quot;&quot;</span>
+    <span class="n">deprecation</span> <span class="o">=</span> <span class="n">DeprecationInfo</span><span class="p">(</span>
+        <span class="n">status</span><span class="o">=</span><span class="s2">&quot;deprecated&quot;</span><span class="p">,</span>
+        <span class="n">deprecates_on</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">sunsets_on</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">replacement</span><span class="o">=</span><span class="s2">&quot;gpt-4o&quot;</span><span class="p">,</span>
+        <span class="n">migration_guide</span><span class="o">=</span><span class="s2">&quot;Use gpt-4o instead&quot;</span><span class="p">,</span>
+        <span class="n">reason</span><span class="o">=</span><span class="s2">&quot;Model deprecated&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">capabilities</span> <span class="o">=</span> <span class="n">Mock</span><span class="p">(</span><span class="n">spec</span><span class="o">=</span><span class="n">ModelCapabilities</span><span class="p">)</span>
+    <span class="n">capabilities</span><span class="o">.</span><span class="n">context_window</span> <span class="o">=</span> <span class="mi">8192</span>
+    <span class="n">capabilities</span><span class="o">.</span><span class="n">max_output_tokens</span> <span class="o">=</span> <span class="mi">1024</span>
+    <span class="n">capabilities</span><span class="o">.</span><span class="n">deprecation</span> <span class="o">=</span> <span class="n">deprecation</span>
+    <span class="n">capabilities</span><span class="o">.</span><span class="n">is_deprecated</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">return</span> <span class="n">capabilities</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_my_app_handles_deprecated_models</span><span class="p">(</span><span class="n">deprecated_model_capabilities</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test your app&#39;s handling of deprecated models.&quot;&quot;&quot;</span>
+
+    <span class="k">with</span> <span class="n">patch</span><span class="p">(</span><span class="s2">&quot;openai_model_registry.ModelRegistry.get_default&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">mock_registry</span><span class="p">:</span>
+        <span class="n">mock_registry</span><span class="o">.</span><span class="n">return_value</span><span class="o">.</span><span class="n">get_capabilities</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">deprecated_model_capabilities</span>
+        <span class="p">)</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="n">my_app_select_model</span><span class="p">(</span><span class="s2">&quot;deprecated-model&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Verify your app handles deprecation appropriately</span>
+        <span class="k">assert</span> <span class="n">result</span><span class="o">.</span><span class="n">warning_shown</span> <span class="o">==</span> <span class="kc">True</span>
+        <span class="k">assert</span> <span class="n">result</span><span class="o">.</span><span class="n">suggested_alternative</span> <span class="o">==</span> <span class="s2">&quot;gpt-4o&quot;</span>
+
+
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">high_capacity_model</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create capabilities for a high-capacity model.&quot;&quot;&quot;</span>
+    <span class="n">capabilities</span> <span class="o">=</span> <span class="n">Mock</span><span class="p">(</span><span class="n">spec</span><span class="o">=</span><span class="n">ModelCapabilities</span><span class="p">)</span>
+    <span class="n">capabilities</span><span class="o">.</span><span class="n">context_window</span> <span class="o">=</span> <span class="mi">1000000</span>  <span class="c1"># 1M tokens</span>
+    <span class="n">capabilities</span><span class="o">.</span><span class="n">max_output_tokens</span> <span class="o">=</span> <span class="mi">32768</span>
+    <span class="n">capabilities</span><span class="o">.</span><span class="n">supports_streaming</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">capabilities</span><span class="o">.</span><span class="n">supports_structured</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">return</span> <span class="n">capabilities</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_my_app_uses_high_capacity_features</span><span class="p">(</span><span class="n">high_capacity_model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test your app leverages high-capacity model features.&quot;&quot;&quot;</span>
+
+    <span class="k">with</span> <span class="n">patch</span><span class="p">(</span><span class="s2">&quot;openai_model_registry.ModelRegistry.get_default&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">mock_registry</span><span class="p">:</span>
+        <span class="n">mock_registry</span><span class="o">.</span><span class="n">return_value</span><span class="o">.</span><span class="n">get_capabilities</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="n">high_capacity_model</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="n">my_app_process_large_document</span><span class="p">(</span><span class="s2">&quot;huge-document.txt&quot;</span><span class="p">)</span>
+
+        <span class="k">assert</span> <span class="n">result</span><span class="o">.</span><span class="n">used_streaming</span> <span class="o">==</span> <span class="kc">True</span>
+        <span class="k">assert</span> <span class="n">result</span><span class="o">.</span><span class="n">context_exceeded</span> <span class="o">==</span> <span class="kc">False</span>
+</code></pre></div>
+<h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">&para;</a></h2>
+<h3 id="1-always-clear-registry-cache">1. Always Clear Registry Cache<a class="headerlink" href="#1-always-clear-registry-cache" title="Permanent link">&para;</a></h3>
+<p>The registry uses singleton behavior, so clear the cache between tests:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openai_model_registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelRegistry</span>
+
+
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span><span class="p">(</span><span class="n">autouse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">clear_registry_cache</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Automatically clear registry cache before each test.&quot;&quot;&quot;</span>
+    <span class="n">ModelRegistry</span><span class="o">.</span><span class="n">cleanup</span><span class="p">()</span>
+    <span class="k">yield</span>
+    <span class="n">ModelRegistry</span><span class="o">.</span><span class="n">cleanup</span><span class="p">()</span>
+</code></pre></div>
+<h3 id="2-use-realistic-test-data">2. Use Realistic Test Data<a class="headerlink" href="#2-use-realistic-test-data" title="Permanent link">&para;</a></h3>
+<p>When creating fake registry data, use realistic model configurations:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Good - includes all required fields</span>
+<span class="n">REALISTIC_MODEL_CONFIG</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">version: &quot;2.0.0&quot;</span>
+<span class="s2">models:</span>
+<span class="s2">  test-model-2024-01-01:</span>
+<span class="s2">    context_window: 128000</span>
+<span class="s2">    max_output_tokens: 16384</span>
+<span class="s2">    supports_streaming: true</span>
+<span class="s2">    supports_structured: true</span>
+<span class="s2">    supported_parameters:</span>
+<span class="s2">      - ref: &quot;numeric_constraints.temperature&quot;</span>
+<span class="s2">      - ref: &quot;numeric_constraints.top_p&quot;</span>
+<span class="s2">    deprecation:</span>
+<span class="s2">      status: &quot;active&quot;</span>
+<span class="s2">      deprecates_on: null</span>
+<span class="s2">      sunsets_on: null</span>
+<span class="s2">      replacement: null</span>
+<span class="s2">      migration_guide: null</span>
+<span class="s2">      reason: &quot;active&quot;</span>
+<span class="s2">    min_version:</span>
+<span class="s2">      year: 2024</span>
+<span class="s2">      month: 1</span>
+<span class="s2">      day: 1</span>
+<span class="s2">&quot;&quot;&quot;</span>
+</code></pre></div>
+<h3 id="3-test-error-conditions">3. Test Error Conditions<a class="headerlink" href="#3-test-error-conditions" title="Permanent link">&para;</a></h3>
+<p>Test how your app handles registry errors:</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">test_my_app_handles_missing_models</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test app behavior when requested model doesn&#39;t exist.&quot;&quot;&quot;</span>
+
+    <span class="k">with</span> <span class="n">patch</span><span class="p">(</span><span class="s2">&quot;openai_model_registry.ModelRegistry.get_default&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">mock_registry</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">openai_model_registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelNotSupportedError</span>
+
+        <span class="n">mock_registry</span><span class="o">.</span><span class="n">return_value</span><span class="o">.</span><span class="n">get_capabilities</span><span class="o">.</span><span class="n">side_effect</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">ModelNotSupportedError</span><span class="p">(</span><span class="s2">&quot;Model not found&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">&quot;nonexistent-model&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="n">my_app_use_model</span><span class="p">(</span><span class="s2">&quot;nonexistent-model&quot;</span><span class="p">)</span>
+
+        <span class="k">assert</span> <span class="n">result</span><span class="o">.</span><span class="n">used_fallback_model</span> <span class="o">==</span> <span class="kc">True</span>
+        <span class="k">assert</span> <span class="n">result</span><span class="o">.</span><span class="n">error_logged</span> <span class="o">==</span> <span class="kc">True</span>
+</code></pre></div>
+<h3 id="4-test-parameter-validation-integration">4. Test Parameter Validation Integration<a class="headerlink" href="#4-test-parameter-validation-integration" title="Permanent link">&para;</a></h3>
+<p>If your app validates parameters using the registry:</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">test_my_app_validates_parameters_correctly</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test that your app properly validates model parameters.&quot;&quot;&quot;</span>
+
+    <span class="c1"># Mock a model with specific parameter constraints</span>
+    <span class="n">mock_capabilities</span> <span class="o">=</span> <span class="n">Mock</span><span class="p">()</span>
+    <span class="n">mock_capabilities</span><span class="o">.</span><span class="n">validate_parameter</span><span class="o">.</span><span class="n">side_effect</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="kc">None</span><span class="p">,</span>  <span class="c1"># temperature=0.7 is valid</span>
+        <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;temperature must be between 0 and 2&quot;</span><span class="p">),</span>  <span class="c1"># temperature=3.0 is invalid</span>
+    <span class="p">]</span>
+
+    <span class="k">with</span> <span class="n">patch</span><span class="p">(</span><span class="s2">&quot;openai_model_registry.ModelRegistry.get_default&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">mock_registry</span><span class="p">:</span>
+        <span class="n">mock_registry</span><span class="o">.</span><span class="n">return_value</span><span class="o">.</span><span class="n">get_capabilities</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="n">mock_capabilities</span>
+
+        <span class="c1"># Test valid parameters</span>
+        <span class="n">result1</span> <span class="o">=</span> <span class="n">my_app_call_openai</span><span class="p">(</span><span class="s2">&quot;gpt-4o&quot;</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">result1</span><span class="o">.</span><span class="n">parameters_valid</span> <span class="o">==</span> <span class="kc">True</span>
+
+        <span class="c1"># Test invalid parameters</span>
+        <span class="n">result2</span> <span class="o">=</span> <span class="n">my_app_call_openai</span><span class="p">(</span><span class="s2">&quot;gpt-4o&quot;</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="mf">3.0</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">result2</span><span class="o">.</span><span class="n">validation_error</span> <span class="o">==</span> <span class="kc">True</span>
+        <span class="k">assert</span> <span class="n">result2</span><span class="o">.</span><span class="n">error_message</span> <span class="o">==</span> <span class="s2">&quot;temperature must be between 0 and 2&quot;</span>
+</code></pre></div>
+<h2 id="integration-testing">Integration Testing<a class="headerlink" href="#integration-testing" title="Permanent link">&para;</a></h2>
+<p>For integration tests that need the full registry behavior:</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">test_end_to_end_with_real_registry</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Integration test using the actual registry.&quot;&quot;&quot;</span>
+
+    <span class="c1"># Use the real registry (ensure it&#39;s properly installed)</span>
+    <span class="n">registry</span> <span class="o">=</span> <span class="n">ModelRegistry</span><span class="o">.</span><span class="n">get_default</span><span class="p">()</span>
+
+    <span class="c1"># Test with a model you know exists</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">capabilities</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">get_capabilities</span><span class="p">(</span><span class="s2">&quot;gpt-4o&quot;</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">my_complete_workflow</span><span class="p">(</span><span class="s2">&quot;gpt-4o&quot;</span><span class="p">,</span> <span class="s2">&quot;test prompt&quot;</span><span class="p">)</span>
+
+        <span class="k">assert</span> <span class="n">result</span><span class="o">.</span><span class="n">model_used</span> <span class="o">==</span> <span class="s2">&quot;gpt-4o&quot;</span>
+        <span class="k">assert</span> <span class="n">result</span><span class="o">.</span><span class="n">context_within_limits</span> <span class="o">==</span> <span class="kc">True</span>
+
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">pytest</span><span class="o">.</span><span class="n">skip</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Integration test skipped due to registry issue: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>This testing approach ensures your application properly integrates with the OpenAI Model Registry while maintaining test reliability and isolation.</p>
+<h2 id="cli-based-debugging">CLI-Based Debugging<a class="headerlink" href="#cli-based-debugging" title="Permanent link">&para;</a></h2>
+<p>For interactive debugging and inspection during testing, use the <code>omr</code> CLI:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check data source paths and status</span>
+omr<span class="w"> </span>data<span class="w"> </span>paths
+
+<span class="c1"># Show environment variables affecting tests</span>
+omr<span class="w"> </span>data<span class="w"> </span>env
+
+<span class="c1"># List all models available in tests</span>
+omr<span class="w"> </span>models<span class="w"> </span>list
+
+<span class="c1"># Inspect specific model data</span>
+omr<span class="w"> </span>models<span class="w"> </span>get<span class="w"> </span>gpt-4o<span class="w"> </span>--effective
+
+<span class="c1"># Check cache status that might affect tests</span>
+omr<span class="w"> </span>cache<span class="w"> </span>info
+</code></pre></div>
+<p>The CLI is particularly useful for:</p>
+<ul>
+<li><strong>Debugging test failures</strong> - Check what data the registry is actually loading</li>
+<li><strong>Validating test environments</strong> - Ensure test data is set up correctly</li>
+<li><strong>Comparing configurations</strong> - Switch providers and compare model data</li>
+<li><strong>Cache management</strong> - Clear cache between test runs if needed</li>
+</ul>
+<p>See the <a href="../cli/">CLI Reference</a> for complete documentation.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.expand", "navigation.indexes", "search.highlight", "search.share", "content.code.copy"], "search": "../../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.50899def.min.js"></script>
+      
+    
+  </body>
+</html>

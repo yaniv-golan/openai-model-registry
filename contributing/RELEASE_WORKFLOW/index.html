@@ -1,0 +1,1961 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A lightweight Python package for validating OpenAI model parameters and capabilities">
+      
+      
+        <meta name="author" content="Yaniv Golan">
+      
+      
+        <link rel="canonical" href="https://yaniv-golan.github.io/openai-model-registry/contributing/RELEASE_WORKFLOW/">
+      
+      
+        <link rel="prev" href="../RELEASE_CHECKLIST/">
+      
+      
+        <link rel="next" href="../cli-maintainers-guide/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.16">
+    
+    
+      
+        <title>Release Workflow - OpenAI Model Registry</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.7e37652d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#release-hot-fix-workflow" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="OpenAI Model Registry" class="md-header__button md-logo" aria-label="OpenAI Model Registry" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            OpenAI Model Registry
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Release Workflow
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/yaniv-golan/openai-model-registry" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path fill="currentColor" d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    yaniv-golan/openai-model-registry
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="OpenAI Model Registry" class="md-nav__button md-logo" aria-label="OpenAI Model Registry" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    OpenAI Model Registry
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/yaniv-golan/openai-model-registry" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path fill="currentColor" d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    yaniv-golan/openai-model-registry
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../user-guide/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    User Guide
+    
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            User Guide
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting Started
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    CLI Reference
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/model-capabilities/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Model Capabilities
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/parameter-validation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Parameter Validation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/advanced-usage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Advanced Usage
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Testing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../api/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    API Reference
+    
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            API Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/model-registry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    ModelRegistry
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/model-capabilities/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    ModelCapabilities
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Contributing
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Contributing
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    Release Process
+    
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            Release Process
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../RELEASE_CHECKLIST/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Release Checklist
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Release Workflow
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Release Workflow
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      Table of Contents
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#branching-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      Branching Model
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#release-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      Release Types
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Release Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-library-releases" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Library Releases
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-data-releases" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Data Releases
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#library-release-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Library Release Workflow
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Library Release Workflow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#before-writing-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      Before Writing Code
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#creating-a-release-candidate" class="md-nav__link">
+    <span class="md-ellipsis">
+      Creating a Release Candidate
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#creating-the-final-release" class="md-nav__link">
+    <span class="md-ellipsis">
+      Creating the Final Release
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-release-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Release Workflow
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Data Release Workflow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#automatic-data-releases" class="md-nav__link">
+    <span class="md-ellipsis">
+      Automatic Data Releases
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#contributor-data-release-playbook" class="md-nav__link">
+    <span class="md-ellipsis">
+      Contributor Data Release Playbook
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manual-data-releases" class="md-nav__link">
+    <span class="md-ellipsis">
+      Manual Data Releases
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hot-fix-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Hot-Fix Workflow
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Hot-Fix Workflow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scenario-a-fix-is-already-on-main-and-safe-to-release" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scenario A – Fix is already on main and safe to release
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scenario-b-fix-must-not-include-unreleased-work-on-main" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scenario B – Fix must not include unreleased work on main
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dos-and-donts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Do's and Don'ts
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Do&#39;s and Don&#39;ts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#do" class="md-nav__link">
+    <span class="md-ellipsis">
+      Do ✓
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dont" class="md-nav__link">
+    <span class="md-ellipsis">
+      Don't ✗
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Issues
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#release-script-fails" class="md-nav__link">
+    <span class="md-ellipsis">
+      Release Script Fails
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ci-build-fails" class="md-nav__link">
+    <span class="md-ellipsis">
+      CI Build Fails
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testpypi-installation-fails" class="md-nav__link">
+    <span class="md-ellipsis">
+      TestPyPI Installation Fails
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#version-mismatch" class="md-nav__link">
+    <span class="md-ellipsis">
+      Version Mismatch
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getting-help" class="md-nav__link">
+    <span class="md-ellipsis">
+      Getting Help
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#automation-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Automation Overview
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Automation Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#github-actions-workflows" class="md-nav__link">
+    <span class="md-ellipsis">
+      GitHub Actions Workflows
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scripts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scripts
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Related Documentation
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli-maintainers-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    CLI Maintainers Guide
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Changelog
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      Table of Contents
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#branching-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      Branching Model
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#release-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      Release Types
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Release Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-library-releases" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Library Releases
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-data-releases" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Data Releases
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#library-release-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Library Release Workflow
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Library Release Workflow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#before-writing-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      Before Writing Code
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#creating-a-release-candidate" class="md-nav__link">
+    <span class="md-ellipsis">
+      Creating a Release Candidate
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#creating-the-final-release" class="md-nav__link">
+    <span class="md-ellipsis">
+      Creating the Final Release
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-release-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Release Workflow
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Data Release Workflow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#automatic-data-releases" class="md-nav__link">
+    <span class="md-ellipsis">
+      Automatic Data Releases
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#contributor-data-release-playbook" class="md-nav__link">
+    <span class="md-ellipsis">
+      Contributor Data Release Playbook
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manual-data-releases" class="md-nav__link">
+    <span class="md-ellipsis">
+      Manual Data Releases
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hot-fix-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Hot-Fix Workflow
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Hot-Fix Workflow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scenario-a-fix-is-already-on-main-and-safe-to-release" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scenario A – Fix is already on main and safe to release
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scenario-b-fix-must-not-include-unreleased-work-on-main" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scenario B – Fix must not include unreleased work on main
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dos-and-donts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Do's and Don'ts
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Do&#39;s and Don&#39;ts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#do" class="md-nav__link">
+    <span class="md-ellipsis">
+      Do ✓
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dont" class="md-nav__link">
+    <span class="md-ellipsis">
+      Don't ✗
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Issues
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#release-script-fails" class="md-nav__link">
+    <span class="md-ellipsis">
+      Release Script Fails
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ci-build-fails" class="md-nav__link">
+    <span class="md-ellipsis">
+      CI Build Fails
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testpypi-installation-fails" class="md-nav__link">
+    <span class="md-ellipsis">
+      TestPyPI Installation Fails
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#version-mismatch" class="md-nav__link">
+    <span class="md-ellipsis">
+      Version Mismatch
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getting-help" class="md-nav__link">
+    <span class="md-ellipsis">
+      Getting Help
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#automation-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Automation Overview
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Automation Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#github-actions-workflows" class="md-nav__link">
+    <span class="md-ellipsis">
+      GitHub Actions Workflows
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scripts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scripts
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Related Documentation
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="release-hot-fix-workflow">Release &amp; Hot-Fix Workflow<a class="headerlink" href="#release-hot-fix-workflow" title="Permanent link">&para;</a></h1>
+<p>This document explains how to cut a new feature release, data release, or hot-fix in the OpenAI Model Registry project.</p>
+<h2 id="table-of-contents">Table of Contents<a class="headerlink" href="#table-of-contents" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="#branching-model">Branching Model</a></li>
+<li><a href="#release-types">Release Types</a></li>
+<li><a href="#library-release-workflow">Library Release Workflow</a></li>
+<li><a href="#data-release-workflow">Data Release Workflow</a></li>
+<li><a href="#hot-fix-workflow">Hot-Fix Workflow</a></li>
+<li><a href="#dos-and-donts">Do's and Don'ts</a></li>
+<li><a href="#troubleshooting">Troubleshooting</a></li>
+</ul>
+<h2 id="branching-model">Branching Model<a class="headerlink" href="#branching-model" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong><code>main</code></strong> – the only long-lived branch. All daily work happens here.</li>
+<li><strong>Tags</strong> – every published version (<code>v1.0.0</code>, <code>v1.0.1</code>, <code>data-v1.0.0</code>) is an <em>annotated</em> git tag on <code>main</code>.</li>
+<li><strong>Hot-fix branch</strong> – created <em>only if</em> you must fix the current release <em>without</em> pulling in unreleased work that is already on <code>main</code>. Delete it right after the tag is pushed.</li>
+</ul>
+<h2 id="release-types">Release Types<a class="headerlink" href="#release-types" title="Permanent link">&para;</a></h2>
+<h3 id="1-library-releases">1. Library Releases<a class="headerlink" href="#1-library-releases" title="Permanent link">&para;</a></h3>
+<p>Library releases contain the Python package code and are published to PyPI.</p>
+<ul>
+<li><strong>Tag Format</strong>: <code>v1.0.0</code>, <code>v1.0.1</code>, <code>v1.1.0</code></li>
+<li><strong>RC Format</strong>: <code>v1.0.0-rc1</code>, <code>v1.0.0-rc2</code></li>
+<li><strong>Publishing</strong>:</li>
+<li>RC → TestPyPI</li>
+<li>Final → PyPI</li>
+</ul>
+<h3 id="2-data-releases">2. Data Releases<a class="headerlink" href="#2-data-releases" title="Permanent link">&para;</a></h3>
+<p>Data releases contain model configuration files and are published as GitHub releases.</p>
+<ul>
+<li><strong>Tag Format</strong>: <code>data-v1.0.0</code>, <code>data-v1.0.1</code></li>
+<li><strong>RC Format</strong>: <code>data-v1.0.0-rc1</code>, <code>data-v1.0.0-rc2</code></li>
+<li><strong>Publishing</strong>: GitHub Releases with data packages</li>
+</ul>
+<h2 id="library-release-workflow">Library Release Workflow<a class="headerlink" href="#library-release-workflow" title="Permanent link">&para;</a></h2>
+<h3 id="before-writing-code">Before Writing Code<a class="headerlink" href="#before-writing-code" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Make sure you are on <code>main</code> and up-to-date:</li>
+</ol>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>switch<span class="w"> </span>main
+git<span class="w"> </span>pull<span class="w"> </span>--ff-only<span class="w"> </span>origin<span class="w"> </span>main
+</code></pre></div>
+<ol>
+<li>Create a short feature branch <em>(optional but recommended)</em>:</li>
+</ol>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>switch<span class="w"> </span>-c<span class="w"> </span>feature/&lt;short-name&gt;
+</code></pre></div>
+<ol>
+<li>
+<p>Implement the feature, update tests, <strong>update <code>CHANGELOG.md</code> incrementally</strong>.</p>
+</li>
+<li>
+<p>Open a PR (even if you merge it yourself) – CI must be green.</p>
+</li>
+</ol>
+<h3 id="creating-a-release-candidate">Creating a Release Candidate<a class="headerlink" href="#creating-a-release-candidate" title="Permanent link">&para;</a></h3>
+<ol>
+<li>
+<p>Merge your PR into <code>main</code>.</p>
+</li>
+<li>
+<p>Verify <code>CHANGELOG.md</code> and docs are ready.</p>
+</li>
+<li>
+<p>Run pre-release validation:</p>
+</li>
+</ol>
+<div class="highlight"><pre><span></span><code>./scripts/release/create-rc.sh
+</code></pre></div>
+<ol>
+<li>Create RC tag:</li>
+</ol>
+<div class="highlight"><pre><span></span><code>./scripts/release/create-rc.sh<span class="w"> </span><span class="m">1</span>.0.0<span class="w"> </span><span class="m">1</span>
+</code></pre></div>
+<ol>
+<li>
+<p><strong>CI automatically</strong>:</p>
+</li>
+<li>
+<p>Builds the package</p>
+</li>
+<li>Runs tests</li>
+<li>Publishes to TestPyPI</li>
+<li>
+<p>Creates GitHub release (marked as prerelease)</p>
+</li>
+<li>
+<p><strong>Test the RC</strong>:</p>
+</li>
+</ol>
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--index-url<span class="w"> </span>https://test.pypi.org/simple/<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--extra-index-url<span class="w"> </span>https://pypi.org/simple/<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="s2">&quot;openai-model-registry==1.0.0rc1&quot;</span>
+</code></pre></div>
+<ol>
+<li><strong>Verify functionality</strong>:</li>
+</ol>
+<div class="highlight"><pre><span></span><code>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import openai_model_registry; print(&#39;✅ Import works&#39;)&quot;</span>
+python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from openai_model_registry import ModelRegistry, RegistryConfig; registry = ModelRegistry(RegistryConfig(auto_update=False)); print(&#39;✅ Registry works&#39;)&quot;</span>
+</code></pre></div>
+<h3 id="creating-the-final-release">Creating the Final Release<a class="headerlink" href="#creating-the-final-release" title="Permanent link">&para;</a></h3>
+<ol>
+<li>After RC testing is complete and successful:</li>
+</ol>
+<div class="highlight"><pre><span></span><code>./scripts/release/create-final.sh<span class="w"> </span><span class="m">1</span>.0.0
+</code></pre></div>
+<ol>
+<li>
+<p><strong>CI automatically</strong>:</p>
+</li>
+<li>
+<p>Builds the package</p>
+</li>
+<li>Runs tests</li>
+<li>Publishes to PyPI</li>
+<li>
+<p>Creates GitHub release (production)</p>
+</li>
+<li>
+<p><strong>Verify PyPI publication</strong>:</p>
+</li>
+</ol>
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>openai-model-registry<span class="o">==</span><span class="m">1</span>.0.0
+python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import openai_model_registry; print(&#39;✅ PyPI install works&#39;)&quot;</span>
+</code></pre></div>
+<h2 id="data-release-workflow">Data Release Workflow<a class="headerlink" href="#data-release-workflow" title="Permanent link">&para;</a></h2>
+<h3 id="automatic-data-releases">Automatic Data Releases<a class="headerlink" href="#automatic-data-releases" title="Permanent link">&para;</a></h3>
+<p>Data releases are automatically triggered when configuration files change:</p>
+<ol>
+<li>
+<p><strong>Edit data files</strong> in <code>data/</code>:</p>
+</li>
+<li>
+<p><code>models.yaml</code> - Model definitions</p>
+</li>
+<li>
+<p><code>overrides.yaml</code> - Provider-specific overrides</p>
+</li>
+<li>
+<p><strong>Commit and push</strong> to <code>main</code>:</p>
+</li>
+</ol>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>add<span class="w"> </span>data/
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;feat: add new model definitions&quot;</span>
+git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>main
+</code></pre></div>
+<ol>
+<li>
+<p><strong>CI automatically</strong>:</p>
+</li>
+<li>
+<p>Detects config changes</p>
+</li>
+<li>Validates YAML files</li>
+<li>Creates data package</li>
+<li>Increments version</li>
+<li>Creates GitHub release</li>
+</ol>
+<h3 id="contributor-data-release-playbook">Contributor Data Release Playbook<a class="headerlink" href="#contributor-data-release-playbook" title="Permanent link">&para;</a></h3>
+<p>Use this checklist when publishing a new data release (or RC):</p>
+<ol>
+<li>Update files:</li>
+<li><code>data/models.yaml</code></li>
+<li>
+<p><code>data/overrides.yaml</code></p>
+</li>
+<li>
+<p>Update <code>data/data-changelog.md</code> (summarize changes, breaking notes)</p>
+</li>
+<li>Tag and publish:</li>
+<li>RC: <code>data-vX.Y.Z-rcN</code></li>
+<li>Final: <code>data-vX.Y.Z</code></li>
+<li>Attach assets: <code>models.yaml</code>, <code>overrides.yaml</code></li>
+<li>Provide clear Release notes and link to changelog</li>
+<li>Verify client awareness:</li>
+<li>Run <code>omr --format json update check</code> → exit code <code>10</code> indicates an available update</li>
+<li>In code: <code>ModelRegistry.check_for_updates()</code> / <code>get_update_info()</code> returns latest</li>
+<li>Optionally notify via GitHub Releases (watch → releases)</li>
+<li>Respect environments:</li>
+<li>Clients may pin via <code>OMR_DATA_VERSION_PIN</code></li>
+<li>Clients may disable updates via <code>OMR_DISABLE_DATA_UPDATES</code></li>
+<li>Confirm integrity:</li>
+<li>Assets properly attached and downloadable</li>
+<li>Fallback raw URLs (only if needed) should be tag-pinned for immutability</li>
+</ol>
+<h3 id="manual-data-releases">Manual Data Releases<a class="headerlink" href="#manual-data-releases" title="Permanent link">&para;</a></h3>
+<p>For manual data releases or RCs:</p>
+<ol>
+<li><strong>Create RC</strong>:</li>
+</ol>
+<div class="highlight"><pre><span></span><code>./scripts/release/create-rc.sh<span class="w"> </span><span class="m">1</span>.0.0<span class="w"> </span><span class="m">1</span><span class="w"> </span>--data
+</code></pre></div>
+<ol>
+<li><strong>Create final release</strong>:</li>
+</ol>
+<div class="highlight"><pre><span></span><code>./scripts/release/create-final.sh<span class="w"> </span><span class="m">1</span>.0.0<span class="w"> </span>--data
+</code></pre></div>
+<ol>
+<li><strong>Test data release</strong>:</li>
+</ol>
+<div class="highlight"><pre><span></span><code><span class="c1"># Download and verify</span>
+curl<span class="w"> </span>-L<span class="w"> </span>https://github.com/yaniv-golan/openai-model-registry/releases/download/data-v1.0.0/openai-model-registry-data-1.0.0.tar.gz<span class="w"> </span>-o<span class="w"> </span>data.tar.gz
+tar<span class="w"> </span>-xzf<span class="w"> </span>data.tar.gz
+<span class="nb">cd</span><span class="w"> </span>data-package
+<span class="c1"># Verify files are present</span>
+ls<span class="w"> </span>-la<span class="w"> </span>models.yaml<span class="w"> </span>overrides.yaml
+</code></pre></div>
+<h2 id="hot-fix-workflow">Hot-Fix Workflow<a class="headerlink" href="#hot-fix-workflow" title="Permanent link">&para;</a></h2>
+<h3 id="scenario-a-fix-is-already-on-main-and-safe-to-release">Scenario A – Fix is already on <code>main</code> and safe to release<a class="headerlink" href="#scenario-a-fix-is-already-on-main-and-safe-to-release" title="Permanent link">&para;</a></h3>
+<ol>
+<li>
+<p>Ensure <code>CHANGELOG.md</code> has a <em>Hot-fix</em> entry.</p>
+</li>
+<li>
+<p>Tag and push directly from <code>main</code>:</p>
+</li>
+</ol>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>switch<span class="w"> </span>main<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>pull<span class="w"> </span>--ff-only
+./scripts/release/create-final.sh<span class="w"> </span><span class="m">1</span>.1.1
+</code></pre></div>
+<h3 id="scenario-b-fix-must-not-include-unreleased-work-on-main">Scenario B – Fix must not include unreleased work on <code>main</code><a class="headerlink" href="#scenario-b-fix-must-not-include-unreleased-work-on-main" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Create a throw-away branch from the last tag:</li>
+</ol>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>switch<span class="w"> </span>-c<span class="w"> </span>hotfix/v1.1.1<span class="w"> </span>v1.1.0
+</code></pre></div>
+<ol>
+<li>
+<p>Cherry-pick or implement just the necessary commits.</p>
+</li>
+<li>
+<p>Update <code>CHANGELOG.md</code> in that branch.</p>
+</li>
+<li>
+<p>Tag &amp; push:</p>
+</li>
+</ol>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>tag<span class="w"> </span>-a<span class="w"> </span>v1.1.1<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;v1.1.1: security hot-fix&quot;</span>
+git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>hotfix/v1.1.1<span class="w"> </span>v1.1.1
+</code></pre></div>
+<ol>
+<li><strong>After CI turns green</strong>, delete the branch:</li>
+</ol>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>--delete<span class="w"> </span>hotfix/v1.1.1
+git<span class="w"> </span>branch<span class="w"> </span>-D<span class="w"> </span>hotfix/v1.1.1
+</code></pre></div>
+<h2 id="dos-and-donts">Do's and Don'ts<a class="headerlink" href="#dos-and-donts" title="Permanent link">&para;</a></h2>
+<h3 id="do">Do ✓<a class="headerlink" href="#do" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Keep <code>main</code> in a releasable state; let CI protect you.</li>
+<li>Use <strong>annotated tags</strong> (<code>-a</code>) for every version.</li>
+<li>Update the <strong>CHANGELOG</strong> steadily while you code.</li>
+<li>Delete merged or obsolete branches immediately.</li>
+<li>Test release candidates thoroughly before final release.</li>
+<li>Use the provided scripts for consistent release process.</li>
+<li>Run validation before creating releases.</li>
+</ul>
+<h3 id="dont">Don't ✗<a class="headerlink" href="#dont" title="Permanent link">&para;</a></h3>
+<ul>
+<li>✗ Don't create long-lived <code>release/x.y</code> branches – history gets messy.</li>
+<li>✗ Don't manually publish to PyPI – CI handles this automatically.</li>
+<li>✗ Don't force-push to shared branches or tags.</li>
+<li>✗ Don't skip RC testing for significant releases.</li>
+<li>✗ Don't forget to update CHANGELOG.md.</li>
+</ul>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<h3 id="common-issues">Common Issues<a class="headerlink" href="#common-issues" title="Permanent link">&para;</a></h3>
+<h4 id="release-script-fails">Release Script Fails<a class="headerlink" href="#release-script-fails" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check if you&#39;re on main branch</span>
+git<span class="w"> </span>branch<span class="w"> </span>--show-current
+
+<span class="c1"># Ensure you&#39;re up to date</span>
+git<span class="w"> </span>pull<span class="w"> </span>--ff-only<span class="w"> </span>origin<span class="w"> </span>main
+
+<span class="c1"># Check for existing tags</span>
+git<span class="w"> </span>tag<span class="w"> </span>-l<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>v1.0.0
+</code></pre></div>
+<h4 id="ci-build-fails">CI Build Fails<a class="headerlink" href="#ci-build-fails" title="Permanent link">&para;</a></h4>
+<ol>
+<li>
+<p><strong>Check GitHub Actions logs</strong> for detailed error messages</p>
+</li>
+<li>
+<p><strong>Run validation locally</strong>:</p>
+</li>
+</ol>
+<div class="highlight"><pre><span></span><code>./scripts/release/create-final.sh
+</code></pre></div>
+<ol>
+<li><strong>Test locally</strong>:</li>
+</ol>
+<div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-v
+poetry<span class="w"> </span>build
+python<span class="w"> </span>-m<span class="w"> </span>twine<span class="w"> </span>check<span class="w"> </span>dist/*
+</code></pre></div>
+<h4 id="testpypi-installation-fails">TestPyPI Installation Fails<a class="headerlink" href="#testpypi-installation-fails" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="c1"># Try with verbose output</span>
+pip<span class="w"> </span>install<span class="w"> </span>-v<span class="w"> </span>--index-url<span class="w"> </span>https://test.pypi.org/simple/<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--extra-index-url<span class="w"> </span>https://pypi.org/simple/<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="s2">&quot;openai-model-registry==1.0.0rc1&quot;</span>
+
+<span class="c1"># Check if dependencies are available</span>
+pip<span class="w"> </span>install<span class="w"> </span>--index-url<span class="w"> </span>https://test.pypi.org/simple/<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--extra-index-url<span class="w"> </span>https://pypi.org/simple/<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--dry-run<span class="w"> </span><span class="s2">&quot;openai-model-registry==1.0.0rc1&quot;</span>
+</code></pre></div>
+<h4 id="version-mismatch">Version Mismatch<a class="headerlink" href="#version-mismatch" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check current versions</span>
+poetry<span class="w"> </span>version<span class="w"> </span>--short
+python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import openai_model_registry; print(openai_model_registry.__version__)&quot;</span>
+
+<span class="c1"># Update if needed</span>
+poetry<span class="w"> </span>version<span class="w"> </span><span class="m">1</span>.0.0
+</code></pre></div>
+<h3 id="getting-help">Getting Help<a class="headerlink" href="#getting-help" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Check CI logs</strong> in GitHub Actions</li>
+<li><strong>Review validation output</strong> from CI workflows (build/tests/docs) triggered by the release tag</li>
+<li><strong>Test in clean environment</strong> to isolate issues</li>
+<li><strong>Check existing tags</strong> to avoid conflicts</li>
+</ol>
+<h2 id="automation-overview">Automation Overview<a class="headerlink" href="#automation-overview" title="Permanent link">&para;</a></h2>
+<h3 id="github-actions-workflows">GitHub Actions Workflows<a class="headerlink" href="#github-actions-workflows" title="Permanent link">&para;</a></h3>
+<ol>
+<li>
+<p><strong><a href="https://github.com/yaniv-golan/openai-model-registry/blob/main/.github/workflows/release.yml">release.yml</a></strong> - Library releases</p>
+</li>
+<li>
+<p>Triggered by <code>v*</code> and <code>v*-rc*</code> tags</p>
+</li>
+<li>Builds package, runs tests, publishes to PyPI/TestPyPI</li>
+<li>
+<p>Creates GitHub releases</p>
+</li>
+<li>
+<p><strong><a href="https://github.com/yaniv-golan/openai-model-registry/blob/main/.github/workflows/data-release-enhanced.yml">data-release-enhanced.yml</a></strong> - Data releases</p>
+</li>
+<li>
+<p>Triggered by config file changes or <code>data-v*</code> tags</p>
+</li>
+<li>Validates YAML, creates data packages</li>
+<li>
+<p>Creates GitHub releases</p>
+</li>
+<li>
+<p><strong><a href="https://github.com/yaniv-golan/openai-model-registry/blob/main/.github/workflows/cross-platform-test.yml">cross-platform-test.yml</a></strong> - Cross-platform testing</p>
+</li>
+<li>
+<p>Tests installation across OS and Python versions</p>
+</li>
+<li>Validates package quality and performance</li>
+</ol>
+<h3 id="scripts">Scripts<a class="headerlink" href="#scripts" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong><a href="https://github.com/yaniv-golan/openai-model-registry/blob/main/scripts/release/create-rc.sh">create-rc.sh</a></strong> - Create release candidates</li>
+<li><strong><a href="https://github.com/yaniv-golan/openai-model-registry/blob/main/scripts/release/create-final.sh">create-final.sh</a></strong> - Create final releases</li>
+<li>Use GitHub Actions logs for validation (build/tests/docs) instead of local <code>validate-release.py</code></li>
+</ol>
+<h2 id="related-documentation">Related Documentation<a class="headerlink" href="#related-documentation" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="/RELEASE_CHECKLIST.md">RELEASE_CHECKLIST.md</a> - Pre-release validation checklist</li>
+<li><a href="/CHANGELOG.md">CHANGELOG.md</a> - Version history and changes</li>
+<li><a href="/CONTRIBUTING.md">CONTRIBUTING.md</a> - General contribution guidelines</li>
+<li><a href="/scripts/ostruct/README.md">ostruct pricing automation</a> - Detector and per-model pricing extraction templates used by CI</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.expand", "navigation.indexes", "search.highlight", "search.share", "content.code.copy"], "search": "../../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.50899def.min.js"></script>
+      
+    
+  </body>
+</html>

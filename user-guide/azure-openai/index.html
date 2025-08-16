@@ -1,0 +1,1375 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A lightweight Python package for validating OpenAI model parameters and capabilities">
+      
+      
+        <meta name="author" content="Yaniv Golan">
+      
+      
+        <link rel="canonical" href="https://yaniv-golan.github.io/openai-model-registry/user-guide/azure-openai/">
+      
+      
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.16">
+    
+    
+      
+        <title>Azure OpenAI Usage - OpenAI Model Registry</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.7e37652d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#azure-openai-usage" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="OpenAI Model Registry" class="md-header__button md-logo" aria-label="OpenAI Model Registry" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            OpenAI Model Registry
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Azure OpenAI Usage
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/yaniv-golan/openai-model-registry" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path fill="currentColor" d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    yaniv-golan/openai-model-registry
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="OpenAI Model Registry" class="md-nav__button md-logo" aria-label="OpenAI Model Registry" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    OpenAI Model Registry
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/yaniv-golan/openai-model-registry" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path fill="currentColor" d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    yaniv-golan/openai-model-registry
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    User Guide
+    
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            User Guide
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting Started
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    CLI Reference
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../model-capabilities/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Model Capabilities
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameter-validation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Parameter Validation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../advanced-usage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Advanced Usage
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Testing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../api/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    API Reference
+    
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            API Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/model-registry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    ModelRegistry
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/model-capabilities/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    ModelCapabilities
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Contributing
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Contributing
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_2" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../contributing/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    Release Process
+    
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            Release Process
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/RELEASE_CHECKLIST/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Release Checklist
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/RELEASE_WORKFLOW/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Release Workflow
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/cli-maintainers-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    CLI Maintainers Guide
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Changelog
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#web-search-limitations-on-azure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Web Search Limitations on Azure
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Web Search Limitations on Azure">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#standard-azure-openai-apis-chat-responses" class="md-nav__link">
+    <span class="md-ellipsis">
+      Standard Azure OpenAI APIs (Chat &amp; Responses)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-this-limitation-exists" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why This Limitation Exists
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recommended-approach-for-azure-users" class="md-nav__link">
+    <span class="md-ellipsis">
+      Recommended Approach for Azure Users
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Recommended Approach for Azure Users">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-use-the-built-in-provider-system-recommended" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Use the Built-in Provider System (Recommended)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-manual-endpoint-detection-alternative" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Manual Endpoint Detection (Alternative)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-alternative-approaches-for-azure-users" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Alternative Approaches for Azure Users
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Alternative Approaches for Azure Users">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#option-a-use-azure-assistants-api-preview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Option A: Use Azure Assistants API (Preview)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-b-external-search-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Option B: External Search Integration
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#platform-specific-capability-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      Platform-Specific Capability Detection
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices-for-azure-users" class="md-nav__link">
+    <span class="md-ellipsis">
+      Best Practices for Azure Users
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices for Azure Users">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-always-check-platform-before-using-web-search" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Always Check Platform Before Using Web Search
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-graceful-fallback-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Graceful Fallback Implementation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-environment-specific-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Environment-Specific Configuration
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#provider-system-details" class="md-nav__link">
+    <span class="md-ellipsis">
+      Provider System Details
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="azure-openai-usage">Azure OpenAI Usage<a class="headerlink" href="#azure-openai-usage" title="Permanent link">&para;</a></h1>
+<p>This guide explains important considerations when using the OpenAI Model Registry with Azure OpenAI endpoints.</p>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>Azure OpenAI provides access to OpenAI's models through Microsoft's cloud infrastructure, but there are important differences in feature support compared to OpenAI's direct API. The most significant difference relates to <strong>web search capabilities</strong>.</p>
+<p>The OpenAI Model Registry includes built-in <strong>provider support</strong> to handle these differences automatically. You can use <code>--provider azure</code> or set <code>OMR_PROVIDER=azure</code> to get Azure-specific model configurations that reflect platform limitations.</p>
+<h2 id="web-search-limitations-on-azure">Web Search Limitations on Azure<a class="headerlink" href="#web-search-limitations-on-azure" title="Permanent link">&para;</a></h2>
+<h3 id="standard-azure-openai-apis-chat-responses">Standard Azure OpenAI APIs (Chat &amp; Responses)<a class="headerlink" href="#standard-azure-openai-apis-chat-responses" title="Permanent link">&para;</a></h3>
+<p><strong>⚠️ Important</strong>: Standard Azure OpenAI Chat Completions and Responses APIs <strong>do not support</strong> the <code>web_search_preview</code> tool, even for models that our registry indicates have <code>supports_web_search: true</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">openai_model_registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelRegistry</span>
+
+<span class="n">registry</span> <span class="o">=</span> <span class="n">ModelRegistry</span><span class="o">.</span><span class="n">get_default</span><span class="p">()</span>
+<span class="n">capabilities</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">get_capabilities</span><span class="p">(</span><span class="s2">&quot;gpt-4o&quot;</span><span class="p">)</span>
+
+<span class="c1"># This will return True (the model itself supports web search)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Model supports web search: </span><span class="si">{</span><span class="n">capabilities</span><span class="o">.</span><span class="n">supports_web_search</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="c1"># Output: Model supports web search: True</span>
+
+<span class="c1"># However, if you&#39;re using Azure OpenAI standard endpoints:</span>
+<span class="c1"># - *.openai.azure.com/openai/deployments/.../chat/completions</span>
+<span class="c1"># - *.openai.azure.com/openai/deployments/.../responses</span>
+<span class="c1"># Using web_search_preview tool will FAIL with an error</span>
+</code></pre></div>
+<h3 id="why-this-limitation-exists">Why This Limitation Exists<a class="headerlink" href="#why-this-limitation-exists" title="Permanent link">&para;</a></h3>
+<p>Microsoft's Azure OpenAI documentation explicitly states that the <code>web_search_preview</code> tool is "not currently supported" in standard Azure endpoints. This is a platform-level limitation, not a model limitation.</p>
+<p>The OpenAI Model Registry reflects the <strong>underlying model capabilities</strong> as defined by OpenAI. When these models are deployed through Azure's infrastructure, certain features may be restricted or unavailable.</p>
+<h2 id="recommended-approach-for-azure-users">Recommended Approach for Azure Users<a class="headerlink" href="#recommended-approach-for-azure-users" title="Permanent link">&para;</a></h2>
+<h3 id="1-use-the-built-in-provider-system-recommended">1. Use the Built-in Provider System (Recommended)<a class="headerlink" href="#1-use-the-built-in-provider-system-recommended" title="Permanent link">&para;</a></h3>
+<p>The simplest approach is to use the registry's built-in Azure provider:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Set Azure provider globally</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">OMR_PROVIDER</span><span class="o">=</span>azure
+
+<span class="c1"># Or use CLI flag</span>
+omr<span class="w"> </span>--provider<span class="w"> </span>azure<span class="w"> </span>models<span class="w"> </span>get<span class="w"> </span>gpt-4o
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openai_model_registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelRegistry</span>
+
+<span class="c1"># Set provider via environment</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;OMR_PROVIDER&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;azure&quot;</span>
+<span class="n">registry</span> <span class="o">=</span> <span class="n">ModelRegistry</span><span class="o">.</span><span class="n">get_default</span><span class="p">()</span>
+
+<span class="c1"># Get Azure-adjusted capabilities</span>
+<span class="n">capabilities</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">get_capabilities</span><span class="p">(</span><span class="s2">&quot;gpt-4o&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Web search support (Azure-adjusted): </span><span class="si">{</span><span class="n">capabilities</span><span class="o">.</span><span class="n">supports_web_search</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="c1"># This will reflect Azure limitations automatically</span>
+</code></pre></div>
+<h3 id="2-manual-endpoint-detection-alternative">2. Manual Endpoint Detection (Alternative)<a class="headerlink" href="#2-manual-endpoint-detection-alternative" title="Permanent link">&para;</a></h3>
+<p>Before using web search capabilities, determine if you're using Azure OpenAI:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">openai</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openai_model_registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelRegistry</span>
+
+<span class="c1"># Initialize your OpenAI client (however you normally do it)</span>
+<span class="n">client</span> <span class="o">=</span> <span class="n">openai</span><span class="o">.</span><span class="n">OpenAI</span><span class="p">(</span>
+    <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;your-azure-api-key&quot;</span><span class="p">,</span>
+    <span class="n">base_url</span><span class="o">=</span><span class="s2">&quot;https://your-resource.openai.azure.com/openai/deployments/your-deployment&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="c1"># Check if you&#39;re using Azure</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">is_azure_endpoint</span><span class="p">(</span><span class="n">client</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if the OpenAI client is configured for Azure.&quot;&quot;&quot;</span>
+    <span class="n">base_url</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">client</span><span class="o">.</span><span class="n">base_url</span><span class="p">)</span> <span class="k">if</span> <span class="n">client</span><span class="o">.</span><span class="n">base_url</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">return</span> <span class="s2">&quot;openai.azure.com&quot;</span> <span class="ow">in</span> <span class="n">base_url</span>
+
+
+<span class="c1"># Get model capabilities with Azure consideration</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_web_search_capability</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">client</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get accurate web search capability considering Azure limitations.&quot;&quot;&quot;</span>
+    <span class="n">registry</span> <span class="o">=</span> <span class="n">ModelRegistry</span><span class="o">.</span><span class="n">get_default</span><span class="p">()</span>
+    <span class="n">capabilities</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">get_capabilities</span><span class="p">(</span><span class="n">model_name</span><span class="p">)</span>
+
+    <span class="c1"># Model supports web search, but check if endpoint allows it</span>
+    <span class="n">model_supports_search</span> <span class="o">=</span> <span class="n">capabilities</span><span class="o">.</span><span class="n">supports_web_search</span>
+    <span class="n">endpoint_supports_search</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">is_azure_endpoint</span><span class="p">(</span><span class="n">client</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">model_supports_search</span> <span class="ow">and</span> <span class="n">endpoint_supports_search</span>
+
+
+<span class="c1"># Usage</span>
+<span class="n">registry</span> <span class="o">=</span> <span class="n">ModelRegistry</span><span class="o">.</span><span class="n">get_default</span><span class="p">()</span>
+<span class="n">can_use_web_search</span> <span class="o">=</span> <span class="n">get_web_search_capability</span><span class="p">(</span><span class="s2">&quot;gpt-4o&quot;</span><span class="p">,</span> <span class="n">client</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">can_use_web_search</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;✅ You can use web search with this model and endpoint&quot;</span><span class="p">)</span>
+    <span class="c1"># Proceed with web_search_preview tool</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;❌ Web search not available (check model support and endpoint type)&quot;</span><span class="p">)</span>
+    <span class="c1"># Use alternative approach or skip web search</span>
+</code></pre></div>
+<h3 id="2-alternative-approaches-for-azure-users">2. Alternative Approaches for Azure Users<a class="headerlink" href="#2-alternative-approaches-for-azure-users" title="Permanent link">&para;</a></h3>
+<p>If you need web search functionality with Azure OpenAI, consider these options:</p>
+<h4 id="option-a-use-azure-assistants-api-preview">Option A: Use Azure Assistants API (Preview)<a class="headerlink" href="#option-a-use-azure-assistants-api-preview" title="Permanent link">&para;</a></h4>
+<p>Azure's newer Assistants API includes a "Browse" tool that provides web search via Bing:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Note: This requires Azure Assistants API, not standard Chat/Responses API</span>
+<span class="c1"># The Browse tool must be enabled in Azure AI Studio</span>
+
+<span class="c1"># Example Azure Assistant with Browse tool (pseudo-code)</span>
+<span class="c1"># This is different from standard chat completions</span>
+<span class="n">assistant_client</span> <span class="o">=</span> <span class="n">AzureAssistantsClient</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="n">assistant</span> <span class="o">=</span> <span class="n">assistant_client</span><span class="o">.</span><span class="n">create_assistant</span><span class="p">(</span>
+    <span class="n">model</span><span class="o">=</span><span class="s2">&quot;gpt-4o&quot;</span><span class="p">,</span>
+    <span class="n">tools</span><span class="o">=</span><span class="p">[{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;browse&quot;</span><span class="p">}],</span>  <span class="c1"># Azure&#39;s Browse tool, not web_search_preview</span>
+<span class="p">)</span>
+</code></pre></div>
+<h4 id="option-b-external-search-integration">Option B: External Search Integration<a class="headerlink" href="#option-b-external-search-integration" title="Permanent link">&para;</a></h4>
+<p>Implement your own search integration using Bing Search API or other services:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">openai_model_registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelRegistry</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">enhanced_azure_chat</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">messages</span><span class="p">,</span> <span class="n">use_search</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Enhanced chat function with optional external search for Azure.&quot;&quot;&quot;</span>
+    <span class="n">registry</span> <span class="o">=</span> <span class="n">ModelRegistry</span><span class="o">.</span><span class="n">get_default</span><span class="p">()</span>
+    <span class="n">capabilities</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">get_capabilities</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+    <span class="c1"># Check if this is an Azure endpoint</span>
+    <span class="k">if</span> <span class="n">is_azure_endpoint</span><span class="p">(</span><span class="n">client</span><span class="p">)</span> <span class="ow">and</span> <span class="n">use_search</span><span class="p">:</span>
+        <span class="c1"># Use external search API (Bing, Google, etc.)</span>
+        <span class="n">search_results</span> <span class="o">=</span> <span class="n">perform_external_search</span><span class="p">(</span><span class="n">messages</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;content&quot;</span><span class="p">])</span>
+
+        <span class="c1"># Enhance the prompt with search results</span>
+        <span class="n">enhanced_message</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;role&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">messages</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;content&#39;</span><span class="p">]</span><span class="si">}</span><span class="se">\n\n</span><span class="s2">Search results: </span><span class="si">{</span><span class="n">search_results</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">messages</span> <span class="o">=</span> <span class="n">messages</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">enhanced_message</span><span class="p">]</span>
+
+    <span class="c1"># Make standard chat completion call (no web_search_preview tool)</span>
+    <span class="k">return</span> <span class="n">client</span><span class="o">.</span><span class="n">chat</span><span class="o">.</span><span class="n">completions</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+        <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+        <span class="n">messages</span><span class="o">=</span><span class="n">messages</span><span class="p">,</span>
+        <span class="c1"># Note: No tools parameter for Azure standard endpoints</span>
+    <span class="p">)</span>
+</code></pre></div>
+<h2 id="platform-specific-capability-detection">Platform-Specific Capability Detection<a class="headerlink" href="#platform-specific-capability-detection" title="Permanent link">&para;</a></h2>
+<p>For applications that need to work across both OpenAI direct and Azure endpoints:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">openai_model_registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelRegistry</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Any</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">PlatformAwareCapabilities</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Wrapper that provides platform-aware capability checking.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">registry</span> <span class="o">=</span> <span class="n">ModelRegistry</span><span class="o">.</span><span class="n">get_default</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">client</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_azure</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_detect_azure</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_detect_azure</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Detect if client is using Azure endpoint.&quot;&quot;&quot;</span>
+        <span class="n">base_url</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">base_url</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">base_url</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;openai.azure.com&quot;</span> <span class="ow">in</span> <span class="n">base_url</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_effective_capabilities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get capabilities adjusted for the current platform.&quot;&quot;&quot;</span>
+        <span class="n">capabilities</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">registry</span><span class="o">.</span><span class="n">get_capabilities</span><span class="p">(</span><span class="n">model_name</span><span class="p">)</span>
+
+        <span class="c1"># Create a dictionary of effective capabilities</span>
+        <span class="n">effective_caps</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;model_name&quot;</span><span class="p">:</span> <span class="n">capabilities</span><span class="o">.</span><span class="n">model_name</span><span class="p">,</span>
+            <span class="s2">&quot;context_window&quot;</span><span class="p">:</span> <span class="n">capabilities</span><span class="o">.</span><span class="n">context_window</span><span class="p">,</span>
+            <span class="s2">&quot;max_output_tokens&quot;</span><span class="p">:</span> <span class="n">capabilities</span><span class="o">.</span><span class="n">max_output_tokens</span><span class="p">,</span>
+            <span class="s2">&quot;supports_structured&quot;</span><span class="p">:</span> <span class="n">capabilities</span><span class="o">.</span><span class="n">supports_structured</span><span class="p">,</span>
+            <span class="s2">&quot;supports_streaming&quot;</span><span class="p">:</span> <span class="n">capabilities</span><span class="o">.</span><span class="n">supports_streaming</span><span class="p">,</span>
+            <span class="c1"># Adjust web search based on platform</span>
+            <span class="s2">&quot;supports_web_search&quot;</span><span class="p">:</span> <span class="n">capabilities</span><span class="o">.</span><span class="n">supports_web_search</span>
+            <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_azure</span><span class="p">,</span>
+            <span class="s2">&quot;platform&quot;</span><span class="p">:</span> <span class="s2">&quot;azure&quot;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_azure</span> <span class="k">else</span> <span class="s2">&quot;openai_direct&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">effective_caps</span>
+
+
+<span class="c1"># Usage</span>
+<span class="n">platform_caps</span> <span class="o">=</span> <span class="n">PlatformAwareCapabilities</span><span class="p">(</span><span class="n">client</span><span class="p">)</span>
+<span class="n">effective_capabilities</span> <span class="o">=</span> <span class="n">platform_caps</span><span class="o">.</span><span class="n">get_effective_capabilities</span><span class="p">(</span><span class="s2">&quot;gpt-4o&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Platform: </span><span class="si">{</span><span class="n">effective_capabilities</span><span class="p">[</span><span class="s1">&#39;platform&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Effective web search support: </span><span class="si">{</span><span class="n">effective_capabilities</span><span class="p">[</span><span class="s1">&#39;supports_web_search&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="best-practices-for-azure-users">Best Practices for Azure Users<a class="headerlink" href="#best-practices-for-azure-users" title="Permanent link">&para;</a></h2>
+<h3 id="1-always-check-platform-before-using-web-search">1. Always Check Platform Before Using Web Search<a class="headerlink" href="#1-always-check-platform-before-using-web-search" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># ✅ Good: Check platform first</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">is_azure_endpoint</span><span class="p">(</span><span class="n">client</span><span class="p">)</span> <span class="ow">and</span> <span class="n">capabilities</span><span class="o">.</span><span class="n">supports_web_search</span><span class="p">:</span>
+    <span class="c1"># Use web_search_preview tool</span>
+    <span class="n">tools</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;web_search_preview&quot;</span><span class="p">}]</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="c1"># Skip web search or use alternatives</span>
+    <span class="n">tools</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">chat</span><span class="o">.</span><span class="n">completions</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">messages</span><span class="o">=</span><span class="n">messages</span><span class="p">,</span> <span class="n">tools</span><span class="o">=</span><span class="n">tools</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="c1"># ❌ Bad: Using registry info without platform consideration</span>
+<span class="n">capabilities</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">get_capabilities</span><span class="p">(</span><span class="s2">&quot;gpt-4o&quot;</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">capabilities</span><span class="o">.</span><span class="n">supports_web_search</span><span class="p">:</span>
+    <span class="c1"># This will fail on Azure standard endpoints!</span>
+    <span class="n">tools</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;web_search_preview&quot;</span><span class="p">}]</span>
+</code></pre></div>
+<h3 id="2-graceful-fallback-implementation">2. Graceful Fallback Implementation<a class="headerlink" href="#2-graceful-fallback-implementation" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">robust_chat_completion</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">messages</span><span class="p">,</span> <span class="n">prefer_web_search</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Chat completion with robust handling of web search availability.&quot;&quot;&quot;</span>
+    <span class="n">registry</span> <span class="o">=</span> <span class="n">ModelRegistry</span><span class="o">.</span><span class="n">get_default</span><span class="p">()</span>
+    <span class="n">capabilities</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">get_capabilities</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+    <span class="c1"># Determine if web search is actually available</span>
+    <span class="n">web_search_available</span> <span class="o">=</span> <span class="n">capabilities</span><span class="o">.</span><span class="n">supports_web_search</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_azure_endpoint</span><span class="p">(</span>
+        <span class="n">client</span>
+    <span class="p">)</span>
+
+    <span class="n">tools</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">prefer_web_search</span> <span class="ow">and</span> <span class="n">web_search_available</span><span class="p">:</span>
+        <span class="n">tools</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;web_search_preview&quot;</span><span class="p">})</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">client</span><span class="o">.</span><span class="n">chat</span><span class="o">.</span><span class="n">completions</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+            <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">messages</span><span class="o">=</span><span class="n">messages</span><span class="p">,</span> <span class="n">tools</span><span class="o">=</span><span class="n">tools</span>
+        <span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;web_search&quot;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">and</span> <span class="n">tools</span><span class="p">:</span>
+            <span class="c1"># Fallback: retry without web search</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Web search failed, retrying without search...&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">client</span><span class="o">.</span><span class="n">chat</span><span class="o">.</span><span class="n">completions</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+                <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+                <span class="n">messages</span><span class="o">=</span><span class="n">messages</span><span class="p">,</span>
+                <span class="c1"># No tools parameter</span>
+            <span class="p">)</span>
+        <span class="k">raise</span>  <span class="c1"># Re-raise if it&#39;s a different error</span>
+</code></pre></div>
+<h3 id="3-environment-specific-configuration">3. Environment-Specific Configuration<a class="headerlink" href="#3-environment-specific-configuration" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openai_model_registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelRegistry</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">get_search_strategy</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the appropriate search strategy based on environment.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;OPENAI_API_TYPE&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;azure&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;external_search&quot;</span>  <span class="c1"># Use Bing API or other external search</span>
+    <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;AZURE_ASSISTANTS_ENABLED&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;true&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;azure_browse_tool&quot;</span>  <span class="c1"># Use Azure Assistants Browse tool</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;openai_web_search&quot;</span>  <span class="c1"># Use OpenAI&#39;s web_search_preview</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">create_search_enabled_request</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">messages</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create request with appropriate search strategy.&quot;&quot;&quot;</span>
+    <span class="n">registry</span> <span class="o">=</span> <span class="n">ModelRegistry</span><span class="o">.</span><span class="n">get_default</span><span class="p">()</span>
+    <span class="n">capabilities</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">get_capabilities</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="n">strategy</span> <span class="o">=</span> <span class="n">get_search_strategy</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">capabilities</span><span class="o">.</span><span class="n">supports_web_search</span><span class="p">:</span>
+        <span class="n">strategy</span> <span class="o">=</span> <span class="s2">&quot;no_search&quot;</span>
+
+    <span class="k">if</span> <span class="n">strategy</span> <span class="o">==</span> <span class="s2">&quot;openai_web_search&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="n">model</span><span class="p">,</span>
+            <span class="s2">&quot;messages&quot;</span><span class="p">:</span> <span class="n">messages</span><span class="p">,</span>
+            <span class="s2">&quot;tools&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;web_search_preview&quot;</span><span class="p">}],</span>
+        <span class="p">}</span>
+    <span class="k">elif</span> <span class="n">strategy</span> <span class="o">==</span> <span class="s2">&quot;external_search&quot;</span><span class="p">:</span>
+        <span class="c1"># Enhance messages with external search results</span>
+        <span class="n">enhanced_messages</span> <span class="o">=</span> <span class="n">add_external_search_context</span><span class="p">(</span><span class="n">messages</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="n">model</span><span class="p">,</span> <span class="s2">&quot;messages&quot;</span><span class="p">:</span> <span class="n">enhanced_messages</span><span class="p">}</span>
+    <span class="c1"># ... handle other strategies</span>
+</code></pre></div>
+<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Use <code>--provider azure</code> or <code>OMR_PROVIDER=azure</code></strong> for automatic Azure-specific configurations</li>
+<li><strong>The registry's provider system</strong> handles platform differences automatically</li>
+<li><strong>Azure's standard endpoints don't support <code>web_search_preview</code></strong> regardless of model capabilities</li>
+<li><strong>Provider overrides</strong> in <code>overrides.yaml</code> adjust capabilities for Azure limitations</li>
+<li><strong>Consider Azure Assistants API</strong> for web search functionality on Azure</li>
+<li><strong>Implement graceful fallbacks</strong> for robust cross-platform applications</li>
+</ul>
+<h2 id="provider-system-details">Provider System Details<a class="headerlink" href="#provider-system-details" title="Permanent link">&para;</a></h2>
+<p>The registry uses <code>data/overrides.yaml</code> to apply Azure-specific adjustments:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">overrides</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">azure</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">models</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">gpt-4o</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">capabilities</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">supports_web_search</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w">  </span><span class="c1"># Disabled for Azure standard endpoints</span>
+<span class="w">        </span><span class="nt">pricing</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">input_cost_per_unit</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5.0</span><span class="w">    </span><span class="c1"># Azure-specific pricing</span>
+</code></pre></div>
+<p>For more details on the provider system, see <a href="../advanced-usage/#data-files-and-provider-overrides">Advanced Usage → Data files and provider overrides</a>.</p>
+<p>For the most up-to-date information on Azure OpenAI feature support, consult <a href="https://docs.microsoft.com/en-us/azure/cognitive-services/openai/">Microsoft's Azure OpenAI documentation</a>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.expand", "navigation.indexes", "search.highlight", "search.share", "content.code.copy"], "search": "../../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.50899def.min.js"></script>
+      
+    
+  </body>
+</html>

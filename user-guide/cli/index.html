@@ -1,0 +1,2136 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A lightweight Python package for validating OpenAI model parameters and capabilities">
+      
+      
+        <meta name="author" content="Yaniv Golan">
+      
+      
+        <link rel="canonical" href="https://yaniv-golan.github.io/openai-model-registry/user-guide/cli/">
+      
+      
+        <link rel="prev" href="../getting-started/">
+      
+      
+        <link rel="next" href="../model-capabilities/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.16">
+    
+    
+      
+        <title>CLI Reference - OpenAI Model Registry</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.7e37652d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#omr-cli-reference" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="OpenAI Model Registry" class="md-header__button md-logo" aria-label="OpenAI Model Registry" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            OpenAI Model Registry
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              CLI Reference
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/yaniv-golan/openai-model-registry" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path fill="currentColor" d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    yaniv-golan/openai-model-registry
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="OpenAI Model Registry" class="md-nav__button md-logo" aria-label="OpenAI Model Registry" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    OpenAI Model Registry
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/yaniv-golan/openai-model-registry" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path fill="currentColor" d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    yaniv-golan/openai-model-registry
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    User Guide
+    
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            User Guide
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting Started
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    CLI Reference
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    CLI Reference
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Installation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick Start
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#global-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Global Options
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      Commands
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Commands">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#data-commands-omr-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Commands (omr data)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Data Commands (omr data)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#omr-data-paths" class="md-nav__link">
+    <span class="md-ellipsis">
+      omr data paths
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#omr-data-env" class="md-nav__link">
+    <span class="md-ellipsis">
+      omr data env
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#omr-data-dump" class="md-nav__link">
+    <span class="md-ellipsis">
+      omr data dump
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#update-commands-omr-update" class="md-nav__link">
+    <span class="md-ellipsis">
+      Update Commands (omr update)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Update Commands (omr update)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#omr-update-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      omr update check
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#omr-update-apply" class="md-nav__link">
+    <span class="md-ellipsis">
+      omr update apply
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#omr-update-refresh" class="md-nav__link">
+    <span class="md-ellipsis">
+      omr update refresh
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#omr-update-show-config" class="md-nav__link">
+    <span class="md-ellipsis">
+      omr update show-config
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#model-commands-omr-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      Model Commands (omr models)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Model Commands (omr models)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#omr-models-list" class="md-nav__link">
+    <span class="md-ellipsis">
+      omr models list
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#omr-models-get" class="md-nav__link">
+    <span class="md-ellipsis">
+      omr models get
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#provider-commands-omr-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      Provider Commands (omr providers)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Provider Commands (omr providers)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#omr-providers-list" class="md-nav__link">
+    <span class="md-ellipsis">
+      omr providers list
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#omr-providers-current" class="md-nav__link">
+    <span class="md-ellipsis">
+      omr providers current
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cache-commands-omr-cache" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cache Commands (omr cache)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Cache Commands (omr cache)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#omr-cache-info" class="md-nav__link">
+    <span class="md-ellipsis">
+      omr cache info
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#omr-cache-clear" class="md-nav__link">
+    <span class="md-ellipsis">
+      omr cache clear
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Environment Variables
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output-formats" class="md-nav__link">
+    <span class="md-ellipsis">
+      Output Formats
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Output Formats">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#table-format-default-for-tty" class="md-nav__link">
+    <span class="md-ellipsis">
+      Table Format (Default for TTY)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#json-format-default-for-non-tty" class="md-nav__link">
+    <span class="md-ellipsis">
+      JSON Format (Default for non-TTY)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#csv-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      CSV Format
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#yaml-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      YAML Format
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-workflows" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Workflows
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Workflows">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#development-and-debugging" class="md-nav__link">
+    <span class="md-ellipsis">
+      Development and Debugging
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cicd-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      CI/CD Integration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Management
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#provider-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      Provider Comparison
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#exit-codes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Exit Codes
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#command-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      Command Not Found
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#no-models-listed" class="md-nav__link">
+    <span class="md-ellipsis">
+      No Models Listed
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#permission-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      Permission Errors
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#provider-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      Provider Issues
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../model-capabilities/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Model Capabilities
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameter-validation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Parameter Validation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../advanced-usage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Advanced Usage
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Testing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../api/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    API Reference
+    
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            API Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/model-registry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    ModelRegistry
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/model-capabilities/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    ModelCapabilities
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Contributing
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Contributing
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_2" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../contributing/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    Release Process
+    
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            Release Process
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/RELEASE_CHECKLIST/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Release Checklist
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/RELEASE_WORKFLOW/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Release Workflow
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/cli-maintainers-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    CLI Maintainers Guide
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Changelog
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Installation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick Start
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#global-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Global Options
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      Commands
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Commands">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#data-commands-omr-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Commands (omr data)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Data Commands (omr data)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#omr-data-paths" class="md-nav__link">
+    <span class="md-ellipsis">
+      omr data paths
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#omr-data-env" class="md-nav__link">
+    <span class="md-ellipsis">
+      omr data env
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#omr-data-dump" class="md-nav__link">
+    <span class="md-ellipsis">
+      omr data dump
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#update-commands-omr-update" class="md-nav__link">
+    <span class="md-ellipsis">
+      Update Commands (omr update)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Update Commands (omr update)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#omr-update-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      omr update check
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#omr-update-apply" class="md-nav__link">
+    <span class="md-ellipsis">
+      omr update apply
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#omr-update-refresh" class="md-nav__link">
+    <span class="md-ellipsis">
+      omr update refresh
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#omr-update-show-config" class="md-nav__link">
+    <span class="md-ellipsis">
+      omr update show-config
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#model-commands-omr-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      Model Commands (omr models)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Model Commands (omr models)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#omr-models-list" class="md-nav__link">
+    <span class="md-ellipsis">
+      omr models list
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#omr-models-get" class="md-nav__link">
+    <span class="md-ellipsis">
+      omr models get
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#provider-commands-omr-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      Provider Commands (omr providers)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Provider Commands (omr providers)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#omr-providers-list" class="md-nav__link">
+    <span class="md-ellipsis">
+      omr providers list
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#omr-providers-current" class="md-nav__link">
+    <span class="md-ellipsis">
+      omr providers current
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cache-commands-omr-cache" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cache Commands (omr cache)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Cache Commands (omr cache)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#omr-cache-info" class="md-nav__link">
+    <span class="md-ellipsis">
+      omr cache info
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#omr-cache-clear" class="md-nav__link">
+    <span class="md-ellipsis">
+      omr cache clear
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Environment Variables
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output-formats" class="md-nav__link">
+    <span class="md-ellipsis">
+      Output Formats
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Output Formats">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#table-format-default-for-tty" class="md-nav__link">
+    <span class="md-ellipsis">
+      Table Format (Default for TTY)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#json-format-default-for-non-tty" class="md-nav__link">
+    <span class="md-ellipsis">
+      JSON Format (Default for non-TTY)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#csv-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      CSV Format
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#yaml-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      YAML Format
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-workflows" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Workflows
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Workflows">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#development-and-debugging" class="md-nav__link">
+    <span class="md-ellipsis">
+      Development and Debugging
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cicd-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      CI/CD Integration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Management
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#provider-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      Provider Comparison
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#exit-codes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Exit Codes
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#command-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      Command Not Found
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#no-models-listed" class="md-nav__link">
+    <span class="md-ellipsis">
+      No Models Listed
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#permission-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      Permission Errors
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#provider-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      Provider Issues
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="omr-cli-reference">OMR CLI Reference<a class="headerlink" href="#omr-cli-reference" title="Permanent link">&para;</a></h1>
+<p>The OpenAI Model Registry CLI (<code>omr</code>) provides a powerful command-line interface for inspecting, debugging, and managing your model registry data.</p>
+<h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
+<p>The CLI requires the optional <code>[cli]</code> extra dependencies:</p>
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>openai-model-registry<span class="o">[</span>cli<span class="o">]</span>
+</code></pre></div>
+<p>After installation, the <code>omr</code> command should be available in your shell.</p>
+<blockquote>
+<p><strong>Note</strong>: The core library (<code>pip install openai-model-registry</code>) does not include CLI dependencies. You must install the <code>[cli]</code> extra to use the <code>omr</code> command.</p>
+</blockquote>
+<h2 id="quick-start">Quick Start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span class="c1"># Show help</span>
+omr<span class="w"> </span>--help
+
+<span class="c1"># List all models</span>
+omr<span class="w"> </span>models<span class="w"> </span>list
+
+<span class="c1"># Show data source paths</span>
+omr<span class="w"> </span>data<span class="w"> </span>paths
+
+<span class="c1"># Check for updates</span>
+omr<span class="w"> </span>update<span class="w"> </span>check
+
+<span class="c1"># Clear cache</span>
+omr<span class="w"> </span>cache<span class="w"> </span>clear<span class="w"> </span>--yes
+
+<span class="c1"># Programmatic model-card access examples</span>
+<span class="c1"># Parameters-only view</span>
+omr<span class="w"> </span>--format<span class="w"> </span>json<span class="w"> </span>models<span class="w"> </span>get<span class="w"> </span>gpt-4o<span class="w"> </span>--parameters-only<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span><span class="s1">&#39;.&#39;</span>
+
+<span class="c1"># Inspect web-search billing block</span>
+omr<span class="w"> </span>--format<span class="w"> </span>json<span class="w"> </span>models<span class="w"> </span>get<span class="w"> </span>gpt-4o<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span><span class="s1">&#39;.billing.web_search&#39;</span>
+
+<span class="c1"># Inspect input/output modalities</span>
+omr<span class="w"> </span>--format<span class="w"> </span>json<span class="w"> </span>models<span class="w"> </span>get<span class="w"> </span>gpt-4o<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span><span class="s1">&#39;.input_modalities, .output_modalities&#39;</span>
+
+<span class="c1"># View per-image pricing tiers (e.g., DALL·E)</span>
+omr<span class="w"> </span>--format<span class="w"> </span>json<span class="w"> </span>models<span class="w"> </span>get<span class="w"> </span>dall-e-3<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span><span class="s1">&#39;.pricing.tiers&#39;</span>
+</code></pre></div>
+<h2 id="global-options">Global Options<a class="headerlink" href="#global-options" title="Permanent link">&para;</a></h2>
+<p>These options can be used with any command:</p>
+<ul>
+<li><code>--provider &lt;openai|azure&gt;</code>: Override the active provider (takes precedence over <code>OMR_PROVIDER</code> environment variable)</li>
+<li><code>--format &lt;table|json|csv|yaml&gt;</code>: Output format (defaults to <code>table</code> for TTY, <code>json</code> for non-TTY)</li>
+<li><strong>Note</strong>: Not all commands support all formats - see individual command documentation</li>
+<li><code>--verbose</code>, <code>-v</code>: Increase verbosity (stackable: <code>-vv</code> for more verbose)</li>
+<li><code>--quiet</code>, <code>-q</code>: Decrease verbosity (stackable)</li>
+<li><code>--debug</code>: Enable debug-level logging</li>
+<li><code>--no-color</code>: Disable color output</li>
+<li><code>--version</code>: Show version information</li>
+<li><code>--help</code>: Show help information</li>
+<li><code>--help-json</code>: Show help in JSON format for programmatic use</li>
+</ul>
+<h2 id="commands">Commands<a class="headerlink" href="#commands" title="Permanent link">&para;</a></h2>
+<h3 id="data-commands-omr-data">Data Commands (<code>omr data</code>)<a class="headerlink" href="#data-commands-omr-data" title="Permanent link">&para;</a></h3>
+<p>Inspect data sources and configuration.</p>
+<h4 id="omr-data-paths"><code>omr data paths</code><a class="headerlink" href="#omr-data-paths" title="Permanent link">&para;</a></h4>
+<p>Show resolved data source paths and their precedence:</p>
+<div class="highlight"><pre><span></span><code>omr<span class="w"> </span>data<span class="w"> </span>paths
+omr<span class="w"> </span>data<span class="w"> </span>paths<span class="w"> </span>--format<span class="w"> </span>json
+</code></pre></div>
+<h4 id="omr-data-env"><code>omr data env</code><a class="headerlink" href="#omr-data-env" title="Permanent link">&para;</a></h4>
+<p>Show effective OMR environment variables:</p>
+<div class="highlight"><pre><span></span><code>omr<span class="w"> </span>data<span class="w"> </span>env
+omr<span class="w"> </span>data<span class="w"> </span>env<span class="w"> </span>--format<span class="w"> </span>json
+</code></pre></div>
+<h4 id="omr-data-dump"><code>omr data dump</code><a class="headerlink" href="#omr-data-dump" title="Permanent link">&para;</a></h4>
+<p>Dump registry data in various formats:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Dump effective (merged) data as JSON</span>
+omr<span class="w"> </span>data<span class="w"> </span>dump<span class="w"> </span>--effective
+
+<span class="c1"># Dump raw data as YAML</span>
+omr<span class="w"> </span>data<span class="w"> </span>dump<span class="w"> </span>--raw<span class="w"> </span>--format<span class="w"> </span>yaml
+
+<span class="c1"># Save to file</span>
+omr<span class="w"> </span>data<span class="w"> </span>dump<span class="w"> </span>--effective<span class="w"> </span>--output<span class="w"> </span>effective.json
+</code></pre></div>
+<p><strong>Supported formats</strong>: <code>json</code>, <code>yaml</code> (on TTY, requesting <code>table</code>/<code>csv</code> falls back to JSON; use <code>--format yaml</code> to force YAML)</p>
+<p>Options:</p>
+<ul>
+<li><code>--raw</code>: Dump original on-disk/bundled YAML (no provider merge)</li>
+<li><code>--effective</code>: Dump fully merged, provider-adjusted dataset (default)</li>
+<li><code>--output FILE</code>: Write to file instead of stdout</li>
+</ul>
+<p>See also: Data files and merge behavior in
+<a href="../advanced-usage/#data-files-and-provider-overrides"><code>Advanced Usage → Data files and provider overrides</code></a>.</p>
+<h3 id="update-commands-omr-update">Update Commands (<code>omr update</code>)<a class="headerlink" href="#update-commands-omr-update" title="Permanent link">&para;</a></h3>
+<p>Manage registry data updates.</p>
+<h4 id="omr-update-check"><code>omr update check</code><a class="headerlink" href="#omr-update-check" title="Permanent link">&para;</a></h4>
+<p>Check for available updates:</p>
+<div class="highlight"><pre><span></span><code>omr<span class="w"> </span>update<span class="w"> </span>check
+omr<span class="w"> </span>update<span class="w"> </span>check<span class="w"> </span>--format<span class="w"> </span>json
+</code></pre></div>
+<p>Exit codes:</p>
+<ul>
+<li><code>0</code>: Up to date</li>
+<li><code>10</code>: Update available (CI-friendly)</li>
+</ul>
+<h4 id="omr-update-apply"><code>omr update apply</code><a class="headerlink" href="#omr-update-apply" title="Permanent link">&para;</a></h4>
+<p>Apply available updates:</p>
+<div class="highlight"><pre><span></span><code>omr<span class="w"> </span>update<span class="w"> </span>apply
+omr<span class="w"> </span>update<span class="w"> </span>apply<span class="w"> </span>--force
+</code></pre></div>
+<p>Options:</p>
+<ul>
+<li><code>--force</code>: Force update even if current version is newer</li>
+<li><code>--url URL</code>: Override update URL</li>
+</ul>
+<p>Note: This command writes updated data files (e.g., <code>models.yaml</code>, <code>overrides.yaml</code>) to the user data directory by default. If <code>OMR_DATA_DIR</code> is set, that directory is used. The <code>OMR_MODEL_REGISTRY_PATH</code> override is read-only and is never modified by updates.</p>
+<h4 id="omr-update-refresh"><code>omr update refresh</code><a class="headerlink" href="#omr-update-refresh" title="Permanent link">&para;</a></h4>
+<p>One-shot validate/check/apply wrapper:</p>
+<div class="highlight"><pre><span></span><code>omr<span class="w"> </span>update<span class="w"> </span>refresh
+omr<span class="w"> </span>update<span class="w"> </span>refresh<span class="w"> </span>--validate-only
+omr<span class="w"> </span>update<span class="w"> </span>refresh<span class="w"> </span>--force
+</code></pre></div>
+<p>Options:</p>
+<ul>
+<li><code>--validate-only</code>: Only validate remote data without applying</li>
+<li><code>--force</code>: Force refresh even if current version is newer</li>
+<li><code>--url URL</code>: Override update URL</li>
+</ul>
+<p>Note: When applying updates (without <code>--validate-only</code>), files are written to the user data directory (or <code>OMR_DATA_DIR</code> if set). <code>OMR_MODEL_REGISTRY_PATH</code> is only used for reading <code>models.yaml</code> and is not modified.</p>
+<h4 id="omr-update-show-config"><code>omr update show-config</code><a class="headerlink" href="#omr-update-show-config" title="Permanent link">&para;</a></h4>
+<p>Show effective update-related configuration:</p>
+<div class="highlight"><pre><span></span><code>omr<span class="w"> </span>update<span class="w"> </span>show-config
+</code></pre></div>
+<h3 id="model-commands-omr-models">Model Commands (<code>omr models</code>)<a class="headerlink" href="#model-commands-omr-models" title="Permanent link">&para;</a></h3>
+<p>Inspect and list models.</p>
+<h4 id="omr-models-list"><code>omr models list</code><a class="headerlink" href="#omr-models-list" title="Permanent link">&para;</a></h4>
+<p>List all available models:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Basic list</span>
+omr<span class="w"> </span>models<span class="w"> </span>list
+
+<span class="c1"># JSON format</span>
+omr<span class="w"> </span>--format<span class="w"> </span>json<span class="w"> </span>models<span class="w"> </span>list
+
+<span class="c1"># CSV format with custom columns (including billing)</span>
+omr<span class="w"> </span>models<span class="w"> </span>list<span class="w"> </span>--format<span class="w"> </span>csv<span class="w"> </span>--columns<span class="w"> </span><span class="s2">&quot;name,pricing.input_cost_per_unit,pricing.unit,billing.web_search.call_fee_per_1000&quot;</span>
+
+<span class="c1"># Filter models</span>
+omr<span class="w"> </span>models<span class="w"> </span>list<span class="w"> </span>--filter<span class="w"> </span><span class="s2">&quot;gpt-4&quot;</span>
+</code></pre></div>
+<p>Options:</p>
+<ul>
+<li><code>--filter EXPR</code>: Filter models using simple expression</li>
+<li><code>--columns COLS</code>: Comma-separated columns to display (supports dotted paths)</li>
+</ul>
+<h4 id="omr-models-get"><code>omr models get</code><a class="headerlink" href="#omr-models-get" title="Permanent link">&para;</a></h4>
+<p>Get detailed information about a specific model:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Get effective model data (default)</span>
+omr<span class="w"> </span>models<span class="w"> </span>get<span class="w"> </span>gpt-4o
+
+<span class="c1"># Get raw model data as YAML</span>
+omr<span class="w"> </span>models<span class="w"> </span>get<span class="w"> </span>gpt-4o<span class="w"> </span>--raw<span class="w"> </span>--format<span class="w"> </span>yaml
+
+<span class="c1"># Parameters only (effective)</span>
+omr<span class="w"> </span>--format<span class="w"> </span>json<span class="w"> </span>models<span class="w"> </span>get<span class="w"> </span>gpt-4o<span class="w"> </span>--parameters-only
+
+<span class="c1"># Save to file</span>
+omr<span class="w"> </span>models<span class="w"> </span>get<span class="w"> </span>gpt-4o<span class="w"> </span>--output<span class="w"> </span>gpt-4o.json
+</code></pre></div>
+<p><strong>Supported formats</strong>: <code>json</code>, <code>yaml</code> (falls back to JSON for <code>table</code>/<code>csv</code> with verbose message)</p>
+<p>Options:</p>
+<ul>
+<li><code>--effective</code>: Show effective model data with provider overrides (default)</li>
+<li><code>--raw</code>: Show raw model data without provider overrides</li>
+<li><code>--output FILE</code>: Write to file instead of stdout</li>
+</ul>
+<p>For how provider overrides are applied, see
+<a href="../advanced-usage/#data-files-and-provider-overrides"><code>Advanced Usage → Data files and provider overrides</code></a>.</p>
+<p>Tip: To view web-search billing for a model in JSON:</p>
+<div class="highlight"><pre><span></span><code>omr<span class="w"> </span>--format<span class="w"> </span>json<span class="w"> </span>models<span class="w"> </span>get<span class="w"> </span>gpt-4o<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span><span class="s1">&#39;.billing.web_search&#39;</span>
+</code></pre></div>
+<h3 id="provider-commands-omr-providers">Provider Commands (<code>omr providers</code>)<a class="headerlink" href="#provider-commands-omr-providers" title="Permanent link">&para;</a></h3>
+<p>Manage and inspect providers.</p>
+<h4 id="omr-providers-list"><code>omr providers list</code><a class="headerlink" href="#omr-providers-list" title="Permanent link">&para;</a></h4>
+<p>List all available providers:</p>
+<div class="highlight"><pre><span></span><code>omr<span class="w"> </span>providers<span class="w"> </span>list
+omr<span class="w"> </span>--format<span class="w"> </span>json<span class="w"> </span>providers<span class="w"> </span>list
+</code></pre></div>
+<h4 id="omr-providers-current"><code>omr providers current</code><a class="headerlink" href="#omr-providers-current" title="Permanent link">&para;</a></h4>
+<p>Show the currently active provider and its source:</p>
+<div class="highlight"><pre><span></span><code>omr<span class="w"> </span>providers<span class="w"> </span>current
+</code></pre></div>
+<h3 id="cache-commands-omr-cache">Cache Commands (<code>omr cache</code>)<a class="headerlink" href="#cache-commands-omr-cache" title="Permanent link">&para;</a></h3>
+<p>Manage registry cache.</p>
+<h4 id="omr-cache-info"><code>omr cache info</code><a class="headerlink" href="#omr-cache-info" title="Permanent link">&para;</a></h4>
+<p>Show cache directory and file information:</p>
+<div class="highlight"><pre><span></span><code>omr<span class="w"> </span>cache<span class="w"> </span>info
+omr<span class="w"> </span>--format<span class="w"> </span>json<span class="w"> </span>cache<span class="w"> </span>info
+</code></pre></div>
+<h4 id="omr-cache-clear"><code>omr cache clear</code><a class="headerlink" href="#omr-cache-clear" title="Permanent link">&para;</a></h4>
+<p>Clear cached registry data files:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Interactive confirmation</span>
+omr<span class="w"> </span>cache<span class="w"> </span>clear
+
+<span class="c1"># Non-interactive (required for scripts)</span>
+omr<span class="w"> </span>cache<span class="w"> </span>clear<span class="w"> </span>--yes
+</code></pre></div>
+<p><strong>Warning</strong>: This removes cached <code>models.yaml</code> and <code>overrides.yaml</code> files. The registry will fall back to bundled data until the next update.</p>
+<h2 id="environment-variables">Environment Variables<a class="headerlink" href="#environment-variables" title="Permanent link">&para;</a></h2>
+<p>The CLI respects these environment variables (all prefixed with <code>OMR_</code>):</p>
+<ul>
+<li><code>OMR_PROVIDER</code>: Default provider (<code>openai</code> or <code>azure</code>)</li>
+<li><code>OMR_DATA_DIR</code>: Custom data directory</li>
+<li><code>OMR_DISABLE_DATA_UPDATES</code>: Disable automatic updates (<code>true</code>/<code>false</code>)</li>
+<li><code>OMR_DATA_VERSION_PIN</code>: Pin to specific data version</li>
+<li><code>OMR_MODEL_REGISTRY_PATH</code>: Override models.yaml path</li>
+<li><code>OMR_PARAMETER_CONSTRAINTS_PATH</code>: Override constraints path</li>
+</ul>
+<p>Note: Pricing updates are fetched and merged via CI using <a href="https://github.com/yaniv-golan/ostruct">ostruct</a>. When running locally, you can execute the same workflow via our helper scripts or by invoking <code>ostruct</code> with <code>pipx</code>.</p>
+<h2 id="output-formats">Output Formats<a class="headerlink" href="#output-formats" title="Permanent link">&para;</a></h2>
+<p><strong>Format Support by Command:</strong></p>
+<ul>
+<li><strong>Full support</strong> (table, json, csv, yaml): <code>models list</code>, <code>providers list</code>, <code>providers current</code>, <code>data paths</code>, <code>data env</code>, <code>cache info</code>, <code>update</code> commands</li>
+<li><strong>JSON/YAML only</strong>: <code>data dump</code>, <code>models get</code> (automatically falls back to JSON for table/csv with verbose message)</li>
+</ul>
+<h3 id="table-format-default-for-tty">Table Format (Default for TTY)<a class="headerlink" href="#table-format-default-for-tty" title="Permanent link">&para;</a></h3>
+<p>Human-readable tables with colors and formatting:</p>
+<div class="highlight"><pre><span></span><code>┏━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━┓
+┃ Model     ┃ Context Window ┃ Input Cost  ┃
+┡━━━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━┩
+│ gpt-4o    │ 128000         │ $2.5        │
+│ gpt-4o-mini│ 128000        │ $0.15       │
+└───────────┴────────────────┴─────────────┘
+</code></pre></div>
+<p>Note on narrow terminals:</p>
+<ul>
+<li>Tables render to your current terminal width. If the console isn't wide
+  enough to fit all columns, cell contents may be truncated on the right.</li>
+<li>Two-line headers (e.g., "Context\nWindow") will still display fully, but
+  their corresponding column values may be shortened to fit.</li>
+<li>To see more:</li>
+<li>Reduce columns: <code>omr models list --columns name,context_window.total</code></li>
+<li>Use a wider terminal or a pager without wrapping: <code>omr models list | less -S</code></li>
+<li>Switch to machine-friendly formats: <code>--format json</code> or <code>--format yaml</code></li>
+</ul>
+<h3 id="json-format-default-for-non-tty">JSON Format (Default for non-TTY)<a class="headerlink" href="#json-format-default-for-non-tty" title="Permanent link">&para;</a></h3>
+<p>Machine-readable JSON with stable keys:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;models&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;gpt-4o&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;context_window&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;total&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">128000</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;output&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">16384</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;pricing&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;scheme&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;per_token&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;million_tokens&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;input_cost_per_unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">2.5</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;output_cost_per_unit&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">10.0</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="csv-format">CSV Format<a class="headerlink" href="#csv-format" title="Permanent link">&para;</a></h3>
+<p>Comma-separated values for spreadsheet import:</p>
+<div class="highlight"><pre><span></span><code>name,context_window.total,pricing.input_cost_per_unit,pricing.unit
+gpt-4o,128000,2.5,million_tokens
+gpt-4o-mini,128000,0.15,million_tokens
+</code></pre></div>
+<h3 id="yaml-format">YAML Format<a class="headerlink" href="#yaml-format" title="Permanent link">&para;</a></h3>
+<p>Human-readable YAML:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">provider</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openai</span>
+<span class="nt">models</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">gpt-4o</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">context_window</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">total</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">128000</span>
+<span class="w">      </span><span class="nt">output</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">16384</span>
+</code></pre></div>
+<h2 id="common-workflows">Common Workflows<a class="headerlink" href="#common-workflows" title="Permanent link">&para;</a></h2>
+<h3 id="development-and-debugging">Development and Debugging<a class="headerlink" href="#development-and-debugging" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check current configuration</span>
+omr<span class="w"> </span>data<span class="w"> </span>env
+omr<span class="w"> </span>data<span class="w"> </span>paths
+
+<span class="c1"># List available models with pricing</span>
+omr<span class="w"> </span>models<span class="w"> </span>list<span class="w"> </span>--columns<span class="w"> </span><span class="s2">&quot;name,pricing.input_cost_per_unit,pricing.output_cost_per_unit,pricing.unit&quot;</span>
+
+<span class="c1"># Get detailed model info</span>
+omr<span class="w"> </span>models<span class="w"> </span>get<span class="w"> </span>gpt-4o<span class="w"> </span>--effective
+
+<span class="c1"># Switch provider and compare</span>
+omr<span class="w"> </span>--provider<span class="w"> </span>azure<span class="w"> </span>models<span class="w"> </span>get<span class="w"> </span>gpt-4o<span class="w"> </span>--effective
+</code></pre></div>
+<h3 id="cicd-integration">CI/CD Integration<a class="headerlink" href="#cicd-integration" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check for updates (exit code 0 = up to date, 10 = update available)</span>
+omr<span class="w"> </span>update<span class="w"> </span>check<span class="w"> </span>--format<span class="w"> </span>json
+
+<span class="c1"># Apply updates in CI</span>
+omr<span class="w"> </span>update<span class="w"> </span>apply<span class="w"> </span>--force
+
+<span class="c1"># Validate data without applying</span>
+omr<span class="w"> </span>update<span class="w"> </span>refresh<span class="w"> </span>--validate-only
+</code></pre></div>
+<h3 id="data-management">Data Management<a class="headerlink" href="#data-management" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Export current effective data</span>
+omr<span class="w"> </span>data<span class="w"> </span>dump<span class="w"> </span>--effective<span class="w"> </span>--output<span class="w"> </span>backup.json
+
+<span class="c1"># Clear cache and start fresh</span>
+omr<span class="w"> </span>cache<span class="w"> </span>clear<span class="w"> </span>--yes
+omr<span class="w"> </span>update<span class="w"> </span>apply
+
+<span class="c1"># Check cache status</span>
+omr<span class="w"> </span>cache<span class="w"> </span>info
+</code></pre></div>
+<h3 id="provider-comparison">Provider Comparison<a class="headerlink" href="#provider-comparison" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Compare pricing between providers</span>
+omr<span class="w"> </span>--provider<span class="w"> </span>openai<span class="w"> </span>models<span class="w"> </span>list<span class="w"> </span>--format<span class="w"> </span>json<span class="w"> </span>&gt;<span class="w"> </span>openai.json
+omr<span class="w"> </span>--provider<span class="w"> </span>azure<span class="w"> </span>models<span class="w"> </span>list<span class="w"> </span>--format<span class="w"> </span>json<span class="w"> </span>&gt;<span class="w"> </span>azure.json
+
+<span class="c1"># Check which providers are available</span>
+omr<span class="w"> </span>providers<span class="w"> </span>list
+</code></pre></div>
+<h2 id="exit-codes">Exit Codes<a class="headerlink" href="#exit-codes" title="Permanent link">&para;</a></h2>
+<p>The CLI uses standard exit codes for CI/CD integration:</p>
+<ul>
+<li><code>0</code>: Success</li>
+<li><code>1</code>: Generic error</li>
+<li><code>2</code>: Invalid usage/arguments</li>
+<li><code>3</code>: Model not found</li>
+<li><code>4</code>: Data source missing/corrupt</li>
+<li><code>10</code>: Update available (used by <code>omr update check</code>)</li>
+</ul>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<h3 id="command-not-found">Command Not Found<a class="headerlink" href="#command-not-found" title="Permanent link">&para;</a></h3>
+<p>If <code>omr</code> command is not found after installation:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check if it&#39;s installed</span>
+pip<span class="w"> </span>show<span class="w"> </span>openai-model-registry
+
+<span class="c1"># Try using the module directly</span>
+python<span class="w"> </span>-m<span class="w"> </span>openai_model_registry.cli<span class="w"> </span>--help
+</code></pre></div>
+<h3 id="no-models-listed">No Models Listed<a class="headerlink" href="#no-models-listed" title="Permanent link">&para;</a></h3>
+<p>If <code>omr models list</code> shows no models:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check data sources</span>
+omr<span class="w"> </span>data<span class="w"> </span>paths
+
+<span class="c1"># Check for data loading errors</span>
+omr<span class="w"> </span>--debug<span class="w"> </span>models<span class="w"> </span>list
+
+<span class="c1"># Try updating data</span>
+omr<span class="w"> </span>update<span class="w"> </span>apply
+</code></pre></div>
+<h3 id="permission-errors">Permission Errors<a class="headerlink" href="#permission-errors" title="Permanent link">&para;</a></h3>
+<p>If you get permission errors with cache operations:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check cache directory permissions</span>
+omr<span class="w"> </span>cache<span class="w"> </span>info
+
+<span class="c1"># Clear cache with appropriate permissions</span>
+sudo<span class="w"> </span>omr<span class="w"> </span>cache<span class="w"> </span>clear<span class="w"> </span>--yes
+</code></pre></div>
+<h3 id="provider-issues">Provider Issues<a class="headerlink" href="#provider-issues" title="Permanent link">&para;</a></h3>
+<p>If provider switching doesn't work:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check current provider</span>
+omr<span class="w"> </span>providers<span class="w"> </span>current
+
+<span class="c1"># Check environment</span>
+omr<span class="w"> </span>data<span class="w"> </span>env
+
+<span class="c1"># Set provider explicitly</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">OMR_PROVIDER</span><span class="o">=</span>azure
+omr<span class="w"> </span>providers<span class="w"> </span>current
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.expand", "navigation.indexes", "search.highlight", "search.share", "content.code.copy"], "search": "../../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.50899def.min.js"></script>
+      
+    
+  </body>
+</html>

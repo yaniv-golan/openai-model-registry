@@ -1,0 +1,1897 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A lightweight Python package for validating OpenAI model parameters and capabilities">
+      
+      
+        <meta name="author" content="Yaniv Golan">
+      
+      
+        <link rel="canonical" href="https://yaniv-golan.github.io/openai-model-registry/user-guide/advanced-usage/">
+      
+      
+        <link rel="prev" href="../parameter-validation/">
+      
+      
+        <link rel="next" href="../testing/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.16">
+    
+    
+      
+        <title>Advanced Usage - OpenAI Model Registry</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.7e37652d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="deep-orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#advanced-usage" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="OpenAI Model Registry" class="md-header__button md-logo" aria-label="OpenAI Model Registry" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            OpenAI Model Registry
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Advanced Usage
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/yaniv-golan/openai-model-registry" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path fill="currentColor" d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    yaniv-golan/openai-model-registry
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="OpenAI Model Registry" class="md-nav__button md-logo" aria-label="OpenAI Model Registry" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    OpenAI Model Registry
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/yaniv-golan/openai-model-registry" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path fill="currentColor" d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    yaniv-golan/openai-model-registry
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    User Guide
+    
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            User Guide
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Getting Started
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    CLI Reference
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../model-capabilities/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Model Capabilities
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameter-validation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Parameter Validation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Advanced Usage
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Advanced Usage
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#custom-registry-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Custom Registry Configuration
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-management-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Management System
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Data Management System">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Environment Variables
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-update-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Update API
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#multiple-registry-instances" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multiple Registry Instances
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#accessing-the-singleton" class="md-nav__link">
+    <span class="md-ellipsis">
+      Accessing the Singleton
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#registry-updates" class="md-nav__link">
+    <span class="md-ellipsis">
+      Registry Updates
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#programmatic-updates-recommended-pattern" class="md-nav__link">
+    <span class="md-ellipsis">
+      Programmatic updates (recommended pattern)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-loading-priority" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Loading Priority
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#schema-versioning" class="md-nav__link">
+    <span class="md-ellipsis">
+      Schema Versioning
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Schema Versioning">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#schema-version-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      Schema Version Detection
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#model-data-accuracy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Model Data Accuracy
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#command-line-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      Command Line Interface
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Command Line Interface">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#data-management-cli-legacy-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Management CLI (Legacy Script)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#legacy-registry-update-cli-legacy-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      Legacy Registry Update CLI (Legacy Script)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#working-with-parameter-references" class="md-nav__link">
+    <span class="md-ellipsis">
+      Working with Parameter References
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#error-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      Error Handling
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Error Handling">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#error-hierarchy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Error Hierarchy
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#logging-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Logging Configuration
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performance Optimization
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-files-and-provider-overrides" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data files and provider overrides
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Data files and provider overrides">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#provider-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      Provider selection
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#structure-of-overridesyaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      Structure of overrides.yaml
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#merge-semantics" class="md-nav__link">
+    <span class="md-ellipsis">
+      Merge semantics
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#inspecting-raw-vs-effective-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Inspecting raw vs effective data
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#where-updates-are-written" class="md-nav__link">
+    <span class="md-ellipsis">
+      Where updates are written
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Testing
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../api/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    API Reference
+    
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            API Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/model-registry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    ModelRegistry
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/model-capabilities/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    ModelCapabilities
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Contributing
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Contributing
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_2" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../contributing/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    Release Process
+    
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            Release Process
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/RELEASE_CHECKLIST/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Release Checklist
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/RELEASE_WORKFLOW/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Release Workflow
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/cli-maintainers-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    CLI Maintainers Guide
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Changelog
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#custom-registry-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Custom Registry Configuration
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-management-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Management System
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Data Management System">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Environment Variables
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-update-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Update API
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#multiple-registry-instances" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multiple Registry Instances
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#accessing-the-singleton" class="md-nav__link">
+    <span class="md-ellipsis">
+      Accessing the Singleton
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#registry-updates" class="md-nav__link">
+    <span class="md-ellipsis">
+      Registry Updates
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#programmatic-updates-recommended-pattern" class="md-nav__link">
+    <span class="md-ellipsis">
+      Programmatic updates (recommended pattern)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-loading-priority" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Loading Priority
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#schema-versioning" class="md-nav__link">
+    <span class="md-ellipsis">
+      Schema Versioning
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Schema Versioning">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#schema-version-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      Schema Version Detection
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#model-data-accuracy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Model Data Accuracy
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#command-line-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      Command Line Interface
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Command Line Interface">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#data-management-cli-legacy-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Management CLI (Legacy Script)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#legacy-registry-update-cli-legacy-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      Legacy Registry Update CLI (Legacy Script)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#working-with-parameter-references" class="md-nav__link">
+    <span class="md-ellipsis">
+      Working with Parameter References
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#error-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      Error Handling
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Error Handling">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#error-hierarchy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Error Hierarchy
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#logging-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Logging Configuration
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performance Optimization
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-files-and-provider-overrides" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data files and provider overrides
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Data files and provider overrides">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#provider-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      Provider selection
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#structure-of-overridesyaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      Structure of overrides.yaml
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#merge-semantics" class="md-nav__link">
+    <span class="md-ellipsis">
+      Merge semantics
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#inspecting-raw-vs-effective-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Inspecting raw vs effective data
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#where-updates-are-written" class="md-nav__link">
+    <span class="md-ellipsis">
+      Where updates are written
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="advanced-usage">Advanced Usage<a class="headerlink" href="#advanced-usage" title="Permanent link">&para;</a></h1>
+<p>This guide covers advanced features and configuration options for the OpenAI Model Registry.</p>
+<h2 id="custom-registry-configuration">Custom Registry Configuration<a class="headerlink" href="#custom-registry-configuration" title="Permanent link">&para;</a></h2>
+<p>The registry uses a modern data management system with automatic updates and fallback mechanisms. You can customize this with the <code>RegistryConfig</code> class:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">openai_model_registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelRegistry</span><span class="p">,</span> <span class="n">RegistryConfig</span>
+
+<span class="c1"># Create a custom configuration</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">RegistryConfig</span><span class="p">(</span>
+    <span class="n">registry_path</span><span class="o">=</span><span class="s2">&quot;/path/to/custom/registry.yml&quot;</span><span class="p">,</span>  <span class="c1"># Optional: custom registry path</span>
+    <span class="n">constraints_path</span><span class="o">=</span><span class="s2">&quot;/path/to/custom/constraints.yml&quot;</span><span class="p">,</span>  <span class="c1"># Custom constraints path</span>
+    <span class="n">auto_update</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># Enable automatic updates</span>
+    <span class="n">cache_size</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>  <span class="c1"># Increase cache size</span>
+<span class="p">)</span>
+
+<span class="c1"># Initialize registry with the custom configuration</span>
+<span class="n">registry</span> <span class="o">=</span> <span class="n">ModelRegistry</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+
+<span class="c1"># Use the registry</span>
+<span class="n">capabilities</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">get_capabilities</span><span class="p">(</span><span class="s2">&quot;gpt-4o&quot;</span><span class="p">)</span>
+<span class="c1"># Expected output: Successfully loads capabilities with custom configuration</span>
+</code></pre></div>
+<p>The <code>RegistryConfig</code> class supports the following options:</p>
+<ul>
+<li><code>registry_path</code>: Custom path to the registry YAML file (if None, DataManager handles loading)</li>
+<li><code>constraints_path</code>: Custom path to the constraints YAML file</li>
+<li><code>auto_update</code>: Whether to automatically update the registry</li>
+<li><code>cache_size</code>: Size of the model capabilities cache</li>
+</ul>
+<h2 id="data-management-system">Data Management System<a class="headerlink" href="#data-management-system" title="Permanent link">&para;</a></h2>
+<p>The registry uses a modern DataManager that provides:</p>
+<ul>
+<li><strong>Automatic Updates</strong>: Fetches latest model data from GitHub releases</li>
+<li><strong>Version Tracking</strong>: Maintains version information and update history</li>
+<li><strong>Fallback Mechanisms</strong>: Environment variable → User directory → Bundled data</li>
+<li><strong>Data Validation</strong>: Comprehensive validation for downloaded data</li>
+</ul>
+<h3 id="environment-variables">Environment Variables<a class="headerlink" href="#environment-variables" title="Permanent link">&para;</a></h3>
+<p>Control data management behavior with these environment variables:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Disable automatic data updates (useful for CI/tests)</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">OMR_DISABLE_DATA_UPDATES</span><span class="o">=</span><span class="m">1</span>
+
+<span class="c1"># Pin to a specific data version</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">OMR_DATA_VERSION_PIN</span><span class="o">=</span>v1.2.3
+
+<span class="c1"># Use custom data directory</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">OMR_DATA_DIR</span><span class="o">=</span>/path/to/custom/data
+
+<span class="c1"># Override registry path (for testing)</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">OMR_MODEL_REGISTRY_PATH</span><span class="o">=</span>/path/to/test/models.yaml
+</code></pre></div>
+<h3 id="data-update-api">Data Update API<a class="headerlink" href="#data-update-api" title="Permanent link">&para;</a></h3>
+<p>The registry provides methods for managing data updates:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">openai_model_registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelRegistry</span>
+
+<span class="n">registry</span> <span class="o">=</span> <span class="n">ModelRegistry</span><span class="o">.</span><span class="n">get_default</span><span class="p">()</span>
+
+<span class="c1"># Check if updates are available</span>
+<span class="k">if</span> <span class="n">registry</span><span class="o">.</span><span class="n">check_data_updates</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Updates are available!&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Update the data</span>
+    <span class="k">if</span> <span class="n">registry</span><span class="o">.</span><span class="n">update_data</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data updated successfully&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Update failed&quot;</span><span class="p">)</span>
+
+<span class="c1"># Force update regardless of current version</span>
+<span class="n">registry</span><span class="o">.</span><span class="n">update_data</span><span class="p">(</span><span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Get current data version</span>
+<span class="n">version</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">get_data_version</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Current version: </span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Get detailed data information</span>
+<span class="n">info</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">get_data_info</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Data directory: </span><span class="si">{</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;data_directory&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Updates enabled: </span><span class="si">{</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;updates_enabled&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="multiple-registry-instances">Multiple Registry Instances<a class="headerlink" href="#multiple-registry-instances" title="Permanent link">&para;</a></h2>
+<p>With the new API, you can create multiple registry instances with different configurations:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">openai_model_registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelRegistry</span><span class="p">,</span> <span class="n">RegistryConfig</span>
+
+<span class="c1"># Create registries for different environments</span>
+<span class="n">prod_config</span> <span class="o">=</span> <span class="n">RegistryConfig</span><span class="p">(</span><span class="n">registry_path</span><span class="o">=</span><span class="s2">&quot;/path/to/prod/registry.yml&quot;</span><span class="p">)</span>
+<span class="n">staging_config</span> <span class="o">=</span> <span class="n">RegistryConfig</span><span class="p">(</span><span class="n">registry_path</span><span class="o">=</span><span class="s2">&quot;/path/to/staging/registry.yml&quot;</span><span class="p">)</span>
+
+<span class="n">prod_registry</span> <span class="o">=</span> <span class="n">ModelRegistry</span><span class="p">(</span><span class="n">prod_config</span><span class="p">)</span>
+<span class="n">staging_registry</span> <span class="o">=</span> <span class="n">ModelRegistry</span><span class="p">(</span><span class="n">staging_config</span><span class="p">)</span>
+
+<span class="c1"># Use different registries as needed</span>
+<span class="n">prod_capabilities</span> <span class="o">=</span> <span class="n">prod_registry</span><span class="o">.</span><span class="n">get_capabilities</span><span class="p">(</span><span class="s2">&quot;gpt-4o&quot;</span><span class="p">)</span>
+<span class="n">staging_capabilities</span> <span class="o">=</span> <span class="n">staging_registry</span><span class="o">.</span><span class="n">get_capabilities</span><span class="p">(</span><span class="s2">&quot;gpt-4o&quot;</span><span class="p">)</span>
+<span class="c1"># Expected output: Successfully loads capabilities from different registry instances</span>
+</code></pre></div>
+<p>This is particularly useful for testing or when you need to support different configurations in the same application.</p>
+<h2 id="accessing-the-singleton">Accessing the Singleton<a class="headerlink" href="#accessing-the-singleton" title="Permanent link">&para;</a></h2>
+<p>Use <code>get_default()</code> to access the singleton instance.</p>
+<div class="highlight"><pre><span></span><code><span class="n">registry</span> <span class="o">=</span> <span class="n">ModelRegistry</span><span class="o">.</span><span class="n">get_default</span><span class="p">()</span>
+</code></pre></div>
+<h2 id="registry-updates">Registry Updates<a class="headerlink" href="#registry-updates" title="Permanent link">&para;</a></h2>
+<p>The registry supports both automatic and manual updates through the DataManager system:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">openai_model_registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelRegistry</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openai_model_registry.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">RefreshStatus</span>
+
+<span class="c1"># Get registry instance</span>
+<span class="n">registry</span> <span class="o">=</span> <span class="n">ModelRegistry</span><span class="o">.</span><span class="n">get_default</span><span class="p">()</span>
+
+<span class="c1"># Check for updates using DataManager</span>
+<span class="k">if</span> <span class="n">registry</span><span class="o">.</span><span class="n">check_data_updates</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DataManager updates are available&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Update using DataManager</span>
+    <span class="k">if</span> <span class="n">registry</span><span class="o">.</span><span class="n">update_data</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Registry updated successfully via DataManager&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DataManager update failed&quot;</span><span class="p">)</span>
+
+<span class="c1"># Legacy update method (also available)</span>
+<span class="n">check_result</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">check_for_updates</span><span class="p">()</span>
+<span class="k">if</span> <span class="n">check_result</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="n">RefreshStatus</span><span class="o">.</span><span class="n">UPDATE_AVAILABLE</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Legacy update available: </span><span class="si">{</span><span class="n">check_result</span><span class="o">.</span><span class="n">message</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Refresh from remote source</span>
+    <span class="n">refresh_result</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">refresh_from_remote</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">refresh_result</span><span class="o">.</span><span class="n">success</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Registry updated successfully&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Update failed: </span><span class="si">{</span><span class="n">refresh_result</span><span class="o">.</span><span class="n">message</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">elif</span> <span class="n">check_result</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="n">RefreshStatus</span><span class="o">.</span><span class="n">ALREADY_CURRENT</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Registry is already up to date&quot;</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Update check failed: </span><span class="si">{</span><span class="n">check_result</span><span class="o">.</span><span class="n">message</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="programmatic-updates-recommended-pattern">Programmatic updates (recommended pattern)<a class="headerlink" href="#programmatic-updates-recommended-pattern" title="Permanent link">&para;</a></h2>
+<p>For the minimal snippet, see Getting Started → Keeping Data Up-to-Date. Below is the same pattern using the typed enum and intended for adaptation in advanced scenarios (scheduling, retries/backoff, metrics):</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">openai_model_registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelRegistry</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openai_model_registry.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">RefreshStatus</span>
+
+<span class="n">registry</span> <span class="o">=</span> <span class="n">ModelRegistry</span><span class="o">.</span><span class="n">get_default</span><span class="p">()</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">check_for_updates</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">status</span> <span class="ow">is</span> <span class="n">RefreshStatus</span><span class="o">.</span><span class="n">UPDATE_AVAILABLE</span><span class="p">:</span>
+        <span class="c1"># Apply the update (writes to user data dir or OMR_DATA_DIR)</span>
+        <span class="n">registry</span><span class="o">.</span><span class="n">update_data</span><span class="p">()</span>
+<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+    <span class="c1"># Never crash the application due to update issues</span>
+    <span class="k">pass</span>
+</code></pre></div>
+<p>Notes:</p>
+<ul>
+<li>The library automatically honors <code>OMR_DISABLE_DATA_UPDATES</code> and <code>OMR_DATA_VERSION_PIN</code>.</li>
+<li>No network calls occur during normal loads; network is used only on explicit update checks/applies.</li>
+<li><code>OMR_MODEL_REGISTRY_PATH</code> is a read‑only override and is never modified by updates.</li>
+</ul>
+<p>For advanced patterns (scheduling, retries/backoff, version pinning strategies, multi‑registry setups), adapt the above to your app’s lifecycle (e.g., run on startup or on a cron/scheduler, add retry/backoff, emit metrics/logs on update checks).</p>
+<h2 id="data-loading-priority">Data Loading Priority<a class="headerlink" href="#data-loading-priority" title="Permanent link">&para;</a></h2>
+<p>The registry loads data with the following priority:</p>
+<ol>
+<li><strong>Environment Variable</strong>: <code>OMR_MODEL_REGISTRY_PATH</code> (if set and file exists)</li>
+<li><strong>User Data Directory</strong>: <code>~/Library/Application Support/openai-model-registry/models.yaml</code> (macOS)</li>
+<li><strong>Bundled Data</strong>: Included with the package as fallback</li>
+</ol>
+<p>This ensures reliable operation even without network access while allowing customization for testing and development.</p>
+<h2 id="schema-versioning">Schema Versioning<a class="headerlink" href="#schema-versioning" title="Permanent link">&para;</a></h2>
+<p>The registry uses semantic versioning for schema compatibility:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># The registry automatically detects and validates schema versions</span>
+<span class="c1"># Current supported range: 1.x (&gt;=1.0.0, &lt;2.0.0)</span>
+<span class="c1"># Schema version is read from the &#39;version&#39; field in data files</span>
+
+<span class="n">registry</span> <span class="o">=</span> <span class="n">ModelRegistry</span><span class="o">.</span><span class="n">get_default</span><span class="p">()</span>
+
+<span class="c1"># Works with any compatible schema version</span>
+<span class="n">capabilities</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">get_capabilities</span><span class="p">(</span><span class="s2">&quot;gpt-4o&quot;</span><span class="p">)</span>
+
+<span class="c1"># All models include comprehensive metadata</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Status: </span><span class="si">{</span><span class="n">capabilities</span><span class="o">.</span><span class="n">deprecation</span><span class="o">.</span><span class="n">status</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Context window: </span><span class="si">{</span><span class="n">capabilities</span><span class="o">.</span><span class="n">context_window</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Supports vision: </span><span class="si">{</span><span class="n">capabilities</span><span class="o">.</span><span class="n">supports_vision</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="c1"># Expected output: Status: active</span>
+</code></pre></div>
+<h3 id="schema-version-detection">Schema Version Detection<a class="headerlink" href="#schema-version-detection" title="Permanent link">&para;</a></h3>
+<p>The registry uses proper semantic versioning:</p>
+<ul>
+<li><strong>Version field</strong>: Schema version is read from the <code>version</code> field in configuration files</li>
+<li><strong>Compatibility checking</strong>: Uses semver ranges (e.g., "&gt;=1.0.0,\&lt;2.0.0" for 1.x support)</li>
+<li><strong>Validation</strong>: Ensures data structure matches the declared schema version</li>
+<li><strong>Error handling</strong>: Clear error messages for unsupported or invalid versions</li>
+</ul>
+<h2 id="model-data-accuracy">Model Data Accuracy<a class="headerlink" href="#model-data-accuracy" title="Permanent link">&para;</a></h2>
+<p>The registry maintains accurate model information based on official OpenAI documentation:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Model release dates are accurate to OpenAI&#39;s official announcements</span>
+<span class="n">capabilities</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">get_capabilities</span><span class="p">(</span><span class="s2">&quot;gpt-4o-2024-05-13&quot;</span><span class="p">)</span>  <span class="c1"># Correct release date</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Model: </span><span class="si">{</span><span class="n">capabilities</span><span class="o">.</span><span class="n">model_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Streaming capabilities reflect current API support</span>
+<span class="n">o1_mini</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">get_capabilities</span><span class="p">(</span><span class="s2">&quot;o1-mini&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;O1-mini supports streaming: </span><span class="si">{</span><span class="n">o1_mini</span><span class="o">.</span><span class="n">supports_streaming</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># True</span>
+
+<span class="n">o1_latest</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">get_capabilities</span><span class="p">(</span><span class="s2">&quot;o1-2024-12-17&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span>
+    <span class="sa">f</span><span class="s2">&quot;O1-2024-12-17 supports streaming: </span><span class="si">{</span><span class="n">o1_latest</span><span class="o">.</span><span class="n">supports_streaming</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="p">)</span>  <span class="c1"># False (not yet in public API)</span>
+
+<span class="c1"># Deprecation dates use null values for unknown timelines instead of placeholder dates</span>
+<span class="nb">print</span><span class="p">(</span>
+    <span class="sa">f</span><span class="s2">&quot;Deprecates on: </span><span class="si">{</span><span class="n">capabilities</span><span class="o">.</span><span class="n">deprecation</span><span class="o">.</span><span class="n">deprecates_on</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="p">)</span>  <span class="c1"># None for active models</span>
+</code></pre></div>
+<h2 id="command-line-interface">Command Line Interface<a class="headerlink" href="#command-line-interface" title="Permanent link">&para;</a></h2>
+<p>The package provides command-line interfaces for managing registry data:</p>
+<h3 id="data-management-cli-legacy-script">Data Management CLI (Legacy Script)<a class="headerlink" href="#data-management-cli-legacy-script" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check current data status</span>
+python<span class="w"> </span>-m<span class="w"> </span>openai_model_registry.scripts.data_update<span class="w"> </span>check
+
+<span class="c1"># Update data files</span>
+python<span class="w"> </span>-m<span class="w"> </span>openai_model_registry.scripts.data_update<span class="w"> </span>update
+
+<span class="c1"># Force update to latest version</span>
+python<span class="w"> </span>-m<span class="w"> </span>openai_model_registry.scripts.data_update<span class="w"> </span>update<span class="w"> </span>--force
+
+<span class="c1"># Show data configuration</span>
+python<span class="w"> </span>-m<span class="w"> </span>openai_model_registry.scripts.data_update<span class="w"> </span>info
+
+<span class="c1"># Clean local data files</span>
+python<span class="w"> </span>-m<span class="w"> </span>openai_model_registry.scripts.data_update<span class="w"> </span>clean
+</code></pre></div>
+<h3 id="legacy-registry-update-cli-legacy-script">Legacy Registry Update CLI (Legacy Script)<a class="headerlink" href="#legacy-registry-update-cli-legacy-script" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Update the registry from the default source</span>
+openai-model-registry-update
+
+<span class="c1"># Update with verbose output</span>
+openai-model-registry-update<span class="w"> </span>--verbose
+
+<span class="c1"># Use a custom source URL</span>
+openai-model-registry-update<span class="w"> </span>--source<span class="w"> </span>https://custom-source.example/registry.json
+</code></pre></div>
+<h2 id="working-with-parameter-references">Working with Parameter References<a class="headerlink" href="#working-with-parameter-references" title="Permanent link">&para;</a></h2>
+<p>The registry uses parameter references to define relationships between parameters:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">openai_model_registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelRegistry</span>
+
+<span class="n">registry</span> <span class="o">=</span> <span class="n">ModelRegistry</span><span class="o">.</span><span class="n">get_default</span><span class="p">()</span>
+<span class="n">capabilities</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">get_capabilities</span><span class="p">(</span><span class="s2">&quot;gpt-4o&quot;</span><span class="p">)</span>
+
+<span class="c1"># Get all parameter references</span>
+<span class="k">for</span> <span class="n">param_ref</span> <span class="ow">in</span> <span class="n">capabilities</span><span class="o">.</span><span class="n">supported_parameters</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parameter: </span><span class="si">{</span><span class="n">param_ref</span><span class="o">.</span><span class="n">ref</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">param_ref</span><span class="o">.</span><span class="n">max_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Max value: </span><span class="si">{</span><span class="n">param_ref</span><span class="o">.</span><span class="n">max_value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">param_ref</span><span class="o">.</span><span class="n">min_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Min value: </span><span class="si">{</span><span class="n">param_ref</span><span class="o">.</span><span class="n">min_value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="error-handling">Error Handling<a class="headerlink" href="#error-handling" title="Permanent link">&para;</a></h2>
+<p>The registry provides comprehensive error handling for various scenarios:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">openai_model_registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelRegistry</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openai_model_registry.errors</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ModelNotSupportedError</span><span class="p">,</span>
+    <span class="n">ParameterValidationError</span><span class="p">,</span>
+    <span class="n">ConfigurationError</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">registry</span> <span class="o">=</span> <span class="n">ModelRegistry</span><span class="o">.</span><span class="n">get_default</span><span class="p">()</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">capabilities</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">get_capabilities</span><span class="p">(</span><span class="s2">&quot;non-existent-model&quot;</span><span class="p">)</span>
+<span class="k">except</span> <span class="n">ModelNotSupportedError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Model not supported: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">capabilities</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">get_capabilities</span><span class="p">(</span><span class="s2">&quot;gpt-4o&quot;</span><span class="p">)</span>
+    <span class="n">capabilities</span><span class="o">.</span><span class="n">validate_parameter</span><span class="p">(</span><span class="s2">&quot;temperature&quot;</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">)</span>  <span class="c1"># Invalid value</span>
+<span class="k">except</span> <span class="n">ParameterValidationError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parameter validation failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="c1"># This might fail if data files are corrupted</span>
+    <span class="n">registry</span><span class="o">.</span><span class="n">_load_capabilities</span><span class="p">()</span>
+<span class="k">except</span> <span class="n">ConfigurationError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Configuration error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="error-hierarchy">Error Hierarchy<a class="headerlink" href="#error-hierarchy" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>ModelRegistryError</code>: Base class for all registry errors</li>
+<li><code>ConfigurationError</code>: Base class for configuration-related errors<ul>
+<li><code>ConfigFileNotFoundError</code>: Configuration file not found</li>
+<li><code>InvalidConfigFormatError</code>: Invalid configuration format</li>
+</ul>
+</li>
+<li><code>ModelVersionError</code>: Base class for version-related errors<ul>
+<li><code>InvalidDateError</code>: Invalid date format in a model version</li>
+<li><code>ModelFormatError</code>: Invalid model name format</li>
+<li><code>VersionTooOldError</code>: Model version is too old</li>
+</ul>
+</li>
+<li><code>ParameterValidationError</code>: Base class for parameter validation errors<ul>
+<li><code>ParameterNotSupportedError</code>: Parameter not supported for model</li>
+<li><code>TokenParameterError</code>: Token-related parameter error</li>
+</ul>
+</li>
+<li><code>ConstraintNotFoundError</code>: Constraint reference not found</li>
+<li><code>NetworkError</code>: Error during network operations</li>
+<li><code>ModelNotSupportedError</code>: Model not supported by registry</li>
+</ul>
+<h2 id="logging-configuration">Logging Configuration<a class="headerlink" href="#logging-configuration" title="Permanent link">&para;</a></h2>
+<p>The library uses standard Python logging. You can configure it like any other Python logger:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openai_model_registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
+
+<span class="c1"># Configure the root logger</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span>
+    <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
+    <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%(asctime)s</span><span class="s2"> - </span><span class="si">%(name)s</span><span class="s2"> - </span><span class="si">%(levelname)s</span><span class="s2"> - </span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Get the library logger</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">()</span>
+
+<span class="c1"># Add custom handlers if needed</span>
+<span class="n">file_handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">FileHandler</span><span class="p">(</span><span class="s2">&quot;registry.log&quot;</span><span class="p">)</span>
+<span class="n">file_handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%(asctime)s</span><span class="s2"> - </span><span class="si">%(name)s</span><span class="s2"> - </span><span class="si">%(levelname)s</span><span class="s2"> - </span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">file_handler</span><span class="p">)</span>
+</code></pre></div>
+<p>The package logger name is "openai_model_registry".</p>
+<h2 id="performance-optimization">Performance Optimization<a class="headerlink" href="#performance-optimization" title="Permanent link">&para;</a></h2>
+<p>For applications that make frequent validation calls, consider caching capabilities:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">openai_model_registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelRegistry</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">functools</span>
+
+
+<span class="c1"># Create a cache of model capabilities</span>
+<span class="nd">@functools</span><span class="o">.</span><span class="n">lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_cached_capabilities</span><span class="p">(</span><span class="n">model_name</span><span class="p">):</span>
+    <span class="n">registry</span> <span class="o">=</span> <span class="n">ModelRegistry</span><span class="o">.</span><span class="n">get_default</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">registry</span><span class="o">.</span><span class="n">get_capabilities</span><span class="p">(</span><span class="n">model_name</span><span class="p">)</span>
+
+
+<span class="c1"># Use cached capabilities</span>
+<span class="n">capabilities</span> <span class="o">=</span> <span class="n">get_cached_capabilities</span><span class="p">(</span><span class="s2">&quot;gpt-4o&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>The registry itself uses LRU caching for capabilities, so repeated calls to <code>get_capabilities()</code> for the same model are automatically optimized.</p>
+<h2 id="data-files-and-provider-overrides">Data files and provider overrides<a class="headerlink" href="#data-files-and-provider-overrides" title="Permanent link">&para;</a></h2>
+<p>The registry composes its effective dataset from two YAML files in <code>data/</code>:</p>
+<ul>
+<li><code>models.yaml</code>: Canonical base dataset for all models (capabilities, parameters,
+  pricing, deprecation, billing).</li>
+<li><code>overrides.yaml</code>: Provider-specific diffs applied on top of <code>models.yaml</code>.</li>
+</ul>
+<h3 id="provider-selection">Provider selection<a class="headerlink" href="#provider-selection" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Default provider: <code>openai</code>.</li>
+<li>Override via environment <code>OMR_PROVIDER</code> or CLI flag <code>--provider &lt;openai|azure&gt;</code>.</li>
+</ul>
+<h3 id="structure-of-overridesyaml">Structure of overrides.yaml<a class="headerlink" href="#structure-of-overridesyaml" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nt">overrides</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">azure</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">models</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">gpt-4o</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">pricing</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">input_cost_per_unit</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5.0</span>
+<span class="w">          </span><span class="nt">output_cost_per_unit</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20.0</span>
+<span class="w">        </span><span class="nt">parameters</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">max_tokens</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">12000</span>
+<span class="w">        </span><span class="nt">capabilities</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">tools</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">file_search</span>
+</code></pre></div>
+<ul>
+<li>Top-level key is <code>overrides</code>.</li>
+<li>Under each provider (e.g., <code>azure</code>), a <code>models</code> map contains partial model
+  entries. Only the fields you want to change need to be present.</li>
+<li>Unknown models under a provider are ignored; the base dataset remains intact.</li>
+</ul>
+<h3 id="merge-semantics">Merge semantics<a class="headerlink" href="#merge-semantics" title="Permanent link">&para;</a></h3>
+<p>When building the effective dataset, the registry loads <code>models.yaml</code> and then
+applies provider overrides. Merge behavior mirrors the implementation in
+<code>ModelRegistry._apply_overrides()</code> and <code>_merge_model_override()</code>:</p>
+<ul>
+<li>pricing (dict): merged with base pricing via shallow update</li>
+<li>capabilities (dict): merged with base capabilities via shallow update</li>
+<li>parameters (dict): merged with base parameters via shallow update</li>
+<li>other top-level fields: replaced entirely</li>
+</ul>
+<p>Notes:</p>
+<ul>
+<li>Shallow updates mean nested dictionaries are updated key-by-key, but lists are
+  replaced as whole values. This keeps overrides concise and predictable.</li>
+<li>If no overrides exist for the selected provider, the base <code>models.yaml</code> data is
+  used as-is.</li>
+</ul>
+<h3 id="inspecting-raw-vs-effective-data">Inspecting raw vs effective data<a class="headerlink" href="#inspecting-raw-vs-effective-data" title="Permanent link">&para;</a></h3>
+<p>Use the CLI to compare the on-disk raw files with the provider-merged effective
+dataset:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Dump effective (merged) dataset</span>
+omr<span class="w"> </span>data<span class="w"> </span>dump<span class="w"> </span>--effective<span class="w"> </span>--format<span class="w"> </span>json<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span><span class="s1">&#39;.&#39;</span>
+
+<span class="c1"># Dump raw base dataset (no provider merge)</span>
+omr<span class="w"> </span>data<span class="w"> </span>dump<span class="w"> </span>--raw<span class="w"> </span>--format<span class="w"> </span>yaml
+
+<span class="c1"># Per-model views</span>
+omr<span class="w"> </span>models<span class="w"> </span>get<span class="w"> </span>gpt-4o<span class="w">                </span><span class="c1"># effective (default)</span>
+omr<span class="w"> </span>models<span class="w"> </span>get<span class="w"> </span>gpt-4o<span class="w"> </span>--raw<span class="w"> </span>--format<span class="w"> </span>yaml
+</code></pre></div>
+<h3 id="where-updates-are-written">Where updates are written<a class="headerlink" href="#where-updates-are-written" title="Permanent link">&para;</a></h3>
+<p>Data updates write <code>models.yaml</code> and <code>overrides.yaml</code> to the user data directory
+by default (or <code>OMR_DATA_DIR</code> if set). The <code>OMR_MODEL_REGISTRY_PATH</code> override is
+read-only and is never modified by updates.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.expand", "navigation.indexes", "search.highlight", "search.share", "content.code.copy"], "search": "../../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.50899def.min.js"></script>
+      
+    
+  </body>
+</html>
