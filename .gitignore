@@ -67,3 +67,4 @@ pricing_data/
 
 # Docs build output
 site/
+openai-model-registry.code-workspace
