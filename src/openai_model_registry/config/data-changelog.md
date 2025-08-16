@@ -11,6 +11,14 @@ Each entry should include:
 
 ## Changelog
 
+### v1.0.2 - 2025-08-16
+
+**Automated data release**
+
+- Configuration files updated via automated release process
+- See git commit history for detailed changes
+
+
 ### v1.0.0 - 2025-08-13
 
 **Automated data release**
