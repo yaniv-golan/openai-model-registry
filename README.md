@@ -56,7 +56,7 @@ The core library provides all programmatic functionality. Add the `[cli]` extra 
 
 ## Simple Example
 
-````python
+```python
 from openai_model_registry import ModelRegistry
 
 # Get information about a model
@@ -81,6 +81,7 @@ except ValueError as e:
 if model.supports_structured:
     print("This model supports Structured Output")
 # Expected output: This model supports Structured Output
+```
 
 ➡️ **Keeping it fresh:** run `openai-model-registry-update` (CLI) or `registry.refresh_from_remote()` whenever OpenAI ships new models.
 
@@ -111,7 +112,7 @@ def call_openai(model, messages, **params):
 messages = [{"role": "user", "content": "Hello!"}]
 response = call_openai("gpt-4o", messages, temperature=0.7, max_tokens=100)
 # Expected output: Successful API call with validated parameters
-````
+```
 
 ### Managing Token Limits
 
