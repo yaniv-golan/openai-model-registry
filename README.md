@@ -31,13 +31,25 @@ Typical benefits:
 - Works offline with locally stored model information
 - Keeps model information up-to-date with optional updates
 - Programmatic model cards: structured access to each model's capabilities, parameters, pricing (including per-image tiers), and deprecation metadata (OpenAI and Azure providers)
-- Coverage and freshness: includes all OpenAI models as of 2025-08-12; pricing and data are kept current automatically via CI using [ostruct](https://github.com/yaniv-golan/ostruct)
+- Coverage and freshness: includes all OpenAI models as of 2025-08-16; pricing and data are kept current automatically via CI using [ostruct](https://github.com/yaniv-golan/ostruct)
 
 ## Installation
 
+### Core Library (Recommended)
 ```bash
 pip install openai-model-registry
 ```
+
+### With CLI Tools
+```bash
+pip install openai-model-registry[cli]
+```
+
+The core library provides all programmatic functionality. Add the `[cli]` extra if you want to use the `omr` command-line tools.
+
+> **💡 Which installation should I choose?**
+> - **Core only** (`pip install openai-model-registry`) - Perfect for programmatic use in applications, scripts, or libraries
+> - **With CLI** (`pip install openai-model-registry[cli]`) - Adds command-line tools for interactive exploration and debugging
 
 ## Simple Example
 
@@ -147,7 +159,9 @@ safe_prompt = prepare_prompt("gpt-4o", long_prompt, max_output=1000)
 
 ### OMR CLI
 
-The `omr` CLI provides comprehensive tools for inspecting and managing your model registry:
+The `omr` CLI provides comprehensive tools for inspecting and managing your model registry.
+
+**Note:** CLI tools require the `[cli]` extra: `pip install openai-model-registry[cli]`
 
 ```bash
 # List all models
@@ -215,8 +229,8 @@ For more details, see:
 ## Development
 
 ```bash
-# Install dependencies (requires Poetry)
-poetry install
+# Install dependencies with CLI tools (requires Poetry)
+poetry install --extras cli
 
 # Run tests
 poetry run pytest
